@@ -194,17 +194,71 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 /* IMPORT PROGRESS */
 .import-status{padding:10px;background:var(--sur2);border-radius:var(--r-md);font-size:12px;color:var(--txt2);margin-top:8px}
 
-@media(max-width:768px){
-  .sidebar{position:fixed;top:56px;bottom:0;left:0;z-index:150;box-shadow:var(--sh2)}
-  .sidebar:not(.collapsed){width:260px}
-  .cards-bar{padding:8px}
-  .sum-card{min-width:90px}
-  .drawer{width:100%}
-}
+
+/* ── MOBILE CARD LIST ───────────────────────────────────────── */
+.mob-list{display:none;flex-direction:column;gap:8px;padding:8px 12px 80px}
+.mob-card{background:#fff;border-radius:var(--r-md);box-shadow:var(--sh1);padding:12px 14px;cursor:pointer;border-left:4px solid var(--bdr);transition:box-shadow .15s;-webkit-tap-highlight-color:transparent}
+.mob-card:active{box-shadow:var(--sh2)}
+.mob-card.risk-crit{border-left-color:var(--c-crit)}
+.mob-card.risk-high{border-left-color:var(--c-high)}
+.mob-card.risk-mod{border-left-color:var(--c-mod)}
+.mob-card.risk-low{border-left-color:var(--c-low-bd)}
+.mob-name{font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;color:var(--txt)}
+.mob-sub{font-size:11px;color:var(--txt2);margin-top:2px}
+.mob-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:8px}
+.mob-meta{font-size:11px;color:var(--txt2)}
+.mob-flags{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.mob-empty{text-align:center;padding:40px 20px;color:var(--txt3);font-size:13px}
+
+/* ── ANIMATIONS ─────────────────────────────────────────────── */
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .sync-spinning{animation:spin 1s linear infinite;display:inline-block}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;margin-right:4px;flex-shrink:0;vertical-align:middle}
 .sync-dot.err{background:#f87171}.sync-dot.loading{background:#FBBC04}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media(max-width:768px){
+  body{height:100svh}
+  .body-wrap{height:calc(100svh - 56px)}
+  .app-bar{padding:0 6px;gap:3px}
+  #syncStatus{display:none}
+  .sidebar{position:fixed;top:56px;bottom:0;left:0;z-index:150;box-shadow:var(--sh2);width:0;transition:width .25s}
+  .sidebar:not(.collapsed){width:82vw;max-width:300px}
+  .sb-overlay{display:none;position:fixed;inset:0;top:56px;background:rgba(0,0,0,.4);z-index:149}
+  .sb-overlay.open{display:block}
+  .cards-bar{flex-wrap:nowrap;overflow-x:auto;padding:8px 10px;gap:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .cards-bar::-webkit-scrollbar{display:none}
+  .sum-card{flex-shrink:0;min-width:95px;padding:8px 10px}
+  .sum-val{font-size:17px}
+  .sum-lbl{font-size:10px}
+  .sum-icon{width:28px;height:28px}
+  .sum-icon .material-icons-round{font-size:15px}
+  .toolbar{padding:8px 10px;gap:6px}
+  .search-wrap{min-width:100%;order:-1}
+  .md-sel{font-size:12px;padding:6px 8px;flex:1;min-width:calc(50% - 3px)}
+  .chip-bar{flex-wrap:nowrap;overflow-x:auto;padding:6px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .chip-bar::-webkit-scrollbar{display:none}
+  .chip{flex-shrink:0}
+  .table-wrap{display:none}
+  .mob-list{display:flex}
+  .drawer{width:100%;top:0}
+  .modal-ov{align-items:flex-end}
+  .modal{width:100%;max-width:100%;border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:92svh;margin:0}
+  .modal-hdr{padding:14px 16px}
+  .modal-body{padding:14px 16px}
+  .modal-ftr{padding:12px 16px}
+  .form-row{grid-template-columns:1fr}
+  .chk-grid{grid-template-columns:1fr}
+  .fab{right:16px;bottom:16px;padding:12px 16px;font-size:12px}
+  .pagination{flex-wrap:wrap;gap:6px;padding:8px 12px}
+  .pagination>span{width:100%;text-align:center;font-size:11px}
+  .tbl-header{flex-wrap:wrap;gap:6px;padding:10px 12px}
+  .snack{white-space:normal;text-align:center;width:90%;max-width:340px}
+}
+@media(max-width:400px){
+  .sum-card{min-width:82px}
+  .icon-btn{width:32px;height:32px}
+}
 </style>
 </head>
 <body>
@@ -253,6 +307,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <div class="sb-divider"></div>
   <div class="sb-section" id="blockTree"></div>
 </div>
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 
 <!-- MAIN -->
 <div class="main">
@@ -310,6 +365,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
       </div>
       <div class="pagination" id="pagination"></div>
     </div>
+    <div class="mob-list" id="mobList"></div>
   </div>
 </div>
 </div>
@@ -662,7 +718,16 @@ function sbFilter(type) {
 }
 
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('collapsed');
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sbOverlay');
+  sb.classList.toggle('collapsed');
+  if(ov) ov.classList.toggle('open', !sb.classList.contains('collapsed'));
+}
+function closeSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sbOverlay');
+  sb.classList.add('collapsed');
+  if(ov) ov.classList.remove('open');
 }
 
 // ============================================================
@@ -892,6 +957,52 @@ function renderTable() {
 
   renderPagination(total);
   updateCards();
+  // Mobile card list
+  if(isMobile()) renderMobileList(pageData, start);
+}
+
+
+// ============================================================
+// MOBILE CARD LIST RENDERER
+// ============================================================
+function isMobile() { return window.innerWidth <= 768; }
+
+function renderMobileList(pageData, start) {
+  const ml = document.getElementById('mobList');
+  if(!ml) return;
+  if(!pageData.length) {
+    ml.innerHTML = '<div class="mob-empty"><span class="material-icons-round" style="font-size:40px;display:block;margin-bottom:8px">search_off</span>No records match current filters</div>';
+    return;
+  }
+  ml.innerHTML = pageData.map((r,i) => {
+    const score = calcScore(r.r);
+    const cat   = riskCat(score);
+    const vs    = visitStatus(r);
+    const flags = (r.r||[]).slice(0,3).map(f =>
+      `<span class="flag-tag">${f.length>24?f.substring(0,22)+'…':f}</span>`).join('');
+    const more  = (r.r||[]).length > 3
+      ? `<span class="flag-tag" style="background:var(--pri-lt);color:var(--pri)">+${r.r.length-3} more</span>` : '';
+    const scoreHtml = score > 0
+      ? `<span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd}"><b>${score}</b> ${cat.label}</span>`
+      : '<span class="rbadge" style="background:var(--c-none-bg);color:var(--c-none)">No flag</span>';
+    const vsHtml = vs ? `<span class="status-pill ${vs.cls}">${vs.label}</span>` : '';
+    const eddStr = r.e ? `EDD: <b>${fmtDate(r.e)}</b>` : '';
+    return `<div class="mob-card ${cat.cls}" onclick="openDrawer('${r.id||r.n}',${start+i})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <div class="mob-name">${r.n}</div>
+          <div class="mob-sub">${r.p}${r.h?' · '+r.h:''}${r.id?' · '+r.id:''}</div>
+        </div>
+        ${scoreHtml}
+      </div>
+      <div class="mob-row">
+        <span class="mob-meta">Age ${r.a||'—'} · G${r.g||'?'}/P${r.pa||'?'} · ${r.b}</span>
+        ${vsHtml}
+      </div>
+      ${eddStr ? `<div style="font-size:11px;color:var(--txt2);margin-top:4px">${eddStr}</div>` : ''}
+      ${(r.r||[]).length ? `<div class="mob-flags">${flags}${more}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
@@ -943,8 +1054,8 @@ function goPage(p) {
 function updateCards() {
   const f = filteredCache;
   const active = f.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion');
-  const crit = active.filter(r=>calcScore(r.r)>=10);
-  const high = active.filter(r=>{const s=calcScore(r.r);return s>=6&&s<10;});
+  const crit = active.filter(r=>calcScore(r.r)>=5);
+  const high = active.filter(r=>{const s=calcScore(r.r);return s>=3&&s<5;});
   const overdue = active.filter(r=>isOverdue(r));
   const eddSoon = active.filter(r=>r.e&&daysUntil(r.e)<=30&&daysUntil(r.e)>=0);
 
@@ -1648,6 +1759,15 @@ function startSyncTimer() {
 }
 
 // ============================================================
+// Re-render on orientation/resize
+window.addEventListener('resize', () => {
+  if(filteredCache.length) {
+    const start = (currentPage-1)*PAGE_SIZE;
+    const pageData = filteredCache.slice(start, start+PAGE_SIZE);
+    if(isMobile()) renderMobileList(pageData, start);
+  }
+});
+
 // INIT — with Google Sheet auto-sync
 // ============================================================
 buildTableHeader();
