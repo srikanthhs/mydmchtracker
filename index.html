@@ -259,6 +259,59 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   .sum-card{min-width:82px}
   .icon-btn{width:32px;height:32px}
 }
+
+/* ── MESSAGING CENTER ────────────────────────────────────── */
+.msg-modal{background:#fff;border-radius:var(--r-xl);width:96%;max-width:1000px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);animation:su .22s ease}
+.msg-tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.msg-tabs::-webkit-scrollbar{display:none}
+.msg-tab{padding:10px 16px;font-size:12px;font-family:'Google Sans',sans-serif;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;color:var(--txt2);transition:all .15s;flex-shrink:0}
+.msg-tab:hover{background:var(--sur2)}
+.msg-tab.active{color:var(--pri);border-bottom-color:var(--pri)}
+.msg-tab .tab-badge{display:inline-block;background:var(--sur3);color:var(--txt2);font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px}
+.msg-tab.active .tab-badge{background:var(--pri-lt);color:var(--pri)}
+.msg-tab.urgent .tab-badge{background:var(--c-crit-bg);color:var(--c-crit)}
+.msg-body{flex:1;overflow-y:auto;padding:16px}
+.msg-template-box{background:var(--sur2);border-radius:var(--r-md);padding:12px 14px;font-size:12px;line-height:1.6;color:var(--txt2);margin-bottom:12px;border-left:3px solid var(--pri);position:relative}
+.msg-patient-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-sm);transition:background .15s;border-bottom:1px solid var(--bdr)}
+.msg-patient-row:last-child{border-bottom:none}
+.msg-patient-row:hover{background:var(--sur2)}
+.msg-chk{accent-color:var(--pri);width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.msg-name{font-weight:500;font-size:13px;flex:1}
+.msg-detail{font-size:11px;color:var(--txt2)}
+.msg-edd-badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;flex-shrink:0}
+.send-bar{background:var(--sur);border-top:1px solid var(--bdr);padding:12px 16px;display:flex;gap:10px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.api-key-input{flex:1;min-width:200px;padding:8px 12px;border-radius:var(--r-sm);border:1px solid var(--bdr);font-size:12px;font-family:'Roboto',sans-serif;outline:none}
+.api-key-input:focus{border-color:var(--pri)}
+.send-count{font-size:12px;color:var(--txt2);flex-shrink:0}
+@media(max-width:768px){
+  .msg-modal{width:100%;border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:94svh}
+  .send-bar{flex-direction:column;align-items:stretch}
+  .api-key-input{min-width:100%}
+}
+
+/* ── GOOGLE MESSAGES QUEUE ───────────────────────────────── */
+.gmsq-modal{background:#fff;border-radius:var(--r-xl);width:96%;max-width:520px;max-height:96vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);animation:su .22s ease}
+.gmsq-prog{height:5px;background:var(--sur3);flex-shrink:0}
+.gmsq-prog-fill{height:100%;background:var(--c-mod);transition:width .4s ease}
+.gmsq-card{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+.gmsq-name{font-family:'Google Sans',sans-serif;font-size:22px;font-weight:500;color:var(--txt)}
+.gmsq-meta{font-size:13px;color:var(--txt2);margin-top:2px}
+.gmsq-msg-preview{background:var(--sur2);border-radius:var(--r-md);padding:14px;font-size:13px;line-height:1.7;color:var(--txt);border-left:3px solid var(--pri);position:relative}
+.gmsq-open-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:var(--r-lg);background:#1A73E8;color:#fff;font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500;text-decoration:none;cursor:pointer;transition:background .2s;-webkit-tap-highlight-color:transparent;border:none;width:100%}
+.gmsq-open-btn:hover{background:#1557B0}
+.gmsq-open-btn:active{background:#0D47A1;transform:scale(.98)}
+.gmsq-open-btn .material-icons-round{font-size:22px}
+.gmsq-skip-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:var(--r-md);background:transparent;color:var(--txt2);font-size:13px;cursor:pointer;border:1px solid var(--bdr);width:100%;font-family:'Roboto',sans-serif}
+.gmsq-skip-btn:hover{background:var(--sur2)}
+.gmsq-sent-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-sm);background:var(--c-mod-bg);color:var(--c-mod);font-size:12px}
+.gmsq-queue-list{display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto}
+.gmsq-q-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;font-size:12px;color:var(--txt2)}
+.gmsq-q-item.done{color:var(--c-mod);text-decoration:line-through;opacity:.7}
+.gmsq-q-item.current{background:var(--pri-lt);color:var(--pri);font-weight:500}
+@media(max-width:768px){
+  .gmsq-modal{width:100%;border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:96svh;margin:0}
+  .modal-ov.open .gmsq-modal{align-self:flex-end}
+}
 </style>
 </head>
 <body>
@@ -274,6 +327,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <button class="icon-btn" title="DPH Report" onclick="openDPH()"><span class="material-icons-round">assessment</span></button>
   <button class="icon-btn" title="Export CSV" onclick="exportCSV()"><span class="material-icons-round">download</span></button>
   <button class="icon-btn" title="Print" onclick="window.print()"><span class="material-icons-round">print</span></button>
+  <button class="icon-btn" title="Messaging Centre" onclick="openMessaging()" style="background:rgba(255,255,255,.2)"><span class="material-icons-round">send</span></button>
   <button class="icon-btn" id="syncBtn" title="Sync from Google Sheet" onclick="syncFromSheet()"><span class="material-icons-round" id="syncIcon">sync</span></button>
   <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.75)" id="syncStatus"><span class="sync-dot loading" id="syncDot"></span><span id="syncTs">Syncing…</span></div>
 </div>
@@ -283,25 +337,38 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
   <div class="sb-section">
+    <div style="padding:8px 16px 4px;font-family:'Google Sans',sans-serif;font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em">VIEWS</div>
     <div class="sb-item active" id="sb-all" onclick="sbSelect('all')">
       <span class="material-icons-round">dashboard</span> All Records
       <span class="sb-badge" id="sb-all-badge">0</span>
     </div>
-    <div class="sb-item" onclick="sbFilter('active')">
+    <div class="sb-item" id="sb-active" onclick="sbFilter('active')">
       <span class="material-icons-round">pregnant_woman</span> Active Cases
       <span class="sb-badge" id="sb-active-badge">0</span>
     </div>
-    <div class="sb-item" onclick="sbFilter('delivered')">
+    <div class="sb-item" id="sb-del" onclick="sbFilter('delivered')">
       <span class="material-icons-round">child_friendly</span> Delivered
       <span class="sb-badge" id="sb-del-badge">0</span>
     </div>
-    <div class="sb-item" onclick="sbFilter('overdue')">
-      <span class="material-icons-round" style="color:var(--c-crit)">schedule</span> Overdue Visit
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div style="padding:8px 16px 4px;font-family:'Google Sans',sans-serif;font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em">ALERTS</div>
+    <div class="sb-item" id="sb-overdue" onclick="sbFilter('overdue')">
+      <span class="material-icons-round" style="color:var(--c-crit)">running_with_errors</span> Overdue Visit
       <span class="sb-badge" style="background:var(--c-crit-bg);color:var(--c-crit)" id="sb-ov-badge">0</span>
     </div>
-    <div class="sb-item" onclick="sbFilter('highrisk')">
+    <div class="sb-item" id="sb-edd15" onclick="sbFilter('edd15')">
+      <span class="material-icons-round" style="color:var(--c-high)">event_upcoming</span> EDD ≤ 15 Days
+      <span class="sb-badge" style="background:var(--c-high-bg);color:var(--c-high)" id="sb-edd15-badge">0</span>
+    </div>
+    <div class="sb-item" id="sb-hr" onclick="sbFilter('highrisk')">
       <span class="material-icons-round" style="color:var(--c-high)">warning</span> Has Risk Flags
       <span class="sb-badge" id="sb-hr-badge">0</span>
+    </div>
+    <div class="sb-item" id="sb-ai" onclick="openAIInsights()">
+      <span class="material-icons-round" style="color:#7C3AED">auto_awesome</span> AI Insights
+      <span class="sb-badge" style="background:#EDE9FE;color:#7C3AED">NEW</span>
     </div>
   </div>
   <div class="sb-divider"></div>
@@ -497,6 +564,91 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   </div>
 </div>
 </div>
+
+<!-- AI INSIGHTS MODAL -->
+<div class="modal-ov" id="aiModal" onclick="closeModalOv(event,'aiModal')">
+<div class="modal" style="max-width:740px">
+  <div class="modal-hdr">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="material-icons-round" style="color:#7C3AED">auto_awesome</span>
+      <h2>AI Insights — HRP District Intelligence</h2>
+    </div>
+    <button onclick="closeModal('aiModal')" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+  </div>
+  <div class="modal-body">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="act-btn" onclick="runAI('summary')" style="background:#EDE9FE;border-color:#7C3AED;color:#7C3AED"><span class="material-icons-round">summarize</span> District Summary</button>
+      <button class="act-btn" onclick="runAI('risk')" style="background:#FCE8E6;border-color:var(--c-crit);color:var(--c-crit)"><span class="material-icons-round">priority_high</span> Risk Analysis</button>
+      <button class="act-btn" onclick="runAI('action')" style="background:#FEF7E0;border-color:var(--c-high);color:var(--c-high)"><span class="material-icons-round">task_alt</span> Action Points</button>
+      <button class="act-btn" onclick="runAI('pattern')" style="background:#E6F4EA;border-color:var(--c-mod);color:var(--c-mod)"><span class="material-icons-round">insights</span> Patterns</button>
+    </div>
+    <div id="aiResult" style="min-height:120px;background:var(--sur2);border-radius:var(--r-md);padding:16px;font-size:13px;line-height:1.7;color:var(--txt)">
+      <div style="color:var(--txt3);text-align:center;padding:24px 0">
+        <span class="material-icons-round" style="font-size:36px;display:block;margin-bottom:8px;color:#7C3AED">auto_awesome</span>
+        Select an analysis type above to generate AI insights from your district HRP data.
+      </div>
+    </div>
+    <div id="aiStatus" style="font-size:11px;color:var(--txt3);margin-top:8px;text-align:right"></div>
+  </div>
+  <div class="modal-ftr">
+    <button class="btn-outlined" onclick="closeModal('aiModal')">Close</button>
+  </div>
+</div>
+</div>
+
+<!-- MESSAGING CENTRE MODAL -->
+<div class="modal-ov" id="msgModal" onclick="closeModalOv(event,'msgModal')">
+<div class="msg-modal">
+  <div class="modal-hdr" style="flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="material-icons-round" style="color:var(--pri)">send</span>
+      <div>
+        <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500">HRP Messaging Centre</div>
+        <div style="font-size:11px;color:var(--txt2)">EDD-based alerts — Admission & Follow-up reminders</div>
+      </div>
+    </div>
+    <button onclick="closeModal('msgModal')" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+  </div>
+  <div class="msg-tabs" id="msgTabs"></div>
+  <div class="msg-body" id="msgBody"></div>
+  <div class="send-bar">
+    <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:220px;background:var(--sur2);border-radius:var(--r-sm);padding:8px 12px">
+      <span class="material-icons-round" style="font-size:16px;color:var(--c-mod)">verified_user</span>
+      <div style="font-size:12px;color:var(--txt2)">
+        <b style="color:var(--txt)">Fast2SMS</b> · API key secured in Vercel environment
+        <div style="font-size:10px;color:var(--txt3)">Set FAST2SMS_KEY in Vercel → Settings → Environment Variables</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="send-count" id="selectedCount">0 selected</span>
+      <button class="act-btn" onclick="selectAllMsg(true)"><span class="material-icons-round">done_all</span>Select All</button>
+      <button class="act-btn" onclick="selectAllMsg(false)"><span class="material-icons-round">remove_done</span>Clear</button>
+      <button class="act-btn" onclick="exportMsgCSV()" style="border-color:var(--c-mod);color:var(--c-mod)"><span class="material-icons-round">download</span>Export CSV</button>
+      <button class="act-btn" onclick="openGoogleMsgQueue()" style="background:#1A73E8;color:#fff;border-color:#1A73E8"><span class="material-icons-round">forum</span>Google Messages</button>
+      <button class="act-btn" id="sendSmsBtn" onclick="sendViaFast2SMS()" style="background:var(--sur2);color:var(--txt2);border-color:var(--bdr)"><span class="material-icons-round">send</span>API Send</button>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- GOOGLE MESSAGES QUEUE MODAL -->
+<div class="modal-ov" id="gmsqModal" onclick="closeModalOv(event,'gmsqModal')">
+<div class="gmsq-modal">
+  <div class="modal-hdr" style="flex-shrink:0;padding:14px 18px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="https://www.gstatic.com/images/branding/product/1x/messages_48dp.png" onerror="this.style.display='none'" style="width:24px;height:24px">
+      <div>
+        <div style="font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500">Send via Google Messages</div>
+        <div style="font-size:11px;color:var(--txt2)" id="gmsqSubtitle">Loading…</div>
+      </div>
+    </div>
+    <button onclick="closeModal('gmsqModal')" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+  </div>
+  <div class="gmsq-prog"><div class="gmsq-prog-fill" id="gmsqProgFill" style="width:0%"></div></div>
+  <div class="gmsq-card" id="gmsqCard"></div>
+</div>
+</div>
 <div class="snack" id="snack"></div>
 
 <script>
@@ -577,7 +729,7 @@ function calcScore(flags) {
 // ============================================================
 // DATE HELPERS
 // ============================================================
-const TODAY = new Date('2026-04-15');
+const TODAY = new Date(new Date().toISOString().split('T')[0]); // always today
 
 function daysUntil(dateStr) {
   if(!dateStr) return null;
@@ -585,22 +737,11 @@ function daysUntil(dateStr) {
 }
 
 function nextVisitDate(rec) {
-  // Active high-risk: every 14 days; moderate: 21 days; low: 28 days
-  const score = calcScore(rec.r);
-  const interval = score >= 5 ? 7 : score >= 3 ? 14 : score >= 2 ? 21 : 28;
-  
+  // Fixed: next visit = 15 days after last visit date
   if(rec.lv) {
     const last = new Date(rec.lv);
-    const next = new Date(last.getTime() + interval * 86400000);
+    const next = new Date(last.getTime() + 15 * 86400000);
     return next.toISOString().split('T')[0];
-  }
-  // No last visit — base on EDD
-  if(rec.e) {
-    const edd = new Date(rec.e);
-    const ga_weeks = Math.floor((edd - TODAY) / (7*86400000));
-    // If within 4 weeks of EDD → weekly; else every interval
-    const d = ga_weeks <= 4 ? 7 : interval;
-    return TODAY.toISOString().split('T')[0]; // needs scheduling
   }
   return null;
 }
@@ -687,10 +828,14 @@ function toggleBlock(bl) {
   hdr.classList.toggle('open', !open);
 }
 
+function setSbActive(id) {
+  document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+}
 function sbSelect(mode) {
   sbMode = mode; sbBlock = ''; sbPHC = '';
-  document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
-  document.getElementById('sb-all').classList.add('active');
+  setSbActive('sb-all');
   applyFilters();
 }
 
@@ -713,7 +858,8 @@ function sbSelectPHC(bl, ph) {
 
 function sbFilter(type) {
   sbMode = type; sbBlock = ''; sbPHC = '';
-  document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
+  const idMap = {active:'sb-active',delivered:'sb-del',overdue:'sb-overdue',edd15:'sb-edd15',highrisk:'sb-hr'};
+  setSbActive(idMap[type]||'sb-all');
   applyFilters();
 }
 
@@ -798,23 +944,29 @@ let currentPage = 1;
 const PAGE_SIZE = 50;
 
 const COLS = [
-  {key:'sno',label:'S.No',sortable:false,w:'40px'},
-  {key:'b',label:'Block',sortable:true},
-  {key:'p',label:'PHC',sortable:true},
-  {key:'h',label:'HSC / Sub-centre',sortable:true},
-  {key:'n',label:'Mother\'s Name',sortable:true},
-  {key:'hu',label:'Husband\'s Name',sortable:true},
-  {key:'id',label:'PICME No.',sortable:true},
-  {key:'a',label:'Age',sortable:true,w:'50px'},
-  {key:'g',label:'G/P',sortable:false,w:'50px'},
-  {key:'e',label:'EDD',sortable:true},
-  {key:'r',label:'Risk Flags',sortable:false},
-  {key:'score',label:'Risk Score',sortable:true},
-  {key:'pp',label:'Planned Delivery',sortable:true},
-  {key:'lv',label:'Last Visit',sortable:true},
-  {key:'nv',label:'Next Visit Due',sortable:true},
-  {key:'as_ds',label:'Status',sortable:true},
-  {key:'ph',label:'Mobile',sortable:false},
+  {key:'sno',  label:'S.No',           sortable:false, w:'44px'},
+  {key:'b',    label:'Block',           sortable:true},
+  {key:'p',    label:'PHC',             sortable:true},
+  {key:'h',    label:'HSC',             sortable:true},
+  {key:'n',    label:'Mother Name',     sortable:true},
+  {key:'hu',   label:'Husband Name',    sortable:true},
+  {key:'id',   label:'PICME No.',       sortable:true},
+  {key:'a',    label:'Age',             sortable:true,  w:'50px'},
+  {key:'g',    label:'G/P',             sortable:false, w:'55px'},
+  {key:'e',    label:'EDD',             sortable:true},
+  {key:'r',    label:'Risk Flags',      sortable:false},
+  {key:'score',label:'Risk Score',      sortable:true},
+  {key:'lv',   label:'Last Visit',      sortable:true},
+  {key:'nv',   label:'Next Visit Due',  sortable:true},
+  {key:'as',   label:'Adm. Status',     sortable:true},
+  {key:'ds',   label:'Delivery Status', sortable:true},
+  {key:'dd',   label:'Delivery Date',   sortable:true},
+  {key:'pp',   label:'Planned Place',   sortable:true},
+  {key:'pd',   label:'Place of Del.',   sortable:true},
+  {key:'mo',   label:'Mentor OG',       sortable:true},
+  {key:'mop',  label:'Mentor Opinion',  sortable:true},
+  {key:'fp',   label:'Family Planning', sortable:true},
+  {key:'ph',   label:'Mobile',          sortable:false},
 ];
 
 function buildTableHeader() {
@@ -851,6 +1003,11 @@ function getFiltered() {
     if(sbMode === 'delivered' && r.ds !== 'Delivered') return false;
     if(sbMode === 'overdue' && !isOverdue(r)) return false;
     if(sbMode === 'highrisk' && (!r.r || r.r.length === 0)) return false;
+    if(sbMode === 'edd15') {
+      if(r.ds === 'Delivered' || r.ds === 'Abortion') return false;
+      const d = daysUntil(r.e);
+      if(d === null || d > 15 || d < 0) return false;
+    }
 
     // Search
     if(q) {
@@ -891,9 +1048,8 @@ function getSorted(arr) {
   return [...arr].sort((a,b) => {
     let av, bv;
     if(sortCol === 'score') { av = calcScore(a.r); bv = calcScore(b.r); }
-    else if(sortCol === 'as_ds') { av = (a.as||'')+(a.ds||''); bv = (b.as||'')+(b.ds||''); }
-    else if(sortCol === 'nv') { av = nextVisitDate(a)||''; bv = nextVisitDate(b)||''; }
-    else { av = a[sortCol]||''; bv = b[sortCol]||''; }
+    else if(sortCol === 'nv') { av = nextVisitDate(a)||'9999'; bv = nextVisitDate(b)||'9999'; }
+    else { av = String(a[sortCol]||''); bv = String(b[sortCol]||''); }
     if(av < bv) return -sortDir;
     if(av > bv) return sortDir;
     return 0;
@@ -932,24 +1088,33 @@ function renderTable() {
       const more = (r.r||[]).length > 2 ? `<span class="flag-tag">+${r.r.length-2}</span>` : '';
       const nvStr = vs ? `<span class="status-pill ${vs.cls}">${vs.label}</span>` : '—';
       const scoreHtml = score > 0 ? `<span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd}"><b>${score}</b> ${cat.label}</span>` : '<span class="rbadge" style="background:var(--c-none-bg);color:var(--c-none)">No flag</span>';
-      const pp = r.pt ? `${r.pp||'—'} <span style="font-size:10px;color:var(--txt3)">(${r.pt})</span>` : (r.pp||'—');
-      return `<tr class="data-row ${cat.cls}" onclick="openDrawer('${r.id||r.n}',${start+i})">
+      const admPill = r.as ? `<span class="status-pill" style="background:${r.as==='Admitted'?'#E8F0FE':r.as==='Discharged'?'var(--c-none-bg)':'var(--c-mod-bg)'};color:${r.as==='Admitted'?'#1A73E8':r.as==='Discharged'?'var(--c-none)':'var(--c-mod)'}">${r.as}</span>` : '<span style="color:var(--txt3);font-size:11px">—</span>';
+      const delPill = r.ds ? `<span class="status-pill" style="background:${r.ds==='Delivered'?'var(--c-mod-bg)':r.ds==='Abortion'?'var(--c-none-bg)':'#FEF7E0'};color:${r.ds==='Delivered'?'var(--c-mod)':r.ds==='Abortion'?'var(--c-none)':'var(--c-high)'}">${r.ds}</span>` : '<span style="color:var(--txt3);font-size:11px">Active</span>';
+      const moCell = r.mo ? `<span style="font-size:11px">${r.mo}</span>` : '—';
+      const mopCell = r.mop ? `<span style="font-size:11px;color:${r.mop.toLowerCase().includes('normal')?'var(--c-mod)':r.mop.toLowerCase().includes('risk')||r.mop.toLowerCase().includes('high')?'var(--c-crit)':'var(--txt2)'}">${r.mop}</span>` : '—';
+      return `<tr class="data-row ${cat.cls}" onclick="openDrawer('${(r.id||r.n).replace(/'/g,'\'')}',${start+i})">
         <td style="color:var(--txt3)">${start+i+1}</td>
-        <td>${r.b}</td>
-        <td style="font-weight:500">${r.p}</td>
-        <td>${r.h||'—'}</td>
+        <td style="font-size:11px">${r.b||'—'}</td>
+        <td style="font-weight:500;font-size:11px">${r.p||'—'}</td>
+        <td style="font-size:11px">${r.h||'—'}</td>
         <td><div style="font-weight:500">${r.n}</div><div style="font-size:10px;color:var(--txt3)">${r.id||''}</div></td>
-        <td style="color:var(--txt2)">${r.hu||'—'}</td>
-        <td style="font-family:monospace;font-size:11px;color:var(--txt3)">${r.id||'—'}</td>
-        <td>${r.a||'—'}</td>
-        <td>${r.g||'—'}/${r.pa||'—'}</td>
+        <td style="color:var(--txt2);font-size:11px">${r.hu||'—'}</td>
+        <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${r.id||'—'}</td>
+        <td style="text-align:center">${r.a||'—'}</td>
+        <td style="text-align:center">${r.g||'—'}/${r.pa||'—'}</td>
         <td><b>${fmtDate(r.e)}</b></td>
         <td>${flags}${more}</td>
         <td>${scoreHtml}</td>
-        <td style="font-size:11px">${pp}</td>
-        <td style="color:var(--txt2)">${fmtDate(r.lv)}</td>
+        <td style="color:var(--txt2)">${fmtDate(r.lv)||'—'}</td>
         <td>${nvStr}</td>
-        <td>${statusCell(r)}</td>
+        <td>${admPill}</td>
+        <td>${delPill}</td>
+        <td style="font-size:11px;color:var(--txt2)">${r.dd?fmtDate(r.dd):'—'}</td>
+        <td style="font-size:11px">${r.pp||'—'}${r.pt?` <span style="font-size:10px;color:var(--txt3)">(${r.pt})</span>`:''}</td>
+        <td style="font-size:11px">${r.pd||'—'}</td>
+        <td>${moCell}</td>
+        <td>${mopCell}</td>
+        <td style="font-size:11px;color:var(--txt2)">${r.fp||'—'}</td>
         <td style="font-size:11px;color:var(--txt3)">${r.ph||'—'}</td>
       </tr>`;
     }).join('');
@@ -1059,13 +1224,14 @@ function updateCards() {
   const overdue = active.filter(r=>isOverdue(r));
   const eddSoon = active.filter(r=>r.e&&daysUntil(r.e)<=30&&daysUntil(r.e)>=0);
 
+  const edd15 = active.filter(r=>{ const d=daysUntil(r.e); return d!==null&&d>=0&&d<=15; });
   const cards = [
-    {icon:'people',color:'var(--pri)',bg:'var(--pri-lt)',val:f.length,lbl:'Total shown',filter:''},
-    {icon:'pregnant_woman',color:'var(--c-mod)',bg:'var(--c-mod-bg)',val:active.length,lbl:'Active',filter:'active'},
-    {icon:'priority_high',color:'var(--c-crit)',bg:'var(--c-crit-bg)',val:crit.length,lbl:'Critical risk',filter:'crit'},
-    {icon:'warning',color:'var(--c-high)',bg:'var(--c-high-bg)',val:high.length,lbl:'High risk',filter:'high'},
-    {icon:'schedule',color:'var(--c-crit)',bg:'var(--c-crit-bg)',val:overdue.length,lbl:'Overdue visit',filter:'overdue'},
-    {icon:'event',color:'var(--c-mod)',bg:'var(--c-mod-bg)',val:eddSoon.length,lbl:'EDD ≤30 days',filter:'edd30'},
+    {icon:'people',         color:'var(--pri)',    bg:'var(--pri-lt)',    val:f.length,       lbl:'Total shown',   filter:''},
+    {icon:'pregnant_woman', color:'var(--c-mod)',  bg:'var(--c-mod-bg)', val:active.length,  lbl:'Active',        filter:'active'},
+    {icon:'priority_high',  color:'var(--c-crit)', bg:'var(--c-crit-bg)',val:crit.length,    lbl:'Critical risk', filter:'crit'},
+    {icon:'warning',        color:'var(--c-high)', bg:'var(--c-high-bg)',val:high.length,     lbl:'High risk',     filter:'high'},
+    {icon:'running_with_errors',color:'var(--c-crit)',bg:'var(--c-crit-bg)',val:overdue.length,lbl:'Overdue visit',filter:'overdue'},
+    {icon:'event_upcoming', color:'var(--c-high)', bg:'var(--c-high-bg)',val:edd15.length,    lbl:'EDD ≤15 days',  filter:'edd15'},
   ];
 
   document.getElementById('cardsBar').innerHTML = cards.map(c=>
@@ -1081,6 +1247,8 @@ function updateCards() {
   document.getElementById('sb-del-badge').textContent = ALL.filter(r=>r.ds==='Delivered').length;
   document.getElementById('sb-ov-badge').textContent = ALL.filter(r=>isOverdue(r)).length;
   document.getElementById('sb-hr-badge').textContent = ALL.filter(r=>r.r&&r.r.length>0).length;
+  const e15el = document.getElementById('sb-edd15-badge');
+  if(e15el) e15el.textContent = ALL.filter(r=>{ const d=daysUntil(r.e); return r.ds!=='Delivered'&&r.ds!=='Abortion'&&d!==null&&d>=0&&d<=15; }).length;
 }
 
 let cardFilterMode = '';
@@ -1089,8 +1257,9 @@ function cardFilter(f) {
   // Quick shortcut filters
   if(f === 'crit') { activeRiskChip = 'Critical'; buildRiskChips(); applyFilters(); }
   else if(f === 'high') { activeRiskChip = 'High'; buildRiskChips(); applyFilters(); }
-  else if(f === 'active') { document.getElementById('statusSel').value = 'active'; applyFilters(); }
-  else if(f === 'overdue') { document.getElementById('visitSel').value = 'overdue'; applyFilters(); }
+  else if(f === 'active') { sbMode='active'; setSbActive('sb-active'); applyFilters(); }
+  else if(f === 'overdue') { sbMode='overdue'; setSbActive('sb-overdue'); applyFilters(); }
+  else if(f === 'edd15') { sbMode='edd15'; setSbActive('sb-edd15'); applyFilters(); }
   else { applyFilters(); }
 }
 
@@ -1129,7 +1298,7 @@ function openDrawer(key, idx) {
   }).join('') || '<div style="color:var(--txt3);font-size:13px;padding:8px 0">No high-risk flags recorded</div>';
 
   const nv = nextVisitDate(r);
-  const score_interval = score >= 5 ? 7 : score >= 3 ? 14 : score >= 2 ? 21 : 28;
+  const score_interval = 15; // Fixed: 15 days after last visit
 
   document.getElementById('drawerContent').innerHTML = `
     <div class="dwr-header">
@@ -1729,27 +1898,47 @@ function mapSheetRow(row) {
     return v;
   }
 
+  // Helper: get first non-empty value from multiple possible column names
+  function col(...keys) {
+    for(const k of keys) {
+      const v = row[k];
+      if(v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+    }
+    return '';
+  }
+
+  // Delivery status: handle "YES"/"NO" in "Delivered" column
+  let dsVal = col("DELIVERY STATUS","Delivery Status","delivery status");
+  if(!dsVal) {
+    const delRaw = col("Delivered","DELIVERED","delivered");
+    if(delRaw.toUpperCase()==='YES' || delRaw.toUpperCase()==='Y') dsVal = 'Delivered';
+    else if(delRaw && delRaw.toUpperCase()!=='NO' && delRaw.toUpperCase()!=='N' && delRaw.toUpperCase()!=='') dsVal = delRaw;
+  }
+
   return {
-    b:  row["BLOCK"] || row["Block"] || "",
-    p:  row["NAME OF PHC"] || row["PHC"] || "",
-    h:  row["NAME OF HSC"] || row["HSC"] || "",
-    id: String(row["PICME_NO"] || row["PICME No."] || ""),
-    n:  name.trim(),
-    hu: row["HUSBAND NAME"] || row["Husband Name"] || "",
-    e:  d(row["EDD"]),
-    a:  row["AGE"] || row["Age"] || "",
-    ph: String(row["MOTHER CONTACT NUMBER"] || row["Mobile"] || ""),
-    g:  row["GRAVIDA"] || row["Gravida"] || "",
-    pa: row["PARA"] || row["Para"] || "",
-    r:  riskFlags,
-    pp: row["PLANNED PLACE OF DELIVERY"] || row["Planned Place"] || "",
-    pt: row["PLANNED PLACE TYPE"] || row["Delivery Type"] || "",
-    lv: d(row["LAST FOLLOW UP/ VISIT DATE"] || row["Last Visit"] || ""),
-    rm: row["REMARKS"] || row["Remarks"] || "",
-    as: row["ADMISSION STATUS"] || row["Admission Status"] || "",
-    ds: row["Delivered"] || row["Delivery Status"] || "",
-    dd: d(row["DATE OF DELIVERY"] || row["Delivery Date"] || ""),
-    fp: row["FAMILY PLANNING"] || "",
+    b:   col("BLOCK","Block","block"),
+    p:   col("NAME OF PHC","PHC","phc"),
+    h:   col("NAME OF HSC","HSC","hsc"),
+    id:  col("PICME_NO","PICME No.","picme_no","PICME NO","picme no"),
+    n:   name.trim(),
+    hu:  col("HUSBAND NAME","Husband Name","husband name"),
+    e:   d(col("EDD","edd")),
+    a:   col("AGE","Age","age"),
+    ph:  col("MOTHER CONTACT NUMBER","Mobile","mobile","phone","PHONE"),
+    g:   col("GRAVIDA","Gravida","gravida"),
+    pa:  col("PARA","Para","para"),
+    r:   riskFlags,
+    pp:  col("PLANNED PLACE OF DELIVERY","Planned Place","planned place of delivery"),
+    pt:  col("PLANNED PLACE TYPE","Delivery Type","planned place type"),
+    pd:  col("PLACE OF DELIVERY","Place of Delivery","place of delivery"),
+    lv:  d(col("LAST FOLLOW UP/ VISIT DATE","LAST VISIT DATE","Last Visit Date","last follow up/ visit date","last visit")),
+    rm:  col("REMARKS","Remarks","remarks"),
+    as:  col("ADMISSION STATUS","Admission Status","admission status"),
+    ds:  dsVal,
+    dd:  d(col("DATE OF DELIVERY","Delivery Date","date of delivery")),
+    fp:  col("FAMILY PLANNING","Family Planning","family planning"),
+    mo:  col("MENTOR OG ALLOTTED","Mentor OG Allotted","mentor og allotted","MENTOR OG","mentor og"),
+    mop: col("MENTOR OG OPINION","Mentor OG Opinion","mentor og opinion","MENTOR OPINION","mentor opinion"),
   };
 }
 
@@ -1757,6 +1946,715 @@ function startSyncTimer() {
   if(syncTimer) clearInterval(syncTimer);
   syncTimer = setInterval(()=>syncFromSheet(true), SYNC_INTERVAL_MS);
 }
+
+
+// ============================================================
+// AI INSIGHTS — Claude API powered analysis
+// ============================================================
+function openAIInsights() {
+  document.getElementById('aiModal').classList.add('open');
+}
+
+async function runAI(type) {
+  const resultDiv = document.getElementById('aiResult');
+  const statusDiv = document.getElementById('aiStatus');
+  resultDiv.innerHTML = `<div style="text-align:center;padding:32px;color:var(--txt2)"><span class="material-icons-round sync-spinning" style="font-size:32px;color:#7C3AED;display:block;margin-bottom:8px">auto_awesome</span>Analysing district data…</div>`;
+  statusDiv.textContent = '';
+
+  const active = ALL.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion');
+  const overdue = active.filter(r=>isOverdue(r));
+  const edd15 = active.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=15;});
+  const crit = active.filter(r=>calcScore(r.r)>=5);
+  const blocks = [...new Set(ALL.map(r=>r.b))].sort();
+
+  const blockStats = blocks.map(bl=>{
+    const bp = active.filter(r=>r.b===bl);
+    const od = bp.filter(r=>isOverdue(r)).length;
+    return `${bl}: ${bp.length} active, ${od} overdue`;
+  }).join('; ');
+
+  const topRisks = Object.entries(
+    ALL.flatMap(r=>r.r).reduce((m,f)=>{m[f]=(m[f]||0)+1;return m},{})
+  ).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([f,n])=>`${f}(${n})`).join(', ');
+
+  const mentorOpinions = ALL.filter(r=>r.mop).slice(0,20).map(r=>`${r.n}: ${r.mop}`).join('; ');
+
+  const prompts = {
+    summary: `You are a public health analyst for Mayiladuthurai District, Tamil Nadu. Provide a concise district HRP status summary in 5-6 bullet points.
+
+Data snapshot:
+- Total registered: ${ALL.length}
+- Active pregnancies: ${active.length}
+- Critical risk (score ≥5): ${crit.length}
+- Overdue visits: ${overdue.length}
+- EDD within 15 days: ${edd15.length}
+- Delivered: ${ALL.filter(r=>r.ds==='Delivered').length}
+- Block-wise: ${blockStats}
+- Top risk conditions: ${topRisks}
+
+Write bullet points in plain language suitable for a Collector's morning brief. Be direct and action-oriented.`,
+
+    risk: `You are a maternal health analyst. Analyse these high-risk pregnancy patterns for Mayiladuthurai District.
+
+Risk data:
+- Total active: ${active.length}
+- Critical (score ≥5): ${crit.length}
+- High (score 3-4): ${active.filter(r=>{const s=calcScore(r.r);return s>=3&&s<5;}).length}
+- Top risk conditions: ${topRisks}
+- Block-wise active: ${blockStats}
+- Mentor OG opinions (sample): ${mentorOpinions||'Not available'}
+
+Provide: (1) Key risk patterns observed (2) Which blocks need immediate attention (3) Most common risk combinations to watch. Keep response structured and under 250 words.`,
+
+    action: `You are a district health programme manager. Generate specific action points for the HRP programme.
+
+Current situation:
+- Overdue visits: ${overdue.length} (patients who haven't visited in 15+ days)
+- EDD within 15 days: ${edd15.length}
+- Critical risk patients: ${crit.length}
+- Block-wise overdue: ${blocks.map(bl=>bl+': '+active.filter(r=>r.b===bl&&isOverdue(r)).length+' overdue').join(', ')}
+
+Generate 6-8 specific, numbered action points for the District Collector / CMHO to act on this week. Be specific about which blocks, timelines, and responsible officers where possible.`,
+
+    pattern: `You are an epidemiologist analysing high-risk pregnancy patterns.
+
+District data:
+- Total: ${ALL.length} registered, ${active.length} active
+- Top risk conditions: ${topRisks}
+- Block distribution: ${blockStats}
+- Delivered: ${ALL.filter(r=>r.ds==='Delivered').length}
+- Mentor OG sample opinions: ${mentorOpinions||'Not available'}
+
+Identify: (1) Emerging patterns or clusters (2) Blocks with disproportionate risk burden (3) Any seasonal or programmatic insights (4) Recommendations for programme strengthening. Keep response under 200 words.`
+  };
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompts[type] }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.[0]?.text || 'No response received';
+    // Render markdown-like formatting
+    const html = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^(\d+\. )/gm, '<br><b>$1</b>')
+      .replace(/^[•\-] /gm, '<br>• ')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+    resultDiv.innerHTML = `<div style="line-height:1.8">${html}</div>`;
+    statusDiv.textContent = `Generated ${new Date().toLocaleTimeString('en-IN')} · Powered by Claude AI`;
+  } catch(err) {
+    resultDiv.innerHTML = `<div style="color:var(--c-crit);padding:16px;background:var(--c-crit-bg);border-radius:var(--r-md)">AI analysis failed: ${err.message}</div>`;
+  }
+}
+
+
+// ============================================================
+// MESSAGING CENTRE — EDD-based bulk SMS alerts
+// ============================================================
+const MSG_ALERTS = [
+  { days:15,  type:'admission', label:'Admission — 15 Days',  icon:'local_hospital',   color:'var(--c-crit)', bg:'var(--c-crit-bg)', window:3 },
+  { days:30,  type:'followup',  label:'Follow-up — 30 Days',  icon:'event',            color:'var(--c-high)', bg:'var(--c-high-bg)', window:3 },
+  { days:45,  type:'followup',  label:'Follow-up — 45 Days',  icon:'event',            color:'var(--c-high)', bg:'var(--c-high-bg)', window:3 },
+  { days:60,  type:'followup',  label:'Follow-up — 60 Days',  icon:'calendar_month',   color:'var(--c-mod)',  bg:'var(--c-mod-bg)',  window:3 },
+  { days:75,  type:'followup',  label:'Follow-up — 75 Days',  icon:'calendar_month',   color:'var(--c-mod)',  bg:'var(--c-mod-bg)',  window:3 },
+  { days:90,  type:'followup',  label:'Follow-up — 90 Days',  icon:'calendar_month',   color:'var(--txt2)',   bg:'var(--sur3)',      window:3 },
+  { days:0,   type:'all',       label:'All Pending',           icon:'list',             color:'var(--pri)',    bg:'var(--pri-lt)',    window:null },
+];
+
+let activeMsgTab = 0;
+const SENT_KEY = 'hrp_msg_sent';
+
+function msgSentKey(r, days) { return `${r.id||r.n}_${days}`; }
+function wasSent(r, days) {
+  try { const s=JSON.parse(localStorage.getItem(SENT_KEY)||'{}'); return !!s[msgSentKey(r,days)]; } catch(e){ return false; }
+}
+function markSent(r, days) {
+  try {
+    const s=JSON.parse(localStorage.getItem(SENT_KEY)||'{}');
+    s[msgSentKey(r,days)] = new Date().toISOString();
+    localStorage.setItem(SENT_KEY, JSON.stringify(s));
+  } catch(e){}
+}
+
+function getPatientsForAlert(alert) {
+  const active = ALL.filter(r => r.ds!=='Delivered' && r.ds!=='Abortion' && r.ph && r.e);
+  if(alert.type === 'all') {
+    // All patients who have any pending alert
+    const seen = new Set();
+    const result = [];
+    MSG_ALERTS.filter(a=>a.type!=='all').forEach(a => {
+      getPatientsForAlert(a).forEach(p => {
+        if(!seen.has(p.r.id||p.r.n)) { seen.add(p.r.id||p.r.n); result.push(p); }
+      });
+    });
+    return result;
+  }
+  return active
+    .map(r => ({ r, d: daysUntil(r.e) }))
+    .filter(({d}) => d !== null && d >= alert.days - alert.window && d <= alert.days + alert.window)
+    .sort((a,b) => a.d - b.d)
+    .map(({r, d}) => ({ r, d, alert }));
+}
+
+function buildMsgTemplate(r, alert) {
+  const eddFormatted = fmtDate(r.e);
+  const place = r.pp || r.p || 'your PHC';
+  const daysLeft = daysUntil(r.e);
+  if(alert.type === 'admission') {
+    return `Dear ${r.n}, Your delivery date is approaching in ${daysLeft} days (${eddFormatted}). Please report for admission at ${place} immediately for safe delivery. Carry your antenatal card. For help call your ANM. -Mayiladuthurai HRP`;
+  }
+  return `Dear ${r.n}, Your antenatal check-up is due. Please visit ${r.p||'your PHC'} or nearest health facility for your follow-up visit. Your expected delivery date is ${eddFormatted}. Carry your ANC card. -Mayiladuthurai HRP`;
+}
+
+function buildTamilTemplate(r, alert) {
+  const eddFormatted = fmtDate(r.e);
+  const place = r.pp || r.p || 'உங்கள் PHC';
+  const daysLeft = daysUntil(r.e);
+  if(alert.type === 'admission') {
+    return `அன்பான ${r.n}, உங்கள் பிரசவம் ${daysLeft} நாட்களில் (${eddFormatted}) உள்ளது. பாதுகாப்பான பிரசவத்திற்கு ${place} மருத்துவமனையில் உடனே அனுமதிக்கப்படுங்கள். ANC கார்டை கொண்டு வாருங்கள். -மயிலாடுதுறை HRP`;
+  }
+  return `அன்பான ${r.n}, உங்கள் கர்ப்பகால பரிசோதனை செய்யும் நேரம் வந்துள்ளது. ${r.p||'உங்கள் PHC'} அல்லது அருகிலுள்ள சுகாதார நிலையத்தை சந்தியுங்கள். பிரசவ தேதி: ${eddFormatted}. ANC கார்டை கொண்டு வாருங்கள். -மயிலாடுதுறை HRP`;
+}
+
+let msgLang = 'en';
+let msgTabData = []; // [{r, d, alert}]
+
+function openMessaging() {
+  activeMsgTab = 0;
+  document.getElementById('msgModal').classList.add('open');
+  buildMsgTabs();
+  renderMsgTab(0);
+}
+
+function buildMsgTabs() {
+  const tabs = document.getElementById('msgTabs');
+  tabs.innerHTML = MSG_ALERTS.map((a,i) => {
+    const patients = getPatientsForAlert(a);
+    const urgent = a.days <= 30 && patients.length > 0;
+    return `<div class="msg-tab ${i===activeMsgTab?'active':''} ${urgent?'urgent':''}" onclick="renderMsgTab(${i})">
+      ${a.label}
+      <span class="tab-badge">${patients.length}</span>
+    </div>`;
+  }).join('');
+  // Language toggle
+  tabs.innerHTML += `<div style="margin-left:auto;padding:8px 12px;display:flex;align-items:center;gap:6px;flex-shrink:0">
+    <span style="font-size:11px;color:var(--txt2)">Lang:</span>
+    <button onclick="setMsgLang('en')" id="langEn" class="pg-btn ${msgLang==='en'?'active':''}" style="padding:3px 8px;font-size:11px">EN</button>
+    <button onclick="setMsgLang('ta')" id="langTa" class="pg-btn ${msgLang==='ta'?'active':''}" style="padding:3px 8px;font-size:11px">தமிழ்</button>
+  </div>`;
+}
+
+function setMsgLang(lang) {
+  msgLang = lang;
+  buildMsgTabs();
+  renderMsgTab(activeMsgTab);
+}
+
+function renderMsgTab(idx) {
+  activeMsgTab = idx;
+  const alert = MSG_ALERTS[idx];
+  const patients = getPatientsForAlert(alert);
+  msgTabData = patients;
+
+  // Highlight active tab
+  document.querySelectorAll('.msg-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  updateSelectedCount();
+
+  const body = document.getElementById('msgBody');
+  if(!patients.length) {
+    body.innerHTML = `<div style="text-align:center;padding:48px;color:var(--txt3)">
+      <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:12px">${alert.icon}</span>
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px">No patients due for this alert today</div>
+      <div style="font-size:12px">Patients with EDD within ${alert.window||3} days of the ${alert.days}-day window will appear here</div>
+    </div>`;
+    return;
+  }
+
+  // Sample template
+  const sample = patients[0];
+  const tmpl = msgLang === 'ta' ? buildTamilTemplate(sample.r, sample.alert||alert) : buildMsgTemplate(sample.r, sample.alert||alert);
+  const sentCount = patients.filter(p=>wasSent(p.r, (p.alert||alert).days)).length;
+
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <span class="material-icons-round" style="color:${alert.color}">${alert.icon}</span>
+      <span style="font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500">${alert.label}</span>
+      <span class="rbadge" style="background:${alert.bg};color:${alert.color}">${patients.length} patient${patients.length>1?'s':''}</span>
+      ${sentCount>0?`<span class="rbadge" style="background:var(--c-mod-bg);color:var(--c-mod)">✓ ${sentCount} already sent</span>`:''}
+    </div>
+
+    <div class="msg-template-box">
+      <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">
+        <span class="material-icons-round" style="font-size:13px;vertical-align:middle">message</span>
+        Message Template Preview (${msgLang==='ta'?'Tamil':'English'})
+      </div>
+      <div style="font-size:12px;color:var(--txt)">${tmpl}</div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:6px">${tmpl.length} characters · Each message is personalised with patient name, EDD, and PHC</div>
+    </div>
+
+    <div style="font-size:11px;color:var(--txt2);margin-bottom:8px;font-weight:500">PATIENTS (${patients.length}) — check to include in bulk send:</div>
+    <div id="msgPatientList">
+    ${patients.map((p,i) => {
+      const r = p.r;
+      const al = p.alert || alert;
+      const sent = wasSent(r, al.days);
+      const dLeft = p.d !== undefined ? p.d : daysUntil(r.e);
+      const urgency = dLeft <= 15 ? 'var(--c-crit)' : dLeft <= 30 ? 'var(--c-high)' : 'var(--c-mod)';
+      return `<div class="msg-patient-row">
+        <input type="checkbox" class="msg-chk" id="msgchk_${i}" ${sent?'':'checked'} onchange="updateSelectedCount()">
+        <div style="flex:1;min-width:0">
+          <div class="msg-name">${r.n} <span style="font-size:10px;color:var(--txt3);font-weight:normal">${r.id?'· '+r.id:''}</span></div>
+          <div class="msg-detail">${r.p||'—'} · ${r.h||'—'} · ${r.b||'—'}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div class="msg-edd-badge" style="background:${urgency}1a;color:${urgency}">EDD ${fmtDate(r.e)} (${dLeft}d)</div>
+          <div style="font-size:10px;color:var(--txt3);margin-top:2px">${r.ph||'No phone'}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          ${r.ph ? `<a href="https://wa.me/91${r.ph.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(msgLang==='ta'?buildTamilTemplate(r,al):buildMsgTemplate(r,al))}" target="_blank" title="WhatsApp" class="icon-btn" style="width:30px;height:30px;background:#25D366;color:#fff;border-radius:6px;text-decoration:none;display:flex;align-items:center;justify-content:center"><span class="material-icons-round" style="font-size:15px">chat</span></a>` : ''}
+          ${sent?`<span title="Already sent" style="color:var(--c-mod);display:flex;align-items:center"><span class="material-icons-round" style="font-size:16px">check_circle</span></span>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+    </div>`;
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const chks = document.querySelectorAll('.msg-chk');
+  const sel = [...chks].filter(c=>c.checked).length;
+  const el = document.getElementById('selectedCount');
+  if(el) el.textContent = sel + ' selected';
+}
+
+function selectAllMsg(val) {
+  document.querySelectorAll('.msg-chk').forEach(c=>c.checked=val);
+  updateSelectedCount();
+}
+
+function getSelectedPatients() {
+  const alert = MSG_ALERTS[activeMsgTab];
+  const chks = document.querySelectorAll('.msg-chk');
+  return msgTabData.filter((_,i)=> chks[i] && chks[i].checked);
+}
+
+function exportMsgCSV() {
+  const selected = getSelectedPatients();
+  if(!selected.length) { showSnack('No patients selected'); return; }
+  const alert = MSG_ALERTS[activeMsgTab];
+  const rows = [['Name','PICME','Mobile','Block','PHC','HSC','EDD','Days to EDD','Alert Type','Message (EN)','Message (TA)']];
+  selected.forEach(({r, d, alert:al}) => {
+    const a = al || alert;
+    rows.push([
+      r.n, r.id||'', r.ph||'', r.b, r.p, r.h||'',
+      r.e, d!==undefined?d:daysUntil(r.e),
+      a.label,
+      buildMsgTemplate(r,a),
+      buildTamilTemplate(r,a),
+    ]);
+  });
+  const csv = rows.map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = `HRP_Messages_${alert.label.replace(/ /g,'_')}_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  showSnack(`Exported ${selected.length} records to CSV`);
+}
+
+// ──────────────────────────────────────────────────────────────
+// SMS via Google Apps Script relay (avoids browser CORS block)
+// ──────────────────────────────────────────────────────────────
+async function sendViaFast2SMS() {
+  const selected = getSelectedPatients();
+  if(!selected.length) { showSnack('Select at least one patient'); return; }
+
+  const curAlert = MSG_ALERTS[activeMsgTab];
+  const sendBtn = document.getElementById('sendSmsBtn');
+  if(sendBtn){ sendBtn.innerHTML='<span class="material-icons-round sync-spinning" style="font-size:16px">sync</span> Sending…'; sendBtn.disabled=true; }
+
+  let sent=0, failed=0, errors=[];
+
+  // Build per-patient payloads — personalised message per recipient
+  const BATCH_SIZE = 50;
+  for(let i=0; i<selected.length; i+=BATCH_SIZE){
+    const batch = selected.slice(i, i+BATCH_SIZE);
+
+    // Build one entry per patient with personalised message
+    const smsPayloads = batch.map(p=>{
+      const al = p.alert || curAlert;
+      const msg = msgLang==='ta' ? buildTamilTemplate(p.r,al) : buildMsgTemplate(p.r,al);
+      const num = String(p.r.ph||'').replace(/[^0-9]/g,'');
+      return { number: num, message: msg, patientRef: p };
+    }).filter(x=>x.number.length >= 10);
+
+    if(!smsPayloads.length) continue;
+
+    // Route through Google Apps Script to avoid CORS
+    try {
+      // Call Vercel serverless function — no CORS, no API key in browser
+      const resp = await fetch('/api/sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: smsPayloads.map(x=>({ number: x.number, message: x.message })),
+        })
+      });
+
+      const raw = await resp.text();
+      let result;
+      try { result = JSON.parse(raw); } catch(e){ throw new Error('Bad response: '+raw.substring(0,120)); }
+
+      if(result.status === 'ok' && result.sent > 0){
+        smsPayloads.forEach(x=>markSent(x.patientRef.r,(x.patientRef.alert||curAlert).days));
+        sent += result.sent;
+        if(result.failed) failed += result.failed;
+      } else {
+        const errMsg = result.error || (result.errors && result.errors[0]) || JSON.stringify(result).substring(0,200);
+        errors.push(errMsg);
+        failed += smsPayloads.length;
+      }
+    } catch(err){
+      errors.push(err.message);
+      failed += smsPayloads.length;
+    }
+  }
+
+  if(sendBtn){ sendBtn.innerHTML='<span class="material-icons-round">send</span> Send SMS'; sendBtn.disabled=false; }
+
+  if(sent>0){
+    showSnack(`✓ Sent to ${sent} patients${failed>0?' · '+failed+' failed':''}`);
+    renderMsgTab(activeMsgTab);
+  } else {
+    showSMSErrorModal(errors, selected.length);
+  }
+}
+
+function showSMSErrorModal(errors, count) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:flex;align-items:center;justify-content:center;padding:16px';
+  wrap.innerHTML=`<div style="background:#fff;border-radius:16px;padding:24px;max-width:520px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.3)">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span class="material-icons-round" style="color:var(--c-crit)">error_outline</span>
+      <span style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500">SMS Send Failed</span>
+    </div>
+    <div style="background:var(--c-crit-bg);border-radius:8px;padding:12px;font-size:12px;color:var(--c-crit);margin-bottom:14px;word-break:break-all">
+      ${errors.map(e=>`<div>• ${e}</div>`).join('')||'Unknown error'}
+    </div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.8;margin-bottom:4px"><b>Most likely causes:</b></div>
+    <ol style="font-size:12px;color:var(--txt2);line-height:1.9;padding-left:18px;margin-bottom:14px">
+      <li>Apps Script not updated — you need to add the <b>doPost SMS relay</b> code to your Apps Script</li>
+      <li>Fast2SMS API key is wrong or expired</li>
+      <li>Fast2SMS account has no balance (minimum ₹100 recharge)</li>
+      <li>Apps Script deployment not re-deployed after code update</li>
+    </ol>
+    <div style="background:var(--pri-lt);border-radius:8px;padding:12px;font-size:12px;color:var(--pri);margin-bottom:14px">
+      <b>Fix:</b> In your Google Sheet → Extensions → Apps Script → replace with updated code (shown below) → Deploy → New Deployment
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button onclick="this.closest('div[style*=fixed]').remove()" class="btn-outlined">Close</button>
+      <button onclick="showAppsScriptCode();this.closest('div[style*=fixed]').remove()" class="btn-filled" style="background:#7C3AED">View Apps Script Code</button>
+      <button onclick="exportMsgCSV();this.closest('div[style*=fixed]').remove()" class="btn-filled">Export CSV Instead</button>
+    </div>
+  </div>`;
+  document.body.appendChild(wrap);
+  wrap.addEventListener('click',e=>{if(e.target===wrap)wrap.remove();});
+}
+
+function showAppsScriptCode() {
+  const code = `const SHEET_NAME = null; // null = first sheet
+
+function doGet(e) {
+  try {
+    return ContentService
+      .createTextOutput(JSON.stringify({status:"ok",data:getSheetData(),ts:new Date().toISOString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:"error",message:err.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  try {
+    const params = JSON.parse(e.postData.contents);
+    
+    if (params.action === 'sendSMS') {
+      const messages = params.messages; // [{number, message}]
+      const apiKey   = params.apiKey;
+      const route    = params.route || 'q';
+      
+      // Send individually for personalised messages
+      let successCount = 0;
+      let lastResult;
+      for (const m of messages) {
+        const resp = UrlFetchApp.fetch('https://www.fast2sms.com/dev/bulkV2', {
+          method: 'post',
+          headers: { 'Authorization': apiKey, 'Content-Type': 'application/json' },
+          payload: JSON.stringify({ route: route, message: m.message, numbers: m.number, flash: 0 }),
+          muteHttpExceptions: true
+        });
+        lastResult = JSON.parse(resp.getContentText());
+        if (lastResult.return) successCount++;
+      }
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          status: successCount > 0 ? 'ok' : 'error',
+          smsResult: lastResult,
+          sent: successCount,
+          total: messages.length
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({status:'error',error:'Unknown action'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error',error:err.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getSheetData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = SHEET_NAME ? ss.getSheetByName(SHEET_NAME) : ss.getSheets()[0];
+  if (!sh) throw new Error("No sheet found");
+  const rows = sh.getDataRange().getValues();
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(h => String(h).trim());
+  const records = [];
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (row.every(c => c === "" || c === null)) continue;
+    const obj = {};
+    headers.forEach((h, j) => {
+      let val = row[j];
+      if (val instanceof Date) {
+        val = val.getFullYear() > 1900
+          ? Utilities.formatDate(val, Session.getScriptTimeZone(), "yyyy-MM-dd") : "";
+      }
+      obj[h] = val;
+    });
+    records.push(obj);
+  }
+  return records;
+}`;
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:flex;align-items:center;justify-content:center;padding:16px';
+  wrap.innerHTML=`<div style="background:#fff;border-radius:16px;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3)">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div style="font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500">Updated Apps Script Code</div>
+      <button onclick="this.closest('div[style*=fixed]').remove()" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+    </div>
+    <div style="padding:12px 16px;background:var(--pri-lt);font-size:12px;color:var(--pri);flex-shrink:0">
+      Go to Google Sheet → <b>Extensions → Apps Script</b> → Select all → Paste this → <b>Deploy → New Deployment</b>
+    </div>
+    <pre style="flex:1;overflow:auto;margin:0;padding:16px;font-size:11px;background:var(--sur2);color:var(--txt);font-family:monospace;line-height:1.6;white-space:pre-wrap">${code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+    <div style="padding:12px 16px;border-top:1px solid var(--bdr);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0">
+      <button onclick="navigator.clipboard.writeText(document.querySelector('pre').textContent);showSnack('Code copied!')" class="btn-outlined">Copy Code</button>
+      <button onclick="this.closest('div[style*=fixed]').remove()" class="btn-filled">Done</button>
+    </div>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function showSMSSetupModal(count) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:flex;align-items:center;justify-content:center;padding:16px';
+  wrap.innerHTML=`<div style="background:#fff;border-radius:16px;padding:24px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.3)">
+    <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+      <span class="material-icons-round" style="color:var(--pri)">send</span>Send ${count} SMS — Setup Required
+    </div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.8;margin-bottom:4px"><b>Two steps needed:</b></div>
+    <div style="background:var(--sur2);border-radius:8px;padding:14px;font-size:12px;color:var(--txt2);line-height:1.9;margin-bottom:12px">
+      <b>Step 1 — Update Apps Script</b><br>
+      Your Apps Script needs a <code>doPost</code> SMS relay function added.<br>
+      Click <b>"View Apps Script Code"</b> below, copy it, paste in Apps Script, re-deploy.
+      <br><br>
+      <b>Step 2 — Fast2SMS API Key</b><br>
+      1. Register free at <a href="https://www.fast2sms.com" target="_blank" style="color:var(--pri)">fast2sms.com</a><br>
+      2. Go to <b>Dev API</b> → copy the Authorization key<br>
+      3. Paste key in the field at the bottom of Messaging Centre<br>
+      4. Cost: ₹0.15–0.20 per SMS · Minimum recharge: ₹100
+    </div>
+    <div style="background:#E8F5E9;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--c-mod);margin-bottom:14px">
+      <b>No API key?</b> Export CSV and upload to any bulk SMS portal (TextLocal, MSG91, BSNL CDAC portal).
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button onclick="this.closest('div[style*=fixed]').remove()" class="btn-outlined">Cancel</button>
+      <button onclick="exportMsgCSV();this.closest('div[style*=fixed]').remove()" class="btn-outlined">Export CSV</button>
+      <button onclick="showAppsScriptCode();this.closest('div[style*=fixed]').remove()" class="btn-filled" style="background:#7C3AED">View Apps Script Code</button>
+    </div>
+  </div>`;
+  document.body.appendChild(wrap);
+  wrap.addEventListener('click',e=>{if(e.target===wrap)wrap.remove();});
+}
+
+function toggleKeyVis() {
+  const inp = document.getElementById('fast2smsKey');
+  const icon = document.getElementById('keyVisIcon');
+  if(inp.type==='password'){inp.type='text';icon.textContent='visibility_off';}
+  else{inp.type='password';icon.textContent='visibility';}
+}
+
+// Add messaging badge to app bar when alerts pending
+function updateMsgBadge() {
+  let total = 0;
+  MSG_ALERTS.filter(a=>a.type!=='all').forEach(a=>{ total += getPatientsForAlert(a).length; });
+  // Could add a badge indicator here if needed
+}
+
+
+// ============================================================
+// GOOGLE MESSAGES QUEUE — sms: URI, tap-to-send, zero cost
+// ============================================================
+let gmsgQueue   = [];   // [{r, al, msg, number}]
+let gmsgCurrent = 0;    // index of current patient
+let gmsgSentSet = new Set(); // indices sent this session
+
+function openGoogleMsgQueue() {
+  const selected = getSelectedPatients();
+  if (!selected.length) { showSnack('Select at least one patient'); return; }
+
+  const curAlert = MSG_ALERTS[activeMsgTab];
+  gmsgQueue = selected
+    .filter(p => p.r.ph)
+    .map(p => {
+      const al  = p.alert || curAlert;
+      const msg = msgLang === 'ta' ? buildTamilTemplate(p.r, al) : buildMsgTemplate(p.r, al);
+      const num = String(p.r.ph).replace(/[^0-9]/g, '');
+      return { r: p.r, al, msg, number: num };
+    })
+    .filter(x => x.number.length >= 10);
+
+  if (!gmsgQueue.length) { showSnack('No patients with valid phone numbers selected'); return; }
+
+  gmsgCurrent = 0;
+  gmsgSentSet = new Set();
+  document.getElementById('gmsqModal').classList.add('open');
+  renderGmsgCard();
+}
+
+function renderGmsgCard() {
+  const total   = gmsgQueue.length;
+  const sentCnt = gmsgSentSet.size;
+  const fill    = total > 0 ? Math.round(sentCnt / total * 100) : 0;
+
+  document.getElementById('gmsqProgFill').style.width = fill + '%';
+  document.getElementById('gmsqSubtitle').textContent =
+    `${sentCnt} of ${total} sent · FREE via Google Messages`;
+
+  // Finished
+  if (gmsgCurrent >= total) {
+    document.getElementById('gmsqCard').innerHTML = `
+      <div style="text-align:center;padding:32px 16px">
+        <span class="material-icons-round" style="font-size:56px;color:var(--c-mod);display:block;margin-bottom:12px">check_circle</span>
+        <div style="font-family:'Google Sans',sans-serif;font-size:18px;font-weight:500;margin-bottom:6px">All ${total} messages sent!</div>
+        <div style="font-size:13px;color:var(--txt2);margin-bottom:20px">${sentCnt} sent · ${total - sentCnt} skipped</div>
+        <button onclick="closeModal('gmsqModal');renderMsgTab(activeMsgTab)" class="btn-filled">Done</button>
+      </div>`;
+    return;
+  }
+
+  const item    = gmsgQueue[gmsgCurrent];
+  const dLeft   = daysUntil(item.r.e);
+  const urgency = dLeft <= 15 ? 'var(--c-crit)' : dLeft <= 30 ? 'var(--c-high)' : 'var(--c-mod)';
+  const smsHref = `sms:+91${item.number}?body=${encodeURIComponent(item.msg)}`;
+
+  // Mini queue list (next 4)
+  const queuePreview = gmsgQueue.slice(gmsgCurrent, gmsgCurrent + 5).map((q, i) => {
+    const cls = i === 0 ? 'current' : gmsgSentSet.has(gmsgCurrent + i) ? 'done' : '';
+    return `<div class="gmsq-q-item ${cls}">
+      <span class="material-icons-round" style="font-size:14px">${i === 0 ? 'arrow_right' : gmsgSentSet.has(gmsgCurrent + i) ? 'check' : 'radio_button_unchecked'}</span>
+      ${q.r.n} <span style="opacity:.6;margin-left:4px">${q.number}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('gmsqCard').innerHTML = `
+    <!-- Progress counter -->
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:12px;color:var(--txt3)">${gmsgCurrent + 1} of ${total}</span>
+      <span class="msg-edd-badge" style="background:${urgency}1a;color:${urgency}">EDD in ${dLeft}d</span>
+    </div>
+
+    <!-- Patient info -->
+    <div style="background:var(--sur2);border-radius:var(--r-md);padding:14px">
+      <div class="gmsq-name">${item.r.n}</div>
+      <div class="gmsq-meta">${item.r.p || '—'} · ${item.r.h || '—'} · ${item.r.b || '—'}</div>
+      <div style="font-size:13px;color:var(--txt3);margin-top:6px">📱 ${item.number}</div>
+    </div>
+
+    <!-- Message preview -->
+    <div class="gmsq-msg-preview">
+      <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Message preview</div>
+      ${item.msg}
+      <div style="font-size:10px;color:var(--txt3);margin-top:6px">${item.msg.length} characters</div>
+    </div>
+
+    <!-- Open in Messages button -->
+    <a href="${smsHref}" class="gmsq-open-btn" onclick="gmsgMarkSentAndNext(${gmsgCurrent})">
+      <span class="material-icons-round">forum</span>
+      Open in Google Messages →
+    </a>
+
+    <!-- Skip -->
+    <button class="gmsq-skip-btn" onclick="gmsgSkip()">
+      <span class="material-icons-round" style="font-size:16px">skip_next</span>
+      Skip this patient
+    </button>
+
+    <!-- Queue preview -->
+    ${total > 1 ? `<div style="margin-top:4px">
+      <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;font-weight:600;letter-spacing:.06em;margin-bottom:4px">Up next</div>
+      <div class="gmsq-queue-list">${queuePreview}</div>
+    </div>` : ''}
+
+    <!-- Already sent indicator -->
+    ${sentCnt > 0 ? `<div class="gmsq-sent-row">
+      <span class="material-icons-round" style="font-size:16px">check_circle</span>
+      ${sentCnt} message${sentCnt > 1 ? 's' : ''} sent this session
+    </div>` : ''}`;
+}
+
+function gmsgMarkSentAndNext(idx) {
+  // Mark as sent
+  const item = gmsgQueue[idx];
+  if (item) {
+    markSent(item.r, item.al.days);
+    gmsgSentSet.add(idx);
+  }
+  gmsgCurrent = idx + 1;
+  // Small delay so user sees the app open, then re-render on return
+  setTimeout(() => {
+    if (document.getElementById('gmsqModal').classList.contains('open')) {
+      renderGmsgCard();
+    }
+  }, 800);
+}
+
+function gmsgSkip() {
+  gmsgCurrent++;
+  renderGmsgCard();
+}
+
+// When user returns to app after Messages, auto-advance if needed
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && document.getElementById('gmsqModal')?.classList.contains('open')) {
+    // If user came back and hasn't advanced yet (tapped Send in Messages), mark and advance
+    const item = gmsgQueue[gmsgCurrent];
+    if (item && !gmsgSentSet.has(gmsgCurrent)) {
+      // Don't auto-advance — let user control flow
+    }
+    renderGmsgCard(); // refresh display
+  }
+});
 
 // ============================================================
 // Re-render on orientation/resize
