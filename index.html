@@ -388,6 +388,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <button class="icon-btn" title="Print" onclick="window.print()"><span class="material-icons-round">print</span></button>
   <button class="icon-btn" title="Messaging Centre" onclick="openMessaging()" style="background:rgba(255,255,255,.2)"><span class="material-icons-round">send</span></button>
   <button class="icon-btn" id="syncBtn" title="Sync from Google Sheet" onclick="syncFromSheet()"><span class="material-icons-round" id="syncIcon">sync</span></button>
+  <button class="icon-btn" title="Sync ALL records to Firebase" onclick="syncAllToFirestore()" style="background:rgba(255,165,0,.25)" id="fbSyncBtn"><span class="material-icons-round">cloud_upload</span></button>
   <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.75)" id="syncStatus"><span class="sync-dot loading" id="syncDot"></span><span id="syncTs">Syncing…</span></div>
 </div>
 
@@ -1846,6 +1847,23 @@ function parseImportRows(rows, status) {
   status.textContent = `Import complete: ${added} new records added, ${updated} updated. Total: ${ALL.length}`;
   buildSidebar(); buildDropdowns(); applyFilters();
   showSnack(`Imported: ${added} new, ${updated} updated`);
+
+  // Push imported/updated records to Firestore if connected, else queue
+  const importedRecs = [];
+  for(let i=1;i<rows.length;i++){
+    const row=rows[i];
+    if(!row.some(v=>v)) continue;
+    const picme=g(row,'picme_no','picme no');
+    const rec = picme ? ALL.find(r=>r.id===picme) : null;
+    if(rec) importedRecs.push(rec);
+  }
+  // Use batch sync if Firebase is ready, else queue individually
+  if (fbReady && db && importedRecs.length) {
+    syncAllToFirestore();
+  } else {
+    importedRecs.forEach(rec => pendingWrites.push(rec));
+    if (importedRecs.length) showSnack(`${importedRecs.length} records queued for Firebase sync`);
+  }
 }
 
 // ============================================================
@@ -3098,6 +3116,7 @@ const firebaseConfig = {
 
 let db = null;
 let fbReady = false;
+let pendingWrites = []; // queued before Firebase is ready
 const FB_VER = '10.12.0';
 
 function loadFirebaseSDK() {
@@ -3131,6 +3150,7 @@ async function initFirebase() {
     fbReady = true;
     setFbBadge('ok', 'Firebase Connected');
     loadSchedulesFromFirebase();
+    flushPendingWrites(); // write anything queued before Firebase was ready
   } catch(e) {
     setFbBadge('err', 'Init failed');
     console.error('Firebase init error:', e);
@@ -3146,14 +3166,71 @@ function setFbBadge(state, msg) {
 }
 
 async function saveToFirestore(rec) {
-  if (!fbReady || !db) return;
+  // If Firebase not ready yet, queue the write for when it connects
+  if (!fbReady || !db) {
+    pendingWrites.push(rec);
+    showSnack('⏳ Firebase connecting — write queued');
+    return;
+  }
   try {
-    const key = (rec.id || (rec.n + '_' + (rec.e||'')).replace(/[^a-zA-Z0-9_-]/g, '_')).slice(0, 80);
+    // Build a safe document key: prefer PICME, else name+EDD, trimmed to 80 chars
+    const rawKey = rec.id
+      ? String(rec.id).trim()
+      : (rec.n + '_' + (rec.e || '')).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const key = rawKey.slice(0, 80) || 'rec_' + Date.now();
+
     await db.collection('hrp_patients').doc(key).set({
       ...rec,
       _updated: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
-  } catch(e) { console.warn('Firestore save failed:', e.message); }
+
+    setFbBadge('ok', `Saved · ${new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})}`);
+  } catch(e) {
+    console.warn('Firestore save failed:', e.message);
+    showSnack(`⚠ Firebase write failed: ${e.message.slice(0, 60)}`);
+    pendingWrites.push(rec); // retry later
+  }
+}
+
+// Flush writes that were queued before Firebase was ready
+async function flushPendingWrites() {
+  if (!pendingWrites.length) return;
+  const toWrite = [...pendingWrites];
+  pendingWrites.length = 0;
+  showSnack(`Flushing ${toWrite.length} queued write(s) to Firebase…`);
+  for (const rec of toWrite) await saveToFirestore(rec);
+}
+
+// Write all imported records to Firestore in batches of 500
+async function syncAllToFirestore() {
+  if (!fbReady || !db) { showSnack('Firebase not connected yet'); return; }
+  const total = ALL.length;
+  if (!total) { showSnack('No records to sync'); return; }
+  showSnack(`Syncing ${total} records to Firebase…`);
+  const BATCH = 400;
+  let written = 0, failed = 0;
+  for (let i = 0; i < total; i += BATCH) {
+    const batch = db.batch();
+    const chunk = ALL.slice(i, i + BATCH);
+    chunk.forEach(rec => {
+      const rawKey = rec.id
+        ? String(rec.id).trim()
+        : (rec.n + '_' + (rec.e || '')).replace(/[^a-zA-Z0-9_-]/g, '_');
+      const key = (rawKey || 'rec_' + Date.now()).slice(0, 80);
+      const ref = db.collection('hrp_patients').doc(key);
+      batch.set(ref, { ...rec, _updated: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    });
+    try {
+      await batch.commit();
+      written += chunk.length;
+      setFbBadge('ok', `Synced ${written}/${total}`);
+    } catch(e) {
+      failed += chunk.length;
+      console.warn('Batch write failed:', e.message);
+    }
+  }
+  showSnack(failed ? `⚠ ${written} written, ${failed} failed` : `✓ All ${written} records synced to Firebase`);
+  setFbBadge('ok', `${written} records in Firestore`);
 }
 
 // ============================================================
