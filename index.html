@@ -675,20 +675,22 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <div class="msg-tabs" id="msgTabs"></div>
   <div class="msg-body" id="msgBody"></div>
   <div class="send-bar">
-    <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:220px;background:var(--sur2);border-radius:var(--r-sm);padding:8px 12px">
-      <span class="material-icons-round" style="font-size:16px;color:var(--c-mod)">verified_user</span>
-      <div style="font-size:12px;color:var(--txt2)">
-        <b style="color:var(--txt)">Fast2SMS</b> · API key secured in Vercel environment
-        <div style="font-size:10px;color:var(--txt3)">Set FAST2SMS_KEY in Vercel → Settings → Environment Variables</div>
+    <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:180px;background:var(--sur2);border-radius:var(--r-sm);padding:8px 12px">
+      <span class="material-icons-round" style="font-size:16px;color:var(--pri)">info</span>
+      <div style="font-size:11px;color:var(--txt2)">
+        <b style="color:var(--txt)">Auto alerts:</b> 7d · 15d · 30d · 45d before EDD
+        <div style="font-size:10px;color:var(--txt3)">Custom Send tab: filter by EDD date range, block or risk level, then bulk send</div>
       </div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <span class="send-count" id="selectedCount">0 selected</span>
-      <button class="act-btn" onclick="selectAllMsg(true)"><span class="material-icons-round">done_all</span>Select All</button>
-      <button class="act-btn" onclick="selectAllMsg(false)"><span class="material-icons-round">remove_done</span>Clear</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="send-count" id="selectedCount" style="font-weight:500;color:var(--pri)">0 selected</span>
       <button class="act-btn" onclick="exportMsgCSV()" style="border-color:var(--c-mod);color:var(--c-mod)"><span class="material-icons-round">download</span>Export CSV</button>
-      <button class="act-btn" onclick="openGoogleMsgQueue()" style="background:#1A73E8;color:#fff;border-color:#1A73E8"><span class="material-icons-round">forum</span>Google Messages</button>
-      <button class="act-btn" id="sendSmsBtn" onclick="sendViaFast2SMS()" style="background:var(--sur2);color:var(--txt2);border-color:var(--bdr)"><span class="material-icons-round">send</span>API Send</button>
+      <button class="act-btn" onclick="openGoogleMsgQueue()" style="background:#1A73E8;color:#fff;border-color:#1A73E8;font-weight:500">
+        <span class="material-icons-round">forum</span>Send via Google Messages
+      </button>
+      <button class="act-btn" id="sendSmsBtn" onclick="sendViaFast2SMS()" style="border-color:var(--bdr)">
+        <span class="material-icons-round">send</span>API Send
+      </button>
     </div>
   </div>
 </div>
@@ -739,13 +741,11 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
       <div>
         <div class="sched-lbl">Alert Type</div>
         <select id="sched_type" class="md-sel" style="width:100%;border-radius:var(--r-sm)">
-          <option value="0">Admission — EDD 15 Days</option>
-          <option value="1">Follow-up — 30 Days</option>
-          <option value="2">Follow-up — 45 Days</option>
-          <option value="3">Follow-up — 60 Days</option>
-          <option value="4">Follow-up — 75 Days</option>
-          <option value="5">Follow-up — 90 Days</option>
-          <option value="6">All Pending Alerts</option>
+          <option value="0">🚨 Urgent — EDD in 7 Days</option>
+          <option value="1">🏥 Admission — EDD in 15 Days</option>
+          <option value="2">📅 Follow-up — EDD in 30 Days</option>
+          <option value="3">📅 Follow-up — EDD in 45 Days</option>
+          <option value="4">📋 Custom Send (all filters)</option>
         </select>
       </div>
       <div>
@@ -2301,16 +2301,14 @@ Identify: (1) Emerging patterns or clusters (2) Blocks with disproportionate ris
 
 
 // ============================================================
-// MESSAGING CENTRE — EDD-based bulk SMS alerts
+// MESSAGING CENTRE — EDD-based alerts: 7 / 15 / 30 / 45 days
 // ============================================================
 const MSG_ALERTS = [
-  { days:15,  type:'admission', label:'Admission — 15 Days',  icon:'local_hospital',   color:'var(--c-crit)', bg:'var(--c-crit-bg)', window:3 },
-  { days:30,  type:'followup',  label:'Follow-up — 30 Days',  icon:'event',            color:'var(--c-high)', bg:'var(--c-high-bg)', window:3 },
-  { days:45,  type:'followup',  label:'Follow-up — 45 Days',  icon:'event',            color:'var(--c-high)', bg:'var(--c-high-bg)', window:3 },
-  { days:60,  type:'followup',  label:'Follow-up — 60 Days',  icon:'calendar_month',   color:'var(--c-mod)',  bg:'var(--c-mod-bg)',  window:3 },
-  { days:75,  type:'followup',  label:'Follow-up — 75 Days',  icon:'calendar_month',   color:'var(--c-mod)',  bg:'var(--c-mod-bg)',  window:3 },
-  { days:90,  type:'followup',  label:'Follow-up — 90 Days',  icon:'calendar_month',   color:'var(--txt2)',   bg:'var(--sur3)',      window:3 },
-  { days:0,   type:'all',       label:'All Pending',           icon:'list',             color:'var(--pri)',    bg:'var(--pri-lt)',    window:null },
+  { days:7,  type:'urgent',    label:'Urgent — 7 Days',    icon:'emergency',      color:'var(--c-crit)', bg:'var(--c-crit-bg)', bd:'var(--c-crit-bd)', window:1 },
+  { days:15, type:'admission', label:'Admission — 15 Days', icon:'local_hospital', color:'var(--c-crit)', bg:'var(--c-crit-bg)', bd:'var(--c-crit-bd)', window:2 },
+  { days:30, type:'followup',  label:'Follow-up — 30 Days', icon:'event',          color:'var(--c-high)', bg:'var(--c-high-bg)', bd:'var(--c-high-bd)', window:2 },
+  { days:45, type:'followup',  label:'Follow-up — 45 Days', icon:'calendar_month', color:'var(--c-mod)',  bg:'var(--c-mod-bg)',  bd:'var(--c-mod-bd)',  window:3 },
+  { days:0,  type:'custom',    label:'Custom Send',         icon:'tune',           color:'var(--pri)',    bg:'var(--pri-lt)',    bd:'var(--pri)',        window:null },
 ];
 
 let activeMsgTab = 0;
@@ -2329,47 +2327,46 @@ function markSent(r, days) {
 }
 
 function getPatientsForAlert(alert) {
-  const active = ALL.filter(r => r.ds!=='Delivered' && r.ds!=='Abortion' && r.ph && r.e);
-  if(alert.type === 'all') {
-    // All patients who have any pending alert
-    const seen = new Set();
-    const result = [];
-    MSG_ALERTS.filter(a=>a.type!=='all').forEach(a => {
-      getPatientsForAlert(a).forEach(p => {
-        if(!seen.has(p.r.id||p.r.n)) { seen.add(p.r.id||p.r.n); result.push(p); }
-      });
-    });
-    return result;
-  }
+  // Only active patients with a phone and EDD
+  const active = ALL.filter(r => r.ds !== 'Delivered' && r.ds !== 'Abortion' && r.ph && r.e);
+  if (alert.type === 'custom') return []; // custom tab handled separately
   return active
     .map(r => ({ r, d: daysUntil(r.e) }))
-    .filter(({d}) => d !== null && d >= alert.days - alert.window && d <= alert.days + alert.window)
-    .sort((a,b) => a.d - b.d)
-    .map(({r, d}) => ({ r, d, alert }));
+    .filter(({ d }) => d !== null && d >= alert.days - alert.window && d <= alert.days + alert.window)
+    .sort((a, b) => a.d - b.d)
+    .map(({ r, d }) => ({ r, d, alert }));
 }
 
 function buildMsgTemplate(r, alert) {
-  const eddFormatted = fmtDate(r.e);
+  const edd = fmtDate(r.e);
   const place = r.pp || r.p || 'your PHC';
-  const daysLeft = daysUntil(r.e);
-  if(alert.type === 'admission') {
-    return `Dear ${r.n}, Your delivery date is approaching in ${daysLeft} days (${eddFormatted}). Please report for admission at ${place} immediately for safe delivery. Carry your antenatal card. For help call your ANM. -Mayiladuthurai HRP`;
+  const d = daysUntil(r.e);
+  if (alert.type === 'urgent') {
+    return `URGENT: Dear ${r.n}, your delivery date is in just ${d} days (${edd}). Report IMMEDIATELY to ${place} for safe delivery. Carry your ANC card. Call your ANM now. -Mayiladuthurai District HRP`;
   }
-  return `Dear ${r.n}, Your antenatal check-up is due. Please visit ${r.p||'your PHC'} or nearest health facility for your follow-up visit. Your expected delivery date is ${eddFormatted}. Carry your ANC card. -Mayiladuthurai HRP`;
+  if (alert.type === 'admission') {
+    return `Dear ${r.n}, your delivery is expected in ${d} days (${edd}). Please plan admission at ${place} now for a safe delivery. Carry your ANC card. Contact your ANM for help. -Mayiladuthurai District HRP`;
+  }
+  // followup (30 or 45 days)
+  return `Dear ${r.n}, your next antenatal check-up is due. Please visit ${r.p || 'your PHC'} soon. Your expected delivery date is ${edd} (${d} days away). Carry your ANC card. -Mayiladuthurai District HRP`;
 }
 
 function buildTamilTemplate(r, alert) {
-  const eddFormatted = fmtDate(r.e);
+  const edd = fmtDate(r.e);
   const place = r.pp || r.p || 'உங்கள் PHC';
-  const daysLeft = daysUntil(r.e);
-  if(alert.type === 'admission') {
-    return `அன்பான ${r.n}, உங்கள் பிரசவம் ${daysLeft} நாட்களில் (${eddFormatted}) உள்ளது. பாதுகாப்பான பிரசவத்திற்கு ${place} மருத்துவமனையில் உடனே அனுமதிக்கப்படுங்கள். ANC கார்டை கொண்டு வாருங்கள். -மயிலாடுதுறை HRP`;
+  const d = daysUntil(r.e);
+  if (alert.type === 'urgent') {
+    return `அவசரம்: அன்பான ${r.n}, உங்கள் பிரசவம் ${d} நாட்களில் (${edd}) உள்ளது. பாதுகாப்பான பிரசவத்திற்கு ${place}-ல் உடனே அனுமதிக்கப்படுங்கள். ANC கார்டை கொண்டு வாருங்கள். -மயிலாடுதுறை மாவட்ட HRP`;
   }
-  return `அன்பான ${r.n}, உங்கள் கர்ப்பகால பரிசோதனை செய்யும் நேரம் வந்துள்ளது. ${r.p||'உங்கள் PHC'} அல்லது அருகிலுள்ள சுகாதார நிலையத்தை சந்தியுங்கள். பிரசவ தேதி: ${eddFormatted}. ANC கார்டை கொண்டு வாருங்கள். -மயிலாடுதுறை HRP`;
+  if (alert.type === 'admission') {
+    return `அன்பான ${r.n}, உங்கள் பிரசவம் ${d} நாட்களில் (${edd}) எதிர்பார்க்கப்படுகிறது. ${place}-ல் அனுமதிக்கும் திட்டம் செய்யுங்கள். ANC கார்டை கொண்டு வாருங்கள். -மயிலாடுதுறை மாவட்ட HRP`;
+  }
+  return `அன்பான ${r.n}, உங்கள் கர்ப்பகால பரிசோதனை செய்யும் நேரம் வந்துள்ளது. ${r.p || 'உங்கள் PHC'}-ஐ அணுகுங்கள். பிரசவ தேதி: ${edd} (${d} நாட்கள்). ANC கார்டை கொண்டு வாருங்கள். -மயிலாடுதுறை மாவட்ட HRP`;
 }
 
 let msgLang = 'en';
 let msgTabData = []; // [{r, d, alert}]
+let customMsgFrom = '', customMsgTo = '', customMsgBlock = '', customMsgRisk = '', customMsgSearch = '';
 
 function openMessaging() {
   activeMsgTab = 0;
@@ -2380,19 +2377,19 @@ function openMessaging() {
 
 function buildMsgTabs() {
   const tabs = document.getElementById('msgTabs');
-  tabs.innerHTML = MSG_ALERTS.map((a,i) => {
-    const patients = getPatientsForAlert(a);
-    const urgent = a.days <= 30 && patients.length > 0;
+  tabs.innerHTML = MSG_ALERTS.map((a, i) => {
+    const cnt = a.type === 'custom' ? '' : getPatientsForAlert(a).length;
+    const urgent = a.days > 0 && a.days <= 15 && typeof cnt === 'number' && cnt > 0;
     return `<div class="msg-tab ${i===activeMsgTab?'active':''} ${urgent?'urgent':''}" onclick="renderMsgTab(${i})">
+      <span class="material-icons-round" style="font-size:14px;vertical-align:middle">${a.icon}</span>
       ${a.label}
-      <span class="tab-badge">${patients.length}</span>
+      ${typeof cnt === 'number' ? `<span class="tab-badge" style="background:${urgent?'var(--c-crit-bg)':'var(--sur3)'};color:${urgent?'var(--c-crit)':'var(--txt2)'}">${cnt}</span>` : ''}
     </div>`;
   }).join('');
-  // Language toggle
   tabs.innerHTML += `<div style="margin-left:auto;padding:8px 12px;display:flex;align-items:center;gap:6px;flex-shrink:0">
     <span style="font-size:11px;color:var(--txt2)">Lang:</span>
-    <button onclick="setMsgLang('en')" id="langEn" class="pg-btn ${msgLang==='en'?'active':''}" style="padding:3px 8px;font-size:11px">EN</button>
-    <button onclick="setMsgLang('ta')" id="langTa" class="pg-btn ${msgLang==='ta'?'active':''}" style="padding:3px 8px;font-size:11px">தமிழ்</button>
+    <button onclick="setMsgLang('en')" class="pg-btn ${msgLang==='en'?'active':''}" style="padding:3px 8px;font-size:11px">EN</button>
+    <button onclick="setMsgLang('ta')" class="pg-btn ${msgLang==='ta'?'active':''}" style="padding:3px 8px;font-size:11px">தமிழ்</button>
   </div>`;
 }
 
@@ -2404,90 +2401,265 @@ function setMsgLang(lang) {
 
 function renderMsgTab(idx) {
   activeMsgTab = idx;
+  document.querySelectorAll('.msg-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+
   const alert = MSG_ALERTS[idx];
+  const body  = document.getElementById('msgBody');
+
+  if (alert.type === 'custom') {
+    renderCustomSendTab(body);
+    return;
+  }
+
   const patients = getPatientsForAlert(alert);
   msgTabData = patients;
-
-  // Highlight active tab
-  document.querySelectorAll('.msg-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
   updateSelectedCount();
 
-  const body = document.getElementById('msgBody');
-  if(!patients.length) {
+  if (!patients.length) {
     body.innerHTML = `<div style="text-align:center;padding:48px;color:var(--txt3)">
-      <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:12px">${alert.icon}</span>
+      <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:12px;color:${alert.color}">${alert.icon}</span>
       <div style="font-size:14px;font-weight:500;margin-bottom:6px">No patients due for this alert today</div>
-      <div style="font-size:12px">Patients with EDD within ${alert.window||3} days of the ${alert.days}-day window will appear here</div>
+      <div style="font-size:12px">Active patients with EDD within ±${alert.window} day(s) of ${alert.days} days from today will appear here</div>
     </div>`;
     return;
   }
 
-  // Sample template
   const sample = patients[0];
-  const tmpl = msgLang === 'ta' ? buildTamilTemplate(sample.r, sample.alert||alert) : buildMsgTemplate(sample.r, sample.alert||alert);
-  const sentCount = patients.filter(p=>wasSent(p.r, (p.alert||alert).days)).length;
+  const tmpl = msgLang === 'ta' ? buildTamilTemplate(sample.r, alert) : buildMsgTemplate(sample.r, alert);
+  const sentCount = patients.filter(p => wasSent(p.r, alert.days)).length;
 
   body.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
       <span class="material-icons-round" style="color:${alert.color}">${alert.icon}</span>
       <span style="font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500">${alert.label}</span>
-      <span class="rbadge" style="background:${alert.bg};color:${alert.color}">${patients.length} patient${patients.length>1?'s':''}</span>
-      ${sentCount>0?`<span class="rbadge" style="background:var(--c-mod-bg);color:var(--c-mod)">✓ ${sentCount} already sent</span>`:''}
+      <span class="rbadge" style="background:${alert.bg};color:${alert.color};border:1px solid ${alert.bd}">${patients.length} patient${patients.length>1?'s':''}</span>
+      ${sentCount > 0 ? `<span class="rbadge" style="background:var(--c-mod-bg);color:var(--c-mod)">✓ ${sentCount} sent</span>` : ''}
     </div>
 
     <div class="msg-template-box">
       <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">
         <span class="material-icons-round" style="font-size:13px;vertical-align:middle">message</span>
-        Message Template Preview (${msgLang==='ta'?'Tamil':'English'})
+        Message preview (${msgLang === 'ta' ? 'Tamil' : 'English'}) · personalised per patient
       </div>
-      <div style="font-size:12px;color:var(--txt)">${tmpl}</div>
-      <div style="font-size:10px;color:var(--txt3);margin-top:6px">${tmpl.length} characters · Each message is personalised with patient name, EDD, and PHC</div>
+      <div style="font-size:12px;color:var(--txt);line-height:1.6">${tmpl}</div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:6px">${tmpl.length} chars</div>
     </div>
 
-    <div style="font-size:11px;color:var(--txt2);margin-bottom:8px;font-weight:500">PATIENTS (${patients.length}) — check to include in bulk send:</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+      <span style="font-size:11px;color:var(--txt2);font-weight:500">PATIENTS (${patients.length}) — check to include in bulk send</span>
+      <div style="display:flex;gap:6px">
+        <button class="act-btn" style="padding:4px 10px;font-size:11px" onclick="selectAllMsg(true)"><span class="material-icons-round" style="font-size:14px">done_all</span>All</button>
+        <button class="act-btn" style="padding:4px 10px;font-size:11px" onclick="selectAllMsg(false)"><span class="material-icons-round" style="font-size:14px">remove_done</span>None</button>
+      </div>
+    </div>
     <div id="msgPatientList">
-    ${patients.map((p,i) => {
-      const r = p.r;
-      const al = p.alert || alert;
-      const sent = wasSent(r, al.days);
-      const dLeft = p.d !== undefined ? p.d : daysUntil(r.e);
-      const urgency = dLeft <= 15 ? 'var(--c-crit)' : dLeft <= 30 ? 'var(--c-high)' : 'var(--c-mod)';
-      return `<div class="msg-patient-row">
-        <input type="checkbox" class="msg-chk" id="msgchk_${i}" ${sent?'':'checked'} onchange="updateSelectedCount()">
-        <div style="flex:1;min-width:0">
-          <div class="msg-name">${r.n} <span style="font-size:10px;color:var(--txt3);font-weight:normal">${r.id?'· '+r.id:''}</span></div>
-          <div class="msg-detail">${r.p||'—'} · ${r.h||'—'} · ${r.b||'—'}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div class="msg-edd-badge" style="background:${urgency}1a;color:${urgency}">EDD ${fmtDate(r.e)} (${dLeft}d)</div>
-          <div style="font-size:10px;color:var(--txt3);margin-top:2px">${r.ph||'No phone'}</div>
-        </div>
-        <div style="display:flex;gap:4px;flex-shrink:0">
-          ${r.ph ? `<a href="https://wa.me/91${r.ph.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(msgLang==='ta'?buildTamilTemplate(r,al):buildMsgTemplate(r,al))}" target="_blank" title="WhatsApp" class="icon-btn" style="width:30px;height:30px;background:#25D366;color:#fff;border-radius:6px;text-decoration:none;display:flex;align-items:center;justify-content:center"><span class="material-icons-round" style="font-size:15px">chat</span></a>` : ''}
-          ${sent?`<span title="Already sent" style="color:var(--c-mod);display:flex;align-items:center"><span class="material-icons-round" style="font-size:16px">check_circle</span></span>`:''}
-        </div>
-      </div>`;
-    }).join('')}
+      ${patients.map((p, i) => renderPatientRow(p, i, alert)).join('')}
     </div>`;
+  updateSelectedCount();
+}
+
+function renderPatientRow(p, i, alert) {
+  const r = p.r;
+  const d = p.d !== undefined ? p.d : daysUntil(r.e);
+  const sent = wasSent(r, alert.days);
+  const urgColor = d <= 7 ? 'var(--c-crit)' : d <= 15 ? 'var(--c-high)' : 'var(--c-mod)';
+  const score = calcScore(r.r);
+  const cat = riskCat(score);
+  return `<div class="msg-patient-row">
+    <input type="checkbox" class="msg-chk" id="msgchk_${i}" ${sent ? '' : 'checked'} onchange="updateSelectedCount()">
+    <div style="flex:1;min-width:0">
+      <div class="msg-name">${r.n}
+        <span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd};font-size:10px;margin-left:4px">${score} ${cat.label}</span>
+      </div>
+      <div class="msg-detail">${r.b} · ${r.p} · ${r.h || '—'}</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div class="msg-edd-badge" style="background:${urgColor}1a;color:${urgColor};font-weight:600">EDD in ${d}d — ${fmtDate(r.e)}</div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:2px">📱 ${r.ph || 'No phone'}</div>
+    </div>
+    ${sent ? `<span title="Already sent today" style="color:var(--c-mod);flex-shrink:0"><span class="material-icons-round" style="font-size:18px">check_circle</span></span>` : ''}
+  </div>`;
+}
+
+// ─── CUSTOM SEND TAB ──────────────────────────────────────────
+function renderCustomSendTab(body) {
+  // Build block options
+  const blocks = [...new Set(ALL.map(r => r.b))].sort();
+  const blockOpts = `<option value="">All Blocks</option>` + blocks.map(b => `<option value="${b}" ${customMsgBlock===b?'selected':''}>${b}</option>`).join('');
+
+  body.innerHTML = `
+    <!-- Custom filter bar -->
+    <div style="background:var(--sur2);border-radius:var(--r-md);padding:12px 14px;margin-bottom:12px;border:1px solid var(--bdr)">
+      <div style="font-family:'Google Sans',sans-serif;font-size:12px;font-weight:500;color:var(--txt);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <span class="material-icons-round" style="font-size:16px;color:var(--pri)">tune</span>Filter Patients to Message
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--txt2);margin-bottom:4px">EDD From</div>
+          <input type="date" id="cMsg_from" value="${customMsgFrom}" onchange="applyCustomMsgFilter()" class="md-sel" style="font-size:12px">
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--txt2);margin-bottom:4px">EDD To</div>
+          <input type="date" id="cMsg_to" value="${customMsgTo}" onchange="applyCustomMsgFilter()" class="md-sel" style="font-size:12px">
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--txt2);margin-bottom:4px">Block</div>
+          <select id="cMsg_block" onchange="applyCustomMsgFilter()" class="md-sel" style="font-size:12px">${blockOpts}</select>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--txt2);margin-bottom:4px">Risk Category</div>
+          <select id="cMsg_risk" onchange="applyCustomMsgFilter()" class="md-sel" style="font-size:12px">
+            <option value="" ${customMsgRisk===''?'selected':''}>All Risk Levels</option>
+            <option value="Critical" ${customMsgRisk==='Critical'?'selected':''}>Critical</option>
+            <option value="High" ${customMsgRisk==='High'?'selected':''}>High</option>
+            <option value="Moderate" ${customMsgRisk==='Moderate'?'selected':''}>Moderate</option>
+            <option value="Low" ${customMsgRisk==='Low'?'selected':''}>Low</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--txt2);margin-bottom:4px">Search</div>
+          <input type="text" id="cMsg_search" value="${customMsgSearch}" oninput="applyCustomMsgFilter()" placeholder="Name / PICME…" class="md-sel" style="font-size:12px;width:140px">
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-outlined" onclick="clearCustomMsgFilter()" style="height:34px;font-size:12px;padding:0 12px">Clear</button>
+          <button class="btn-filled" onclick="customMsgQuickSet(7)" style="height:34px;font-size:12px;padding:0 10px;background:var(--c-crit)">≤7d</button>
+          <button class="btn-filled" onclick="customMsgQuickSet(15)" style="height:34px;font-size:12px;padding:0 10px;background:var(--c-high)">≤15d</button>
+          <button class="btn-filled" onclick="customMsgQuickSet(30)" style="height:34px;font-size:12px;padding:0 10px;background:var(--c-mod)">≤30d</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient list with checkboxes -->
+    <div id="customMsgBody"></div>`;
+
+  applyCustomMsgFilter();
+}
+
+function customMsgQuickSet(days) {
+  const today = new Date().toISOString().split('T')[0];
+  const to = new Date(Date.now() + days * 86400000).toISOString().split('T')[0];
+  customMsgFrom = today;
+  customMsgTo   = to;
+  document.getElementById('cMsg_from').value = today;
+  document.getElementById('cMsg_to').value   = to;
+  applyCustomMsgFilter();
+}
+
+function clearCustomMsgFilter() {
+  customMsgFrom = ''; customMsgTo = ''; customMsgBlock = ''; customMsgRisk = ''; customMsgSearch = '';
+  renderCustomSendTab(document.getElementById('msgBody'));
+}
+
+function applyCustomMsgFilter() {
+  customMsgFrom   = document.getElementById('cMsg_from')?.value   || '';
+  customMsgTo     = document.getElementById('cMsg_to')?.value     || '';
+  customMsgBlock  = document.getElementById('cMsg_block')?.value  || '';
+  customMsgRisk   = document.getElementById('cMsg_risk')?.value   || '';
+  customMsgSearch = (document.getElementById('cMsg_search')?.value || '').toLowerCase();
+
+  let data = ALL.filter(r => r.ds !== 'Delivered' && r.ds !== 'Abortion' && r.ph && r.e);
+  if (customMsgFrom)  data = data.filter(r => r.e >= customMsgFrom);
+  if (customMsgTo)    data = data.filter(r => r.e <= customMsgTo);
+  if (customMsgBlock) data = data.filter(r => r.b === customMsgBlock);
+  if (customMsgRisk)  data = data.filter(r => riskCat(calcScore(r.r)).label === customMsgRisk);
+  if (customMsgSearch) data = data.filter(r => (r.n + r.id + r.p + r.h).toLowerCase().includes(customMsgSearch));
+
+  // Sort by EDD ascending
+  data = data.sort((a, b) => (a.e || '') < (b.e || '') ? -1 : 1);
+  msgTabData = data.map(r => ({ r, d: daysUntil(r.e), alert: MSG_ALERTS[2] })); // use 30d template as default
+
+  const div = document.getElementById('customMsgBody');
+  if (!div) return;
+  if (!data.length) {
+    div.innerHTML = `<div style="text-align:center;padding:40px;color:var(--txt3)">
+      <span class="material-icons-round" style="font-size:40px;display:block;margin-bottom:8px">search_off</span>
+      No active patients match the selected filters
+    </div>`;
+    updateSelectedCount();
+    return;
+  }
+
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+      <span style="font-size:11px;color:var(--txt2);font-weight:500">${data.length} patients — select to include in bulk send</span>
+      <div style="display:flex;gap:6px">
+        <button class="act-btn" style="padding:4px 10px;font-size:11px" onclick="selectAllMsg(true)"><span class="material-icons-round" style="font-size:14px">done_all</span>Select All</button>
+        <button class="act-btn" style="padding:4px 10px;font-size:11px" onclick="selectAllMsg(false)"><span class="material-icons-round" style="font-size:14px">remove_done</span>None</button>
+        <button class="act-btn" style="padding:4px 10px;font-size:11px;border-color:var(--c-crit);color:var(--c-crit)" onclick="selectCriticalOnly()">
+          <span class="material-icons-round" style="font-size:14px">priority_high</span>Critical Only
+        </button>
+      </div>
+    </div>
+    <div id="msgPatientList">
+      ${data.map((r, i) => {
+        const d = daysUntil(r.e);
+        const urgColor = d <= 7 ? 'var(--c-crit)' : d <= 15 ? 'var(--c-high)' : 'var(--c-mod)';
+        const sc = calcScore(r.r); const cat = riskCat(sc);
+        return `<div class="msg-patient-row">
+          <input type="checkbox" class="msg-chk" id="msgchk_${i}" checked onchange="updateSelectedCount()">
+          <div style="flex:1;min-width:0">
+            <div class="msg-name">${r.n}
+              <span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd};font-size:10px;margin-left:4px">${sc} ${cat.label}</span>
+            </div>
+            <div class="msg-detail">${r.b} · ${r.p} · ${r.h || '—'} · PICME: ${r.id || '—'}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div class="msg-edd-badge" style="background:${urgColor}1a;color:${urgColor};font-weight:600">EDD ${fmtDate(r.e)}${d !== null ? ` (${d}d)` : ''}</div>
+            <div style="font-size:10px;color:var(--txt3);margin-top:2px">📱 ${r.ph}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  updateSelectedCount();
+}
+
+function selectCriticalOnly() {
+  const chks = document.querySelectorAll('.msg-chk');
+  msgTabData.forEach((p, i) => {
+    if (chks[i]) chks[i].checked = riskCat(calcScore(p.r.r)).label === 'Critical';
+  });
   updateSelectedCount();
 }
 
 function updateSelectedCount() {
   const chks = document.querySelectorAll('.msg-chk');
-  const sel = [...chks].filter(c=>c.checked).length;
+  const sel = [...chks].filter(c => c.checked).length;
   const el = document.getElementById('selectedCount');
-  if(el) el.textContent = sel + ' selected';
+  if (el) el.textContent = sel + ' selected';
+  const sendBtn = document.getElementById('sendSmsBtn');
+  if (sendBtn) sendBtn.style.opacity = sel > 0 ? '1' : '.5';
 }
 
 function selectAllMsg(val) {
-  document.querySelectorAll('.msg-chk').forEach(c=>c.checked=val);
+  document.querySelectorAll('.msg-chk').forEach(c => c.checked = val);
   updateSelectedCount();
 }
 
 function getSelectedPatients() {
-  const alert = MSG_ALERTS[activeMsgTab];
-  const chks = document.querySelectorAll('.msg-chk');
-  return msgTabData.filter((_,i)=> chks[i] && chks[i].checked);
+  const chks = [...document.querySelectorAll('.msg-chk')];
+  return msgTabData.filter((_, i) => chks[i] && chks[i].checked);
+}
+
+function openGoogleMsgQueue() {
+  const selected = getSelectedPatients();
+  if (!selected.length) { showSnack('Select at least one patient first'); return; }
+
+  const curAlert = MSG_ALERTS[activeMsgTab];
+
+  gmsgQueue = selected.map(p => {
+    const r  = p.r;
+    const al = p.alert || curAlert;
+    const num = String(r.ph || '').replace(/\D/g, '').slice(-10);
+    const msg = msgLang === 'ta' ? buildTamilTemplate(r, al) : buildMsgTemplate(r, al);
+    return { r, al, number: num, msg };
+  }).filter(q => q.number.length === 10);
+
+  if (!gmsgQueue.length) { showSnack('No valid phone numbers in selection'); return; }
+
+  gmsgCurrent = 0;
+  gmsgSentSet = new Set();
+  document.getElementById('gmsqModal').classList.add('open');
+  renderGmsgCard();
 }
 
 function exportMsgCSV() {
