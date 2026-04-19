@@ -312,6 +312,63 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   .gmsq-modal{width:100%;border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:96svh;margin:0}
   .modal-ov.open .gmsq-modal{align-self:flex-end}
 }
+
+/* ── ALERT SCHEDULER ──────────────────────────────────────── */
+.sched-modal{background:#fff;border-radius:var(--r-xl);width:96%;max-width:780px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);animation:su .22s ease}
+.sched-body{flex:1;overflow-y:auto;padding:16px 20px}
+.sched-card{background:var(--sur2);border-radius:var(--r-md);padding:14px 16px;margin-bottom:10px;border:1px solid var(--bdr);transition:border-color .2s;position:relative}
+.sched-card:hover{border-color:var(--bdr2)}
+.sched-card.active-sched{border-color:var(--pri);background:var(--pri-lt)}
+.sched-card.overdue-sched{border-color:var(--c-crit);background:var(--c-crit-bg)}
+.sched-card.today-sched{border-color:var(--c-mod);background:var(--c-mod-bg)}
+.sched-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end}
+.sched-lbl{font-size:11px;font-weight:500;color:var(--txt2);margin-bottom:4px}
+.sched-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.sched-fire-btn{display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:var(--r-md);background:var(--c-mod);color:#fff;border:none;font-family:'Google Sans',sans-serif;font-size:13px;cursor:pointer;transition:background .2s;white-space:nowrap}
+.sched-fire-btn:hover{background:#147230}
+.sched-delete-btn{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--txt3);padding:2px}
+.sched-delete-btn:hover{color:var(--c-crit)}
+.today-badge{display:inline-flex;align-items:center;gap:4px;background:var(--c-mod);color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;animation:pulse-badge 2s ease infinite}
+@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.7}}
+.overdue-badge{background:var(--c-crit);color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.fb-sync-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:10px;background:#FFF3E0;color:#E65100;font-size:11px;font-weight:500}
+.fb-sync-badge.ok{background:#E8F5E9;color:#2E7D32}
+.fb-sync-badge.err{background:var(--c-crit-bg);color:var(--c-crit)}
+@media(max-width:768px){
+  .sched-modal{width:100%;border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:92svh}
+  .sched-row{grid-template-columns:1fr 1fr;gap:8px}
+}
+
+/* ── REPORTS MODAL ────────────────────────────────────────── */
+.report-modal{background:#fff;border-radius:var(--r-xl);width:96%;max-width:900px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);animation:su .22s ease}
+.report-tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.report-tab{padding:10px 18px;font-size:12px;font-family:'Google Sans',sans-serif;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;color:var(--txt2);transition:all .15s}
+.report-tab.active{color:var(--pri);border-bottom-color:var(--pri)}
+.report-tab:hover{background:var(--sur2)}
+.report-body{flex:1;overflow-y:auto;padding:16px 20px}
+.report-filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:12px 14px;background:var(--sur2);border-radius:var(--r-md);border:1px solid var(--bdr)}
+.rpt-fg{display:flex;flex-direction:column;gap:4px}
+.rpt-fg label{font-size:11px;font-weight:500;color:var(--txt2)}
+.rpt-fg input,.rpt-fg select{padding:7px 10px;border-radius:var(--r-sm);border:1px solid var(--bdr);font-family:'Roboto',sans-serif;font-size:12px;color:var(--txt);outline:none;background:#fff}
+.rpt-fg input:focus,.rpt-fg select:focus{border-color:var(--pri)}
+.rpt-stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.rpt-stat{background:var(--sur2);border-radius:var(--r-md);padding:12px;text-align:center;border:1px solid var(--bdr)}
+.rpt-stat-num{font-family:'Google Sans',sans-serif;font-size:26px;font-weight:500}
+.rpt-stat-lbl{font-size:11px;color:var(--txt2);margin-top:2px}
+.rpt-section{margin-bottom:20px}
+.rpt-section-title{font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500;color:var(--txt);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--pri-lt);display:flex;align-items:center;gap:8px}
+.rpt-table{width:100%;border-collapse:collapse;font-size:12px}
+.rpt-table th{background:var(--sur2);padding:8px 10px;text-align:left;font-family:'Google Sans',sans-serif;font-size:11px;font-weight:500;color:var(--txt2);border-bottom:1px solid var(--bdr)}
+.rpt-table td{padding:7px 10px;border-bottom:1px solid var(--bdr);color:var(--txt)}
+.rpt-table tr:last-child td{border-bottom:none}
+.rpt-table tr:hover td{background:var(--pri-lt)}
+.active-filter-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;background:var(--pri-lt);color:var(--pri);border:1px solid var(--pri);font-size:11px;margin:2px}
+@media(max-width:768px){
+  .report-modal{width:100%;border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:94svh}
+  .report-filter-bar{flex-direction:column}
+  .rpt-stat-grid{grid-template-columns:repeat(2,1fr)}
+}
+
 </style>
 </head>
 <body>
@@ -324,6 +381,8 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div style="font-size:11px;opacity:.8;color:#fff">Mayiladuthurai District &nbsp;·&nbsp; EDD: March – June 2026 &nbsp;·&nbsp; DPH Tamil Nadu</div>
   </div>
   <button class="icon-btn" title="Import Data" onclick="openImport()"><span class="material-icons-round">upload_file</span></button>
+  <button class="icon-btn" title="Alert Scheduler" onclick="openAlertScheduler()" style="background:rgba(255,255,255,.18)"><span class="material-icons-round">alarm</span></button>
+  <button class="icon-btn" title="Generate Report" onclick="openReports()"><span class="material-icons-round">bar_chart</span></button>
   <button class="icon-btn" title="DPH Report" onclick="openDPH()"><span class="material-icons-round">assessment</span></button>
   <button class="icon-btn" title="Export CSV" onclick="exportCSV()"><span class="material-icons-round">download</span></button>
   <button class="icon-btn" title="Print" onclick="window.print()"><span class="material-icons-round">print</span></button>
@@ -369,6 +428,10 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div class="sb-item" id="sb-ai" onclick="openAIInsights()">
       <span class="material-icons-round" style="color:#7C3AED">auto_awesome</span> AI Insights
       <span class="sb-badge" style="background:#EDE9FE;color:#7C3AED">NEW</span>
+    </div>
+    <div class="sb-item" id="sb-sched" onclick="openAlertScheduler()">
+      <span class="material-icons-round" style="color:var(--c-high)">alarm</span> Alert Scheduler
+      <span class="sb-badge" id="sb-sched-badge" style="background:var(--c-high-bg);color:var(--c-high)">0</span>
     </div>
   </div>
   <div class="sb-divider"></div>
@@ -649,6 +712,186 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <div class="gmsq-card" id="gmsqCard"></div>
 </div>
 </div>
+<!-- ALERT SCHEDULER MODAL -->
+<div class="modal-ov" id="schedModal" onclick="closeModalOv(event,'schedModal')">
+<div class="sched-modal">
+  <div class="modal-hdr" style="flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="material-icons-round" style="color:var(--c-high)">alarm</span>
+      <div>
+        <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500">Alert Scheduler</div>
+        <div style="font-size:11px;color:var(--txt2)">Auto-send Google Messages on scheduled dates · Synced to Firebase</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="fb-sync-badge" id="fbBadge"><span class="material-icons-round" style="font-size:14px">cloud_sync</span>Connecting…</span>
+      <button onclick="closeModal('schedModal')" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+    </div>
+  </div>
+
+  <!-- New Schedule Form -->
+  <div style="padding:14px 20px;background:var(--sur2);border-bottom:1px solid var(--bdr);flex-shrink:0">
+    <div style="font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500;margin-bottom:10px;color:var(--txt)">
+      <span class="material-icons-round" style="font-size:16px;vertical-align:middle;color:var(--pri)">add_alarm</span>
+      New Scheduled Alert
+    </div>
+    <div class="sched-row">
+      <div>
+        <div class="sched-lbl">Alert Type</div>
+        <select id="sched_type" class="md-sel" style="width:100%;border-radius:var(--r-sm)">
+          <option value="0">Admission — EDD 15 Days</option>
+          <option value="1">Follow-up — 30 Days</option>
+          <option value="2">Follow-up — 45 Days</option>
+          <option value="3">Follow-up — 60 Days</option>
+          <option value="4">Follow-up — 75 Days</option>
+          <option value="5">Follow-up — 90 Days</option>
+          <option value="6">All Pending Alerts</option>
+        </select>
+      </div>
+      <div>
+        <div class="sched-lbl">Send Date</div>
+        <input type="date" id="sched_date" class="md-sel" style="width:100%;border-radius:var(--r-sm)">
+      </div>
+      <div>
+        <div class="sched-lbl">Filter Block</div>
+        <select id="sched_block" class="md-sel" style="width:100%;border-radius:var(--r-sm)">
+          <option value="">All Blocks</option>
+        </select>
+      </div>
+      <div>
+        <div class="sched-lbl">Risk Category</div>
+        <select id="sched_risk" class="md-sel" style="width:100%;border-radius:var(--r-sm)">
+          <option value="">All</option>
+          <option value="Critical">Critical only</option>
+          <option value="High">High only</option>
+          <option value="Critical,High">Critical + High</option>
+          <option value="Moderate">Moderate+</option>
+        </select>
+      </div>
+      <div>
+        <div class="sched-lbl">&nbsp;</div>
+        <button class="btn-filled" onclick="addSchedule()" style="height:36px;border-radius:var(--r-sm);display:flex;align-items:center;gap:6px">
+          <span class="material-icons-round" style="font-size:16px">add</span> Schedule
+        </button>
+      </div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--txt3)">
+      <span class="material-icons-round" style="font-size:13px;vertical-align:middle">info</span>
+      On the scheduled date, the app will auto-open the Google Messages queue for selected patients. Schedules are saved to Firebase Firestore.
+    </div>
+  </div>
+
+  <div class="sched-body" id="schedList">
+    <div style="text-align:center;padding:40px;color:var(--txt3)">
+      <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:8px">alarm_off</span>
+      No scheduled alerts yet. Create one above.
+    </div>
+  </div>
+
+  <div class="modal-ftr" style="flex-shrink:0">
+    <div style="font-size:11px;color:var(--txt3);flex:1">
+      <span class="material-icons-round" style="font-size:13px;vertical-align:middle">schedule</span>
+      App checks for due alerts every minute while open
+    </div>
+    <button class="btn-outlined" onclick="closeModal('schedModal')">Close</button>
+    <button class="btn-filled" onclick="checkDueAlerts()"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">notifications_active</span> Check Now</button>
+  </div>
+</div>
+</div>
+
+<!-- REPORTS MODAL -->
+<div class="modal-ov" id="reportModal" onclick="closeModalOv(event,'reportModal')">
+<div class="report-modal">
+  <div class="modal-hdr" style="flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="material-icons-round" style="color:var(--pri)">bar_chart</span>
+      <div>
+        <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500">Report Generator</div>
+        <div style="font-size:11px;color:var(--txt2)">Custom date range · All active filters applied</div>
+      </div>
+    </div>
+    <button onclick="closeModal('reportModal')" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+  </div>
+
+  <!-- Report Tabs -->
+  <div class="report-tabs" id="reportTabs">
+    <div class="report-tab active" onclick="setReportTab(0,this)">District Summary</div>
+    <div class="report-tab" onclick="setReportTab(1,this)">Block-wise</div>
+    <div class="report-tab" onclick="setReportTab(2,this)">Risk Analysis</div>
+    <div class="report-tab" onclick="setReportTab(3,this)">Patient List</div>
+    <div class="report-tab" onclick="setReportTab(4,this)">Delivery Report</div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div style="padding:12px 20px;background:var(--sur2);border-bottom:1px solid var(--bdr);flex-shrink:0">
+    <div class="report-filter-bar" style="margin-bottom:0">
+      <div class="rpt-fg">
+        <label>Date Field</label>
+        <select id="rpt_date_field" onchange="generateReport()">
+          <option value="e">EDD (Expected Delivery Date)</option>
+          <option value="lv">Last Visit Date</option>
+          <option value="dd">Delivery Date</option>
+        </select>
+      </div>
+      <div class="rpt-fg">
+        <label>From Date</label>
+        <input type="date" id="rpt_from" onchange="generateReport()">
+      </div>
+      <div class="rpt-fg">
+        <label>To Date</label>
+        <input type="date" id="rpt_to" onchange="generateReport()">
+      </div>
+      <div class="rpt-fg">
+        <label>Block Filter</label>
+        <select id="rpt_block" onchange="generateReport()">
+          <option value="">All Blocks</option>
+        </select>
+      </div>
+      <div class="rpt-fg">
+        <label>Risk Category</label>
+        <select id="rpt_risk_cat" onchange="generateReport()">
+          <option value="">All</option>
+          <option value="Critical">Critical</option>
+          <option value="High">High</option>
+          <option value="Moderate">Moderate</option>
+          <option value="Low">Low</option>
+          <option value="No Flag">No Flag</option>
+        </select>
+      </div>
+      <div class="rpt-fg">
+        <label>Status</label>
+        <select id="rpt_status" onchange="generateReport()">
+          <option value="">All</option>
+          <option value="active">Active only</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Admitted">Admitted</option>
+        </select>
+      </div>
+      <div class="rpt-fg" style="justify-content:flex-end">
+        <label>&nbsp;</label>
+        <div style="display:flex;gap:6px">
+          <button class="btn-outlined" onclick="clearReportFilters()" style="height:34px;padding:0 12px;font-size:12px">Clear</button>
+          <button class="btn-filled" onclick="printReport()" style="height:34px;padding:0 12px;font-size:12px;display:flex;align-items:center;gap:4px">
+            <span class="material-icons-round" style="font-size:14px">print</span> Print
+          </button>
+          <button class="act-btn" onclick="exportReportCSV()" style="height:34px;padding:0 12px;font-size:12px">
+            <span class="material-icons-round" style="font-size:14px">download</span> CSV
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="activeReportFilters" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px"></div>
+  </div>
+
+  <div class="report-body" id="reportBody">
+    <div style="text-align:center;padding:40px;color:var(--txt3)">
+      <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:8px">bar_chart</span>
+      Select date range above to generate report
+    </div>
+  </div>
+</div>
+</div>
+
 <div class="snack" id="snack"></div>
 
 <script>
@@ -1469,9 +1712,11 @@ function saveRecord() {
     const orig = filteredCache[editIdx];
     const allIdx = ALL.findIndex(r=>r===orig);
     if(allIdx>=0) ALL[allIdx] = rec;
+    saveToFirestore(rec);
     showSnack('Record updated');
   } else {
     ALL.unshift(rec);
+    saveToFirestore(rec);
     showSnack(`${name} registered — Score: ${calcScore(flags)}`);
   }
   closeModal('addModal');
@@ -2666,14 +2911,759 @@ window.addEventListener('resize', () => {
   }
 });
 
-// INIT — with Google Sheet auto-sync
+// ============================================================
+// FIREBASE — Dynamic loader with confirmed version & fallback
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAOq2unMEJpy4LSG_462AFZRz77Bz3T3sE",
+  authDomain: "mydmchtracker.firebaseapp.com",
+  projectId: "mydmchtracker",
+  storageBucket: "mydmchtracker.firebasestorage.app",
+  messagingSenderId: "235401461436",
+  appId: "1:235401461436:web:489848aafc87efacad9ab9",
+  measurementId: "G-H9ZMVCBXYB"
+};
+
+let db = null;
+let fbReady = false;
+const FB_VER = '10.12.0';
+
+function loadFirebaseSDK() {
+  return new Promise(resolve => {
+    if (typeof firebase !== 'undefined') { resolve(true); return; }
+    const appScript = document.createElement('script');
+    appScript.src = `https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app-compat.js`;
+    appScript.onload = () => {
+      const fsScript = document.createElement('script');
+      fsScript.src = `https://www.gstatic.com/firebasejs/${FB_VER}/firebase-firestore-compat.js`;
+      fsScript.onload  = () => resolve(true);
+      fsScript.onerror = () => resolve(false);
+      document.head.appendChild(fsScript);
+    };
+    appScript.onerror = () => resolve(false);
+    document.head.appendChild(appScript);
+  });
+}
+
+async function initFirebase() {
+  setFbBadge('loading', 'Connecting…');
+  const loaded = await loadFirebaseSDK();
+  if (!loaded) {
+    setFbBadge('err', 'SDK load failed');
+    console.warn('Firebase SDK could not be loaded — offline mode');
+    return;
+  }
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    fbReady = true;
+    setFbBadge('ok', 'Firebase Connected');
+    loadSchedulesFromFirebase();
+  } catch(e) {
+    setFbBadge('err', 'Init failed');
+    console.error('Firebase init error:', e);
+  }
+}
+
+function setFbBadge(state, msg) {
+  const badge = document.getElementById('fbBadge');
+  if (!badge) return;
+  badge.className = `fb-sync-badge ${state === 'ok' ? 'ok' : state === 'err' ? 'err' : ''}`;
+  const icon = state === 'ok' ? 'cloud_done' : state === 'err' ? 'cloud_off' : 'cloud_sync';
+  badge.innerHTML = `<span class="material-icons-round" style="font-size:14px">${icon}</span>${msg}`;
+}
+
+async function saveToFirestore(rec) {
+  if (!fbReady || !db) return;
+  try {
+    const key = (rec.id || (rec.n + '_' + (rec.e||'')).replace(/[^a-zA-Z0-9_-]/g, '_')).slice(0, 80);
+    await db.collection('hrp_patients').doc(key).set({
+      ...rec,
+      _updated: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch(e) { console.warn('Firestore save failed:', e.message); }
+}
+
+// ============================================================
+// ALERT SCHEDULER — Firebase backed
+// ============================================================
+let schedules = [];  // [{id, type, alertIdx, date, block, risk, createdAt, firedAt}]
+const SCHED_KEY = 'hrp_schedules';
+let alertCheckTimer = null;
+
+function openAlertScheduler() {
+  initFirebase();
+  // Pre-fill today's date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('sched_date').value = today;
+  // Fill block dropdown
+  const bd = document.getElementById('sched_block');
+  bd.innerHTML = '<option value="">All Blocks</option>';
+  [...new Set(ALL.map(r=>r.b))].sort().forEach(b => bd.innerHTML += `<option>${b}</option>`);
+  document.getElementById('schedModal').classList.add('open');
+  renderSchedules();
+  updateSchedBadge();
+  // Start alert checker
+  if(!alertCheckTimer) alertCheckTimer = setInterval(checkDueAlerts, 60000);
+}
+
+async function addSchedule() {
+  const alertIdx = parseInt(document.getElementById('sched_type').value);
+  const date = document.getElementById('sched_date').value;
+  const block = document.getElementById('sched_block').value;
+  const risk = document.getElementById('sched_risk').value;
+
+  if (!date) { showSnack('Please select a send date'); return; }
+
+  const alert = MSG_ALERTS[alertIdx];
+  const sched = {
+    id: Date.now().toString(),
+    alertIdx, type: alert.label, date, block, risk,
+    createdAt: new Date().toISOString(),
+    firedAt: null, fired: false
+  };
+
+  schedules.push(sched);
+  saveSchedulesLocal();
+  if (fbReady && db) {
+    try {
+      await db.collection('hrp_alert_schedules').doc(sched.id).set(sched);
+      showSnack(`✓ Alert scheduled for ${fmtDate(date)} — saved to Firebase`);
+    } catch(e) {
+      showSnack(`Alert scheduled locally (Firebase: ${e.message})`);
+    }
+  } else {
+    showSnack(`Alert scheduled for ${fmtDate(date)}`);
+  }
+  renderSchedules();
+  updateSchedBadge();
+}
+
+async function deleteSchedule(id) {
+  schedules = schedules.filter(s => s.id !== id);
+  saveSchedulesLocal();
+  if (fbReady && db) {
+    try { await db.collection('hrp_alert_schedules').doc(id).delete(); } catch(e) {}
+  }
+  renderSchedules();
+  updateSchedBadge();
+  showSnack('Schedule deleted');
+}
+
+async function loadSchedulesFromFirebase() {
+  if (!fbReady || !db) return;
+  try {
+    const snap = await db.collection('hrp_alert_schedules').get();
+    if (!snap.empty) {
+      schedules = [];
+      snap.forEach(doc => schedules.push({...doc.data(), id: doc.id}));
+      saveSchedulesLocal();
+      renderSchedules();
+      updateSchedBadge();
+    }
+    setFbBadge('ok', `Firebase · ${schedules.length} schedules`);
+  } catch(e) {
+    setFbBadge('err', 'Load failed');
+  }
+}
+
+function saveSchedulesLocal() {
+  try { localStorage.setItem(SCHED_KEY, JSON.stringify(schedules)); } catch(e) {}
+}
+
+function loadSchedulesLocal() {
+  try {
+    const d = JSON.parse(localStorage.getItem(SCHED_KEY) || '[]');
+    schedules = Array.isArray(d) ? d : [];
+  } catch(e) { schedules = []; }
+}
+
+function checkDueAlerts() {
+  const today = new Date().toISOString().split('T')[0];
+  const due = schedules.filter(s => !s.fired && s.date <= today);
+  if (!due.length) return;
+
+  due.forEach(sched => {
+    const isToday = sched.date === today;
+    const isOverdue = sched.date < today;
+    const label = isToday ? 'TODAY' : 'OVERDUE';
+    const msg = `🔔 Alert ${label}: "${sched.type}"${sched.block?' for '+sched.block:''} was scheduled for ${fmtDate(sched.date)}. Fire now?`;
+    if (confirm(msg)) {
+      fireScheduledAlert(sched);
+    }
+  });
+}
+
+function fireScheduledAlert(sched) {
+  // Apply block/risk filter, then open Google Messages queue
+  const alertIdx = sched.alertIdx || 0;
+  const alert = MSG_ALERTS[alertIdx];
+
+  // Get patients for this alert, filtered by block and risk
+  let patients = getPatientsForAlert(alert);
+  if (sched.block) patients = patients.filter(p => p.r.b === sched.block);
+  if (sched.risk) {
+    const cats = sched.risk.split(',');
+    patients = patients.filter(p => {
+      const cat = riskCat(calcScore(p.r.r));
+      return cats.includes(cat.label);
+    });
+  }
+
+  if (!patients.length) {
+    showSnack(`No patients match this alert criteria today`);
+    return;
+  }
+
+  // Mark as fired
+  sched.fired = true;
+  sched.firedAt = new Date().toISOString();
+  saveSchedulesLocal();
+  if (fbReady && db) {
+    db.collection('hrp_alert_schedules').doc(sched.id).update({
+      fired: true, firedAt: sched.firedAt
+    }).catch(()=>{});
+  }
+
+  // Build the queue and open it
+  gmsgQueue = patients.map(p => {
+    const num = (p.r.ph||'').replace(/\D/g,'').slice(-10);
+    const msg = msgLang === 'ta' ? buildTamilTemplate(p.r, alert) : buildMsgTemplate(p.r, alert);
+    return { r: p.r, al: alert, number: num, msg };
+  }).filter(q => q.number.length === 10);
+
+  gmsgCurrent = 0;
+  gmsgSentSet = new Set();
+
+  closeModal('schedModal');
+  document.getElementById('gmsqModal').classList.add('open');
+  renderGmsgCard();
+
+  showSnack(`🚀 Firing ${gmsgQueue.length} messages for "${sched.type}"`);
+  renderSchedules();
+  updateSchedBadge();
+}
+
+function manualFireSchedule(id) {
+  const sched = schedules.find(s => s.id === id);
+  if (sched) fireScheduledAlert(sched);
+}
+
+function updateSchedBadge() {
+  const today = new Date().toISOString().split('T')[0];
+  const due = schedules.filter(s => !s.fired && s.date <= today).length;
+  const badge = document.getElementById('sb-sched-badge');
+  if (badge) {
+    badge.textContent = due || schedules.filter(s=>!s.fired).length;
+    badge.style.background = due > 0 ? 'var(--c-crit-bg)' : 'var(--c-high-bg)';
+    badge.style.color = due > 0 ? 'var(--c-crit)' : 'var(--c-high)';
+  }
+}
+
+function renderSchedules() {
+  const container = document.getElementById('schedList');
+  if (!container) return;
+  const today = new Date().toISOString().split('T')[0];
+
+  if (!schedules.length) {
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--txt3)">
+      <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:8px">alarm_off</span>
+      No scheduled alerts yet. Create one above.
+    </div>`;
+    return;
+  }
+
+  // Sort: due first, then upcoming, then fired
+  const sorted = [...schedules].sort((a,b) => {
+    if (a.fired && !b.fired) return 1;
+    if (!a.fired && b.fired) return -1;
+    return a.date < b.date ? -1 : 1;
+  });
+
+  const alert = MSG_ALERTS;
+  container.innerHTML = sorted.map(s => {
+    const isToday = !s.fired && s.date === today;
+    const isOverdue = !s.fired && s.date < today;
+    const isFired = s.fired;
+    const cardCls = isToday ? 'today-sched' : isOverdue ? 'overdue-sched' : isFired ? '' : '';
+    const alertObj = alert[s.alertIdx] || alert[0];
+    const pCount = (() => {
+      try {
+        let p = getPatientsForAlert(alertObj);
+        if (s.block) p = p.filter(x => x.r.b === s.block);
+        if (s.risk) { const cats = s.risk.split(','); p = p.filter(x => cats.includes(riskCat(calcScore(x.r.r)).label)); }
+        return p.length;
+      } catch(e) { return '—'; }
+    })();
+
+    const statusBadge = isFired
+      ? `<span class="sched-tag" style="background:var(--c-mod-bg);color:var(--c-mod)"><span class="material-icons-round" style="font-size:13px">check_circle</span> Fired ${s.firedAt ? fmtDate(s.firedAt.split('T')[0]) : ''}</span>`
+      : isToday
+      ? `<span class="today-badge"><span class="material-icons-round" style="font-size:13px">alarm</span> DUE TODAY</span>`
+      : isOverdue
+      ? `<span class="overdue-badge">OVERDUE</span>`
+      : `<span class="sched-tag" style="background:var(--pri-lt);color:var(--pri)">Upcoming · ${fmtDate(s.date)}</span>`;
+
+    return `<div class="sched-card ${cardCls}">
+      <button class="sched-delete-btn" onclick="deleteSchedule('${s.id}')" title="Delete"><span class="material-icons-round" style="font-size:18px">delete_outline</span></button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <span class="material-icons-round" style="color:${alertObj.color}">${alertObj.icon}</span>
+        <span style="font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500">${s.type}</span>
+        ${statusBadge}
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--txt2);margin-bottom:${!isFired?10:0}px">
+        <span><span class="material-icons-round" style="font-size:14px;vertical-align:middle">event</span> ${fmtDate(s.date)}</span>
+        <span><span class="material-icons-round" style="font-size:14px;vertical-align:middle">location_on</span> ${s.block || 'All Blocks'}</span>
+        <span><span class="material-icons-round" style="font-size:14px;vertical-align:middle">warning</span> ${s.risk || 'All Risk Levels'}</span>
+        <span><span class="material-icons-round" style="font-size:14px;vertical-align:middle">people</span> <b>${pCount}</b> patients</span>
+      </div>
+      ${!isFired ? `<button class="sched-fire-btn" onclick="manualFireSchedule('${s.id}')">
+        <span class="material-icons-round">forum</span> Send Now via Google Messages
+      </button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// REPORTS — Custom date range, all filters applied
+// ============================================================
+let reportTabIdx = 0;
+let reportData = [];
+
+function openReports() {
+  // Set default date range: current month
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  document.getElementById('rpt_from').value = new Date(y, m, 1).toISOString().split('T')[0];
+  document.getElementById('rpt_to').value   = new Date(y, m+1, 0).toISOString().split('T')[0];
+  // Fill block dropdown
+  const bd = document.getElementById('rpt_block');
+  bd.innerHTML = '<option value="">All Blocks</option>';
+  [...new Set(ALL.map(r=>r.b))].sort().forEach(b => bd.innerHTML += `<option>${b}</option>`);
+  document.getElementById('reportModal').classList.add('open');
+  generateReport();
+}
+
+function clearReportFilters() {
+  document.getElementById('rpt_from').value = '';
+  document.getElementById('rpt_to').value   = '';
+  document.getElementById('rpt_block').value = '';
+  document.getElementById('rpt_risk_cat').value = '';
+  document.getElementById('rpt_status').value = '';
+  document.getElementById('rpt_date_field').value = 'e';
+  generateReport();
+}
+
+function setReportTab(idx, el) {
+  reportTabIdx = idx;
+  document.querySelectorAll('.report-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderReportTab();
+}
+
+function getReportData() {
+  const dateField = document.getElementById('rpt_date_field').value;
+  const from = document.getElementById('rpt_from').value;
+  const to   = document.getElementById('rpt_to').value;
+  const block = document.getElementById('rpt_block').value;
+  const riskCatF = document.getElementById('rpt_risk_cat').value;
+  const statusF = document.getElementById('rpt_status').value;
+
+  // Start from currently filtered data (respects sidebar + search + chips)
+  let base = getFiltered();
+
+  // Apply date range
+  if (from || to) {
+    base = base.filter(r => {
+      const val = r[dateField];
+      if (!val) return false;
+      if (from && val < from) return false;
+      if (to   && val > to)   return false;
+      return true;
+    });
+  }
+
+  // Apply block
+  if (block) base = base.filter(r => r.b === block);
+
+  // Apply risk cat
+  if (riskCatF) base = base.filter(r => riskCat(calcScore(r.r)).label === riskCatF);
+
+  // Apply status
+  if (statusF === 'active') base = base.filter(r => r.ds !== 'Delivered' && r.ds !== 'Abortion');
+  else if (statusF === 'Delivered') base = base.filter(r => r.ds === 'Delivered');
+  else if (statusF === 'Admitted') base = base.filter(r => r.as === 'Admitted');
+
+  return base;
+}
+
+function getActiveFilterChips() {
+  const from = document.getElementById('rpt_from').value;
+  const to   = document.getElementById('rpt_to').value;
+  const block = document.getElementById('rpt_block').value;
+  const riskCatF = document.getElementById('rpt_risk_cat').value;
+  const statusF = document.getElementById('rpt_status').value;
+  const df = document.getElementById('rpt_date_field').value;
+  const dfLabel = df === 'e' ? 'EDD' : df === 'lv' ? 'Last Visit' : 'Delivery Date';
+
+  const chips = [];
+  if (from || to) chips.push(`${dfLabel}: ${from?fmtDate(from):'Any'} → ${to?fmtDate(to):'Any'}`);
+  if (block) chips.push(`Block: ${block}`);
+  if (riskCatF) chips.push(`Risk: ${riskCatF}`);
+  if (statusF) chips.push(`Status: ${statusF}`);
+  // Add main view filters
+  if (sbBlock) chips.push(`Sidebar Block: ${sbBlock}`);
+  if (sbPHC) chips.push(`Sidebar PHC: ${sbPHC}`);
+  if (activeRiskChip) chips.push(`Risk Chip: ${activeRiskChip}`);
+  const q = document.getElementById('searchInput').value;
+  if (q) chips.push(`Search: "${q}"`);
+  return chips;
+}
+
+function generateReport() {
+  reportData = getReportData();
+  // Update active filter chips display
+  const chips = getActiveFilterChips();
+  document.getElementById('activeReportFilters').innerHTML =
+    chips.map(c=>`<span class="active-filter-chip"><span class="material-icons-round" style="font-size:12px">filter_alt</span>${c}</span>`).join('');
+  renderReportTab();
+}
+
+function renderReportTab() {
+  const body = document.getElementById('reportBody');
+  const data = reportData;
+
+  if (!data.length) {
+    body.innerHTML = `<div style="text-align:center;padding:40px;color:var(--txt3)">
+      <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:8px">search_off</span>
+      No records match the selected filters. Adjust date range or filters above.
+    </div>`;
+    return;
+  }
+
+  if (reportTabIdx === 0) renderSummaryReport(data, body);
+  else if (reportTabIdx === 1) renderBlockReport(data, body);
+  else if (reportTabIdx === 2) renderRiskReport(data, body);
+  else if (reportTabIdx === 3) renderPatientListReport(data, body);
+  else if (reportTabIdx === 4) renderDeliveryReport(data, body);
+}
+
+function statCard(num, lbl, color) {
+  return `<div class="rpt-stat"><div class="rpt-stat-num" style="color:${color}">${num}</div><div class="rpt-stat-lbl">${lbl}</div></div>`;
+}
+
+function renderSummaryReport(data, body) {
+  const active = data.filter(r => r.ds !== 'Delivered' && r.ds !== 'Abortion');
+  const crit = data.filter(r => riskCat(calcScore(r.r)).label === 'Critical');
+  const high = data.filter(r => riskCat(calcScore(r.r)).label === 'High');
+  const del  = data.filter(r => r.ds === 'Delivered');
+  const od   = data.filter(r => isOverdue(r));
+  const edd15 = data.filter(r => { const d = daysUntil(r.e); return r.ds !== 'Delivered' && r.ds !== 'Abortion' && d !== null && d >= 0 && d <= 15; });
+  const admitted = data.filter(r => r.as === 'Admitted');
+
+  const topFlags = Object.entries(
+    data.flatMap(r=>r.r||[]).reduce((acc,f)=>{acc[f]=(acc[f]||0)+1;return acc;},{})
+  ).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  // Block breakdown
+  const blocks = [...new Set(data.map(r=>r.b))].sort();
+  const blockRows = blocks.map(bl => {
+    const bd = data.filter(r => r.b === bl);
+    return { bl, cnt: bd.length, active: bd.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion').length,
+      crit: bd.filter(r=>riskCat(calcScore(r.r)).label==='Critical').length,
+      high: bd.filter(r=>riskCat(calcScore(r.r)).label==='High').length,
+      del: bd.filter(r=>r.ds==='Delivered').length };
+  });
+
+  body.innerHTML = `
+    <div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">summarize</span>Summary Statistics · ${data.length} records</div>
+      <div class="rpt-stat-grid">
+        ${statCard(data.length, 'Total Records', 'var(--pri)')}
+        ${statCard(active.length, 'Active', 'var(--c-mod)')}
+        ${statCard(crit.length, 'Critical Risk', 'var(--c-crit)')}
+        ${statCard(high.length, 'High Risk', 'var(--c-high)')}
+        ${statCard(del.length, 'Delivered', 'var(--c-mod)')}
+        ${statCard(od.length, 'Overdue Visit', 'var(--c-crit)')}
+        ${statCard(edd15.length, 'EDD ≤ 15 Days', 'var(--c-high)')}
+        ${statCard(admitted.length, 'Admitted', 'var(--c-low)')}
+      </div>
+    </div>
+
+    <div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">location_on</span>Block-wise Breakdown</div>
+      <table class="rpt-table">
+        <thead><tr>
+          <th>Block</th><th>Total</th><th>Active</th>
+          <th style="color:var(--c-crit)">Critical</th>
+          <th style="color:var(--c-high)">High</th>
+          <th style="color:var(--c-mod)">Delivered</th>
+        </tr></thead>
+        <tbody>
+          ${blockRows.map(r=>`<tr>
+            <td style="font-weight:500">${r.bl}</td>
+            <td style="text-align:center">${r.cnt}</td>
+            <td style="text-align:center">${r.active}</td>
+            <td style="text-align:center;color:var(--c-crit);font-weight:${r.crit>0?500:400}">${r.crit}</td>
+            <td style="text-align:center;color:var(--c-high);font-weight:${r.high>0?500:400}">${r.high}</td>
+            <td style="text-align:center;color:var(--c-mod)">${r.del}</td>
+          </tr>`).join('')}
+          <tr style="background:var(--sur2);font-weight:600">
+            <td>TOTAL</td>
+            <td style="text-align:center">${data.length}</td>
+            <td style="text-align:center">${active.length}</td>
+            <td style="text-align:center;color:var(--c-crit)">${crit.length}</td>
+            <td style="text-align:center;color:var(--c-high)">${high.length}</td>
+            <td style="text-align:center;color:var(--c-mod)">${del.length}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    ${topFlags.length ? `<div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--c-crit)">warning</span>Top Risk Conditions</div>
+      ${topFlags.map(([f,cnt])=>{
+        const w = RISK_WEIGHTS[f]||0;
+        const pct = Math.round(cnt/data.length*100);
+        return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px">
+          <span style="width:280px;color:var(--txt2);flex-shrink:0">${f}</span>
+          <div style="flex:1;height:8px;background:var(--sur3);border-radius:4px;min-width:60px">
+            <div style="height:100%;width:${pct}%;background:${w>=3?'var(--c-crit)':w>=2?'var(--c-high)':'var(--c-mod)'};border-radius:4px"></div>
+          </div>
+          <span style="width:36px;text-align:right;font-weight:600">${cnt}</span>
+          <span style="font-size:10px;background:var(--pri-lt);color:var(--pri);padding:1px 6px;border-radius:10px">wt:${w}</span>
+        </div>`;
+      }).join('')}
+    </div>` : ''}`;
+}
+
+function renderBlockReport(data, body) {
+  const blocks = [...new Set(data.map(r=>r.b))].sort();
+  body.innerHTML = blocks.map(bl => {
+    const bd = data.filter(r => r.b === bl);
+    const phcs = [...new Set(bd.map(r=>r.p))].sort();
+    const phcRows = phcs.map(ph => {
+      const pd = bd.filter(r => r.p === ph);
+      const od = pd.filter(r => isOverdue(r)).length;
+      return { ph, cnt: pd.length, crit: pd.filter(r=>riskCat(calcScore(r.r)).label==='Critical').length,
+        high: pd.filter(r=>riskCat(calcScore(r.r)).label==='High').length, od,
+        del: pd.filter(r=>r.ds==='Delivered').length };
+    });
+    return `<div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">location_on</span>${bl} Block — ${bd.length} patients</div>
+      <table class="rpt-table">
+        <thead><tr><th>PHC</th><th>Total</th><th style="color:var(--c-crit)">Critical</th><th style="color:var(--c-high)">High</th><th style="color:var(--c-crit)">Overdue Visit</th><th style="color:var(--c-mod)">Delivered</th></tr></thead>
+        <tbody>${phcRows.map(r=>`<tr>
+          <td style="font-weight:500">${r.ph}</td>
+          <td style="text-align:center">${r.cnt}</td>
+          <td style="text-align:center;color:${r.crit>0?'var(--c-crit)':'var(--txt3)'};font-weight:${r.crit?500:400}">${r.crit}</td>
+          <td style="text-align:center;color:${r.high>0?'var(--c-high)':'var(--txt3)'}">${r.high}</td>
+          <td style="text-align:center;color:${r.od>0?'var(--c-crit)':'var(--txt3)'};font-weight:${r.od?500:400}">${r.od}</td>
+          <td style="text-align:center;color:var(--c-mod)">${r.del}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+function renderRiskReport(data, body) {
+  const cats = RISK_CATS.map(c => {
+    const pts = data.filter(r => riskCat(calcScore(r.r)).label === c.label);
+    return { ...c, pts };
+  });
+
+  body.innerHTML = cats.filter(c=>c.pts.length).map(c => `
+    <div class="rpt-section">
+      <div class="rpt-section-title">
+        <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:12px;background:${c.bg};color:${c.color};font-size:12px;font-weight:600">${c.label}</span>
+        ${c.pts.length} patients
+      </div>
+      <table class="rpt-table">
+        <thead><tr><th>Mother Name</th><th>PHC / Block</th><th>EDD</th><th>Risk Score</th><th>Risk Flags</th><th>Visit Status</th><th>Mobile</th></tr></thead>
+        <tbody>${c.pts.sort((a,b)=>calcScore(b.r)-calcScore(a.r)).map(r=>{
+          const sc = calcScore(r.r);
+          const vs = visitStatus(r);
+          return `<tr>
+            <td style="font-weight:500">${r.n}</td>
+            <td style="font-size:11px">${r.p}<br><span style="color:var(--txt3)">${r.b}</span></td>
+            <td><b>${fmtDate(r.e)}</b></td>
+            <td style="text-align:center"><span class="rbadge" style="background:${c.bg};color:${c.color};border:1px solid ${c.bd}">${sc}</span></td>
+            <td style="font-size:11px">${(r.r||[]).slice(0,2).map(f=>`<span class="flag-tag">${f.length>20?f.slice(0,18)+'…':f}</span>`).join(' ')}${r.r&&r.r.length>2?`+${r.r.length-2}`:''}</td>
+            <td>${vs?`<span class="status-pill ${vs.cls}">${vs.label}</span>`:'—'}</td>
+            <td style="font-size:11px;color:var(--txt3)">${r.ph||'—'}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`).join('');
+}
+
+function renderPatientListReport(data, body) {
+  const sorted = getSorted(data);
+  body.innerHTML = `
+    <div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">list_alt</span>Patient List — ${sorted.length} records</div>
+      <table class="rpt-table">
+        <thead><tr>
+          <th>#</th><th>Mother Name</th><th>Block / PHC</th><th>EDD</th>
+          <th>Risk</th><th>Last Visit</th><th>Next Visit</th><th>Status</th><th>Mobile</th>
+        </tr></thead>
+        <tbody>${sorted.map((r,i)=>{
+          const sc = calcScore(r.r);
+          const cat = riskCat(sc);
+          const vs = visitStatus(r);
+          return `<tr style="border-left:3px solid ${cat.color}">
+            <td style="color:var(--txt3)">${i+1}</td>
+            <td><div style="font-weight:500">${r.n}</div><div style="font-size:10px;color:var(--txt3)">${r.id||''}</div></td>
+            <td style="font-size:11px">${r.b}<br><span style="color:var(--txt2)">${r.p}</span></td>
+            <td><b>${fmtDate(r.e)}</b></td>
+            <td><span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd}">${sc} ${cat.label}</span></td>
+            <td style="font-size:11px">${fmtDate(r.lv)||'—'}</td>
+            <td>${vs?`<span class="status-pill ${vs.cls}">${vs.label}</span>`:'—'}</td>
+            <td>${statusCell(r)}</td>
+            <td style="font-size:11px;color:var(--txt3)">${r.ph||'—'}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderDeliveryReport(data, body) {
+  const delivered = data.filter(r => r.ds === 'Delivered');
+  const active = data.filter(r => r.ds !== 'Delivered' && r.ds !== 'Abortion');
+  const edd30 = active.filter(r => { const d = daysUntil(r.e); return d !== null && d >= 0 && d <= 30; });
+  const edd15 = active.filter(r => { const d = daysUntil(r.e); return d !== null && d >= 0 && d <= 15; });
+
+  const placeGroups = delivered.reduce((acc,r)=>{
+    const k = r.pd || r.pp || 'Unknown'; acc[k]=(acc[k]||0)+1; return acc;
+  },{});
+
+  const fpGroups = delivered.reduce((acc,r)=>{
+    const k = r.fp || 'Not recorded'; acc[k]=(acc[k]||0)+1; return acc;
+  },{});
+
+  body.innerHTML = `
+    <div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--c-mod)">child_friendly</span>Delivery Overview</div>
+      <div class="rpt-stat-grid">
+        ${statCard(delivered.length, 'Delivered', 'var(--c-mod)')}
+        ${statCard(edd15.length, 'EDD ≤ 15 Days', 'var(--c-crit)')}
+        ${statCard(edd30.length, 'EDD ≤ 30 Days', 'var(--c-high)')}
+        ${statCard(data.filter(r=>r.ds==='Abortion').length, 'Abortion', 'var(--txt2)')}
+        ${statCard(data.filter(r=>r.as==='Admitted').length, 'Currently Admitted', 'var(--c-low)')}
+      </div>
+    </div>
+
+    ${Object.keys(placeGroups).length ? `<div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">local_hospital</span>Delivery by Place</div>
+      <table class="rpt-table">
+        <thead><tr><th>Place of Delivery</th><th>Count</th><th>%</th></tr></thead>
+        <tbody>${Object.entries(placeGroups).sort((a,b)=>b[1]-a[1]).map(([p,c])=>`<tr>
+          <td>${p}</td>
+          <td style="text-align:center;font-weight:500">${c}</td>
+          <td style="text-align:center;color:var(--txt2)">${Math.round(c/delivered.length*100)}%</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>` : ''}
+
+    ${edd30.length ? `<div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--c-high)">event_upcoming</span>Upcoming Deliveries (EDD ≤ 30 Days)</div>
+      <table class="rpt-table">
+        <thead><tr><th>Mother Name</th><th>PHC / Block</th><th>EDD</th><th>Days Left</th><th>Risk</th><th>Planned Place</th><th>Mobile</th></tr></thead>
+        <tbody>${edd30.sort((a,b)=>daysUntil(a.e)-daysUntil(b.e)).map(r=>{
+          const d = daysUntil(r.e);
+          const cat = riskCat(calcScore(r.r));
+          return `<tr>
+            <td style="font-weight:500">${r.n}</td>
+            <td style="font-size:11px">${r.p}<br><span style="color:var(--txt3)">${r.b}</span></td>
+            <td><b>${fmtDate(r.e)}</b></td>
+            <td style="text-align:center"><span class="rbadge" style="background:${d<=15?'var(--c-crit-bg)':'var(--c-high-bg)'};color:${d<=15?'var(--c-crit)':'var(--c-high)'}">${d}d</span></td>
+            <td><span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd}">${calcScore(r.r)} ${cat.label}</span></td>
+            <td style="font-size:11px">${r.pp||'—'}</td>
+            <td style="font-size:11px;color:var(--txt3)">${r.ph||'—'}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>` : ''}
+
+    ${Object.keys(fpGroups).length ? `<div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">family_restroom</span>Family Planning (Post-Delivery)</div>
+      <table class="rpt-table">
+        <thead><tr><th>Family Planning Method</th><th>Count</th></tr></thead>
+        <tbody>${Object.entries(fpGroups).sort((a,b)=>b[1]-a[1]).map(([fp,c])=>`<tr>
+          <td>${fp}</td><td style="text-align:center;font-weight:500">${c}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>` : ''}`;
+}
+
+function exportReportCSV() {
+  const data = reportData;
+  if (!data.length) { showSnack('No data to export'); return; }
+  const headers = ['#','Block','PHC','HSC','PICME','Mother Name','Husband Name','EDD','Age','Risk Score','Risk Category','Risk Flags','Last Visit','Next Visit Due','Status','Delivery Status','Delivery Date','Planned Place','Mobile'];
+  const rows = data.map((r,i)=>{
+    const sc = calcScore(r.r); const cat = riskCat(sc); const nv = nextVisitDate(r);
+    return [i+1,r.b,r.p,r.h||'',r.id||'',r.n,r.hu||'',r.e||'',r.a||'',sc,cat.label,(r.r||[]).join('; '),r.lv||'',nv||'',r.as||'',r.ds||'',r.dd||'',r.pp||'',r.ph||'']
+      .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+  });
+  const csv = [headers.map(h=>`"${h}"`).join(','),...rows].join('\n');
+  const a = document.createElement('a');
+  const from = document.getElementById('rpt_from').value;
+  const to   = document.getElementById('rpt_to').value;
+  a.href = URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = `MYL_HRP_Report_${from||'all'}_to_${to||'all'}.csv`;
+  a.click();
+  showSnack(`Exported ${data.length} records`);
+}
+
+function printReport() {
+  const content = document.getElementById('reportBody').innerHTML;
+  const filters = document.getElementById('activeReportFilters').innerHTML;
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head>
+    <title>HRP Report — Mayiladuthurai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      body{font-family:'Roboto',sans-serif;color:#202124;padding:24px}
+      h1{font-family:'Google Sans',sans-serif;font-size:22px;font-weight:500;margin-bottom:4px}
+      .sub{font-size:13px;color:#5F6368;margin-bottom:16px}
+      .rpt-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+      .rpt-stat{border:1px solid #DADCE0;border-radius:8px;padding:10px;text-align:center}
+      .rpt-stat-num{font-family:'Google Sans',sans-serif;font-size:24px;font-weight:500}
+      .rpt-stat-lbl{font-size:11px;color:#5F6368}
+      .rpt-section{margin-bottom:20px}
+      .rpt-section-title{font-family:'Google Sans',sans-serif;font-size:13px;font-weight:500;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #E8F0FE}
+      .rpt-table{width:100%;border-collapse:collapse;font-size:11px}
+      .rpt-table th{background:#F8F9FA;padding:6px 8px;text-align:left;border-bottom:1px solid #DADCE0;font-weight:500}
+      .rpt-table td{padding:5px 8px;border-bottom:1px solid #DADCE0}
+      .rbadge,.flag-tag,.status-pill,.active-filter-chip{border-radius:10px;padding:2px 8px;font-size:10px;display:inline-block}
+      @media print{body{padding:10px}}
+    </style>
+  </head><body>
+    <h1>High-Risk Pregnancy Report — Mayiladuthurai District</h1>
+    <div class="sub">Generated: ${new Date().toLocaleString('en-IN')} &nbsp;·&nbsp; ${reportData.length} records</div>
+    <div style="margin-bottom:12px">${filters}</div>
+    ${content}
+  </body></html>`);
+  w.document.close();
+  w.print();
+}
+
+
+// ============================================================
+// INIT — Google Sheet auto-sync + Firebase + Alert Scheduler
 // ============================================================
 buildTableHeader();
 buildRiskChips();
+loadSchedulesLocal();
+updateSchedBadge();
 // Sync from sheet on load; fall back to demo data if sheet unavailable
 syncFromSheet(false).then(()=>{ startSyncTimer(); });
 // If sheet hasn't responded in 4 seconds, init with whatever is in ALL (demo data)
 setTimeout(()=>{ if(ALL.length===0){ buildSidebar();buildDropdowns();applyFilters(); } }, 4000);
+// Check due alerts on load (after data is ready)
+setTimeout(()=>{ if(schedules.length) checkDueAlerts(); }, 5500);
+// Init Firebase (non-blocking, 2s delay so page loads fast)
+setTimeout(initFirebase, 2000);
 
 </script>
 </body>
