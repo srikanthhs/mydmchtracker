@@ -394,13 +394,25 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <div class="access-card">
     <div class="access-logo"><span class="material-icons-round">pregnant_woman</span></div>
     <div class="access-title">HRP Tracker</div>
-    <div class="access-sub">Mayiladuthurai District · DPH Tamil Nadu<br>Sign in with your authorised Google account to continue</div>
-    <button class="google-btn" onclick="doGoogleSignIn()">
-      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-      Sign in with Google
+    <div class="access-sub">Mayiladuthurai District · DPH Tamil Nadu<br>Enter your name and access code to continue</div>
+
+    <div style="margin-bottom:12px;text-align:left">
+      <label style="font-size:12px;font-weight:500;color:var(--txt2);display:block;margin-bottom:5px">Your Name / Designation</label>
+      <input id="loginName" type="text" placeholder="e.g. Dr. S. Ramesh, CMHO"
+        style="width:100%;padding:10px 14px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;font-family:'Roboto',sans-serif;outline:none"
+        onkeydown="if(event.key==='Enter') document.getElementById('loginCode').focus()">
+    </div>
+    <div style="margin-bottom:16px;text-align:left">
+      <label style="font-size:12px;font-weight:500;color:var(--txt2);display:block;margin-bottom:5px">Access Code</label>
+      <input id="loginCode" type="password" placeholder="Enter access code"
+        style="width:100%;padding:10px 14px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;font-family:'Roboto',sans-serif;outline:none;letter-spacing:.15em"
+        onkeydown="if(event.key==='Enter') doPasscodeLogin()">
+    </div>
+    <button class="google-btn" onclick="doPasscodeLogin()" style="background:var(--pri);color:#fff;border-color:var(--pri);justify-content:center;font-size:14px">
+      <span class="material-icons-round" style="font-size:18px">lock_open</span>&nbsp;Access Tracker
     </button>
     <div class="access-err" id="accessErr"></div>
-    <div style="margin-top:20px;font-size:11px;color:var(--txt3)">Access is restricted to authorised personnel.<br>Contact District CMHO office to request access.</div>
+    <div style="margin-top:20px;font-size:11px;color:var(--txt3)">Access is restricted to authorised DPH / District personnel.<br>Contact CMHO office to obtain the access code.</div>
   </div>
 </div>
 
@@ -4002,128 +4014,81 @@ function printReport() {
 
 
 // ============================================================
-// ACCESS CONTROL — Firebase Auth Google Sign-In + Email Allowlist
+// ACCESS CONTROL — Passcode-based (works on any domain)
 // ============================================================
-// Add authorised email addresses here (lowercase).
-// ALL @tn.gov.in addresses are automatically allowed.
-const ALLOWED_EMAILS = [
-  'collector.mayiladuthurai@tn.gov.in',
-  'cmho.mayiladuthurai@tn.gov.in',
-  // Add more as needed
-];
+// To change the access code: update ACCESS_CODE below.
+// Use a strong code and share it only with authorised staff.
+// To add role-based codes, add entries to ACCESS_ROLES.
+const ACCESS_ROLES = {
+  'MYL@HRP2026':  'District Admin',
+  'CMHO@HRP2026': 'CMHO Office',
+  'DPH@HRP2026':  'DPH Officer',
+  'BDO@HRP2026':  'Block Officer',
+};
+// Session duration in hours (user auto-logged-out after this)
+const SESSION_HOURS = 8;
 
 let currentUser = null;
-let firebaseAuthReady = false;
 
 function initAccessControl() {
-  // Check cached session first (avoids sign-in on every reload)
   try {
-    const cached = sessionStorage.getItem('hrp_user');
-    if(cached) {
-      const u = JSON.parse(cached);
-      if(isEmailAllowed(u.email)) { grantAccess(u); return; }
+    const raw = sessionStorage.getItem('hrp_session');
+    if(raw) {
+      const s = JSON.parse(raw);
+      const age = (Date.now() - s.ts) / 3600000; // hours
+      if(age < SESSION_HOURS && s.name && s.role) {
+        grantAccess(s.name, s.role);
+        return;
+      }
     }
-  } catch(e){}
-  // Show the login overlay — user must sign in
+  } catch(e) {}
   document.getElementById('accessOverlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('loginName').focus(), 300);
 }
 
-async function doGoogleSignIn() {
-  const btn = document.querySelector('.google-btn');
-  btn.disabled = true;
-  btn.innerHTML = `<span class="material-icons-round sync-spinning" style="font-size:18px">refresh</span>&nbsp; Signing in…`;
+function doPasscodeLogin() {
+  const name = (document.getElementById('loginName').value || '').trim();
+  const code = (document.getElementById('loginCode').value || '').trim();
   hideAccessErr();
 
-  try {
-    // Load SDKs sequentially — app → auth (Firestore not needed here)
-    await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app-compat.js`);
-    await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth-compat.js`);
+  if(!name) { showAccessErr('Please enter your name / designation.'); document.getElementById('loginName').focus(); return; }
+  if(!code) { showAccessErr('Please enter the access code.'); document.getElementById('loginCode').focus(); return; }
 
-    // Initialise Firebase app if not already done
-    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
-    const auth = firebase.auth();
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-
-    const result = await auth.signInWithPopup(provider);
-    const fbUser = result.user;
-    const user = {
-      name:    fbUser.displayName || fbUser.email,
-      email:   fbUser.email.toLowerCase(),
-      picture: fbUser.photoURL || null,
-    };
-
-    if(!isEmailAllowed(user.email)) {
-      await auth.signOut();
-      showAccessErr(`Access denied for ${user.email}. This email is not authorised. Contact the CMHO office to request access.`);
-      resetSignInBtn(btn);
-      return;
-    }
-
-    sessionStorage.setItem('hrp_user', JSON.stringify(user));
-    grantAccess(user);
-
-  } catch(err) {
-    if(err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-      showAccessErr('Sign-in cancelled. Please try again.');
-    } else if(err.code === 'auth/popup-blocked') {
-      showAccessErr('Pop-up blocked by browser. Please allow pop-ups for this page and try again.');
-    } else {
-      showAccessErr('Sign-in failed: ' + (err.message || String(err)));
-    }
-    resetSignInBtn(btn);
+  const role = ACCESS_ROLES[code];
+  if(!role) {
+    showAccessErr('Incorrect access code. Contact CMHO office if you need access.');
+    document.getElementById('loginCode').value = '';
+    document.getElementById('loginCode').focus();
+    return;
   }
+
+  const session = { name, role, ts: Date.now() };
+  sessionStorage.setItem('hrp_session', JSON.stringify(session));
+  grantAccess(name, role);
 }
 
-// Simple sequential script loader (resolves immediately if already loaded)
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if(document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = () => reject(new Error('Failed to load: ' + src));
-    document.head.appendChild(s);
-  });
-}
-
-function resetSignInBtn(btn) {
-  btn.disabled = false;
-  btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Sign in with Google`;
-}
-
-function isEmailAllowed(email) {
-  const e = (email || '').toLowerCase().trim();
-  if(e.endsWith('@tn.gov.in')) return true;   // all TN Govt addresses allowed
-  return ALLOWED_EMAILS.includes(e);
-}
-
-function grantAccess(user) {
-  currentUser = user;
+function grantAccess(name, role) {
+  currentUser = { name, role };
   document.getElementById('accessOverlay').classList.add('hidden');
   const slot = document.getElementById('userBarSlot');
   if(slot) slot.innerHTML = `
-    <div class="access-user-bar" onclick="signOut()" title="Signed in as ${user.email} — click to sign out">
-      ${user.picture
-        ? `<img src="${user.picture}" onerror="this.style.display='none'">`
-        : `<span class="material-icons-round" style="font-size:18px">account_circle</span>`}
-      <span style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${user.name || user.email}</span>
+    <div class="access-user-bar" onclick="signOut()" title="${role} — click to sign out">
+      <span class="material-icons-round" style="font-size:16px">account_circle</span>
+      <span style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>
+      <span style="font-size:10px;opacity:.7;background:rgba(255,255,255,.2);padding:1px 6px;border-radius:8px">${role}</span>
       <span class="material-icons-round" style="font-size:14px;opacity:.7">logout</span>
     </div>`;
 }
 
-async function signOut() {
+function signOut() {
   if(!confirm('Sign out of HRP Tracker?')) return;
-  try {
-    // Only call firebase signOut if the auth SDK was actually loaded
-    if(window.firebase?.auth && firebase.apps.length) await firebase.auth().signOut();
-  } catch(e){}
-  sessionStorage.removeItem('hrp_user');
+  sessionStorage.removeItem('hrp_session');
   currentUser = null;
+  document.getElementById('loginCode').value = '';
   document.getElementById('accessOverlay').classList.remove('hidden');
   const slot = document.getElementById('userBarSlot');
   if(slot) slot.innerHTML = '';
+  setTimeout(() => document.getElementById('loginName').focus(), 300);
   showSnack('Signed out');
 }
 
@@ -4137,6 +4102,11 @@ function hideAccessErr() {
   const el = document.getElementById('accessErr');
   if(el) el.classList.remove('show');
 }
+
+// ─── stubs for old Firebase-auth helpers (no longer used) ───
+function doGoogleSignIn() {}
+function loadScript() { return Promise.resolve(); }
+function resetSignInBtn() {}
 
 
 
