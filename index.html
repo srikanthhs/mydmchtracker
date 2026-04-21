@@ -339,6 +339,22 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   .sched-row{grid-template-columns:1fr 1fr;gap:8px}
 }
 
+/* ── ACCESS CONTROL OVERLAY ──────────────────────────────── */
+.access-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1A73E8 0%,#0D47A1 100%);z-index:9999;display:flex;align-items:center;justify-content:center}
+.access-overlay.hidden{display:none}
+.access-card{background:#fff;border-radius:24px;padding:36px 40px;width:92%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.access-logo{width:56px;height:56px;background:var(--pri-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.access-logo .material-icons-round{font-size:28px;color:var(--pri)}
+.access-title{font-family:'Google Sans',sans-serif;font-size:20px;font-weight:500;color:var(--txt);margin-bottom:6px}
+.access-sub{font-size:13px;color:var(--txt2);margin-bottom:28px;line-height:1.5}
+.google-btn{display:flex;align-items:center;gap:12px;padding:12px 20px;border-radius:8px;border:1px solid var(--bdr);background:#fff;width:100%;cursor:pointer;font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;color:var(--txt);transition:background .2s;justify-content:center}
+.google-btn:hover{background:var(--sur2)}
+.google-btn img{width:20px;height:20px}
+.access-err{margin-top:16px;padding:10px 14px;background:var(--c-crit-bg);border-radius:var(--r-sm);font-size:12px;color:var(--c-crit);display:none}
+.access-err.show{display:block}
+.access-user-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.15);border-radius:24px;color:#fff;font-size:12px;cursor:pointer}
+.access-user-bar img{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.5)}
+
 /* ── REPORTS MODAL ────────────────────────────────────────── */
 .report-modal{background:#fff;border-radius:var(--r-xl);width:96%;max-width:900px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);animation:su .22s ease}
 .report-tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
@@ -373,6 +389,21 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 </head>
 <body>
 
+<!-- ACCESS CONTROL OVERLAY -->
+<div class="access-overlay" id="accessOverlay">
+  <div class="access-card">
+    <div class="access-logo"><span class="material-icons-round">pregnant_woman</span></div>
+    <div class="access-title">HRP Tracker</div>
+    <div class="access-sub">Mayiladuthurai District · DPH Tamil Nadu<br>Sign in with your authorised Google account to continue</div>
+    <button class="google-btn" onclick="doGoogleSignIn()">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="access-err" id="accessErr"></div>
+    <div style="margin-top:20px;font-size:11px;color:var(--txt3)">Access is restricted to authorised personnel.<br>Contact District CMHO office to request access.</div>
+  </div>
+</div>
+
 <!-- APP BAR -->
 <div class="app-bar">
   <button class="icon-btn" id="sidebarToggle" onclick="toggleSidebar()"><span class="material-icons-round">menu</span></button>
@@ -389,6 +420,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <button class="icon-btn" title="Messaging Centre" onclick="openMessaging()" style="background:rgba(255,255,255,.2)"><span class="material-icons-round">send</span></button>
   <button class="icon-btn" id="syncBtn" title="Sync from Google Sheet" onclick="syncFromSheet()"><span class="material-icons-round" id="syncIcon">sync</span></button>
   <button class="icon-btn" title="Sync ALL records to Firebase" onclick="syncAllToFirestore()" style="background:rgba(255,165,0,.25)" id="fbSyncBtn"><span class="material-icons-round">cloud_upload</span></button>
+  <div id="userBarSlot"></div>
   <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.75)" id="syncStatus"><span class="sync-dot loading" id="syncDot"></span><span id="syncTs">Syncing…</span></div>
 </div>
 
@@ -409,6 +441,14 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div class="sb-item" id="sb-del" onclick="sbFilter('delivered')">
       <span class="material-icons-round">child_friendly</span> Delivered
       <span class="sb-badge" id="sb-del-badge">0</span>
+    </div>
+    <div class="sb-item" id="sb-post42" onclick="sbFilter('post42')">
+      <span class="material-icons-round" style="color:var(--c-high)">history_toggle_off</span> Post-Delivery &gt;42 Days
+      <span class="sb-badge" style="background:var(--c-high-bg);color:var(--c-high)" id="sb-post42-badge">0</span>
+    </div>
+    <div class="sb-item" id="sb-edd-overdue" onclick="sbFilter('eddOverdue')">
+      <span class="material-icons-round" style="color:var(--c-crit)">event_busy</span> EDD Crossed (Undelivered)
+      <span class="sb-badge" style="background:var(--c-crit-bg);color:var(--c-crit)" id="sb-edd-overdue-badge">0</span>
     </div>
   </div>
   <div class="sb-divider"></div>
@@ -505,53 +545,56 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 <div class="drawer-overlay" id="drawerOv" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer"><div id="drawerContent"></div></div>
 
-<!-- ADD/EDIT MODAL -->
+<!-- EDIT MODAL (Restricted Fields Only — no new case entry) -->
 <div class="modal-ov" id="addModal" onclick="closeModalOv(event,'addModal')">
 <div class="modal" id="addModalPanel">
   <div class="modal-hdr">
-    <h2 id="addModalTitle">Register New HRP Case</h2>
+    <h2 id="addModalTitle">Edit Record</h2>
     <button onclick="closeModal('addModal')" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
   </div>
   <div class="modal-body">
-    <div class="form-row">
-      <div class="fg"><label>Block *</label><select id="f_block" onchange="updatePHCDrop()"><option value="">Select</option></select></div>
-      <div class="fg"><label>PHC *</label><select id="f_phc"><option value="">Select block first</option></select></div>
+    <!-- READ-ONLY INFO SECTION -->
+    <div style="background:var(--sur2);border-radius:var(--r-md);padding:12px 14px;margin-bottom:14px;border-left:3px solid var(--pri)">
+      <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Patient Info (Read-Only — synced from source)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="roInfoGrid"></div>
+    </div>
+    <!-- EDITABLE FIELDS -->
+    <div style="font-family:'Google Sans',sans-serif;font-size:11px;font-weight:600;color:var(--pri);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+      <span class="material-icons-round" style="font-size:14px">edit</span>Editable Fields
     </div>
     <div class="form-row">
-      <div class="fg"><label>HSC / Sub-centre *</label><input id="f_hsc" placeholder="HSC name"></div>
-      <div class="fg"><label>PICME No.</label><input id="f_picme" placeholder="PICME number"></div>
-    </div>
-    <div class="form-row">
-      <div class="fg"><label>Mother's Name *</label><input id="f_name" placeholder="Full name"></div>
-      <div class="fg"><label>Husband's Name</label><input id="f_husband" placeholder="Husband name"></div>
-    </div>
-    <div class="form-row">
-      <div class="fg"><label>EDD *</label><input type="date" id="f_edd"></div>
-      <div class="fg"><label>Age</label><input type="number" id="f_age" min="14" max="55" oninput="calcLiveScore()"></div>
-    </div>
-    <div class="form-row">
-      <div class="fg"><label>Mobile No.</label><input id="f_phone" placeholder="10-digit mobile"></div>
-      <div class="fg"><label>Gravida / Para</label>
-        <div style="display:flex;gap:6px">
-          <input id="f_gravida" placeholder="G" style="width:60px;text-align:center">
-          <input id="f_para" placeholder="P" style="width:60px;text-align:center">
-        </div>
+      <div class="fg"><label>Admission Status</label>
+        <select id="f_as"><option value="">Active</option><option>Admitted</option><option>Discharged</option></select>
+      </div>
+      <div class="fg"><label>Delivery Status</label>
+        <select id="f_ds"><option value="">Active</option><option>Delivered</option><option>Abortion</option><option>IUFD</option></select>
       </div>
     </div>
     <div class="form-row">
-      <div class="fg"><label>Planned Delivery Place</label><input id="f_pp" placeholder="Hospital name"></div>
+      <div class="fg"><label>Last Follow-Up / Visit Date</label><input type="date" id="f_lv"></div>
+      <div class="fg"><label>Date of Delivery</label><input type="date" id="f_dd"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Place of Delivery (Actual)</label><input id="f_pd" placeholder="Where delivery happened"></div>
+      <div class="fg"><label>Family Planning Status</label>
+        <select id="f_fp"><option value="">—</option><option>Cu-T</option><option>Minilap</option><option>IUCD</option><option>OCP</option><option>Condom</option><option>No FP</option><option>Refused</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Planned Place of Delivery</label><input id="f_pp" placeholder="Hospital name"></div>
       <div class="fg"><label>Delivery Type</label>
         <select id="f_pt"><option value="">-</option><option>GH</option><option>PNH</option><option>T-Hosp</option><option>Empanelled Hospitals</option><option>PHC</option><option>Other State</option></select>
       </div>
     </div>
     <div class="form-row">
-      <div class="fg"><label>Last Visit Date</label><input type="date" id="f_lv"></div>
-      <div class="fg"><label>Admission Status</label>
-        <select id="f_as"><option value="">Active</option><option>Admitted</option><option>Discharged</option></select>
+      <div class="fg"><label>Mentor OG Name</label><input id="f_mo" placeholder="Mentor OG allotted"></div>
+      <div class="fg"><label>Mentor OG Opinion</label>
+        <select id="f_mop"><option value="">—</option><option>Normal</option><option>High Risk - Refer</option><option>High Risk - Continue PHC</option><option>Review after investigation</option><option>Admitted for observation</option></select>
       </div>
     </div>
-    <div class="fg" style="margin-bottom:12px"><label>Remarks</label><textarea id="f_remarks" rows="2" placeholder="Any notes…"></textarea></div>
-    <div style="font-family:'Google Sans',sans-serif;font-size:12px;font-weight:500;color:var(--txt2);margin-bottom:8px">HIGH RISK FLAGS — Official TN DPH Criteria (select all that apply)</div>
+    <div style="font-family:'Google Sans',sans-serif;font-size:11px;font-weight:600;color:var(--c-crit);text-transform:uppercase;letter-spacing:.08em;margin:10px 0 8px;display:flex;align-items:center;gap:6px">
+      <span class="material-icons-round" style="font-size:14px">warning</span>High-Risk Flags — TN DPH Criteria
+    </div>
     <div class="chk-grid" id="riskFlagsGrid"></div>
     <div class="score-box" id="liveScoreBox">
       <div class="score-big" id="liveScore">0</div>
@@ -562,7 +605,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   </div>
   <div class="modal-ftr">
     <button class="btn-outlined" onclick="closeModal('addModal')">Cancel</button>
-    <button class="btn-filled" onclick="saveRecord()">Save Patient</button>
+    <button class="btn-filled" onclick="saveRecord()"><span class="material-icons-round" style="font-size:15px;vertical-align:middle">save</span> Save &amp; Sync</button>
   </div>
 </div>
 </div>
@@ -609,10 +652,6 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 </div>
 </div>
 
-<!-- FAB -->
-<button class="fab" onclick="openAdd()">
-  <span class="material-icons-round">add</span> New Case
-</button>
 
 <!-- SYNC DEBUG MODAL -->
 <div class="modal-ov" id="syncModal" onclick="closeModalOv(event,'syncModal')">
@@ -1102,7 +1141,7 @@ function sbSelectPHC(bl, ph) {
 
 function sbFilter(type) {
   sbMode = type; sbBlock = ''; sbPHC = '';
-  const idMap = {active:'sb-active',delivered:'sb-del',overdue:'sb-overdue',edd15:'sb-edd15',highrisk:'sb-hr'};
+  const idMap = {active:'sb-active',delivered:'sb-del',overdue:'sb-overdue',edd15:'sb-edd15',highrisk:'sb-hr',post42:'sb-post42',eddOverdue:'sb-edd-overdue'};
   setSbActive(idMap[type]||'sb-all');
   applyFilters();
 }
@@ -1126,16 +1165,13 @@ function closeSidebar() {
 function buildDropdowns() {
   const phcs = [...new Set(ALL.map(r=>r.p))].sort();
   const phcSel = document.getElementById('phcSel');
+  phcSel.innerHTML = '<option value="">All PHCs</option>';
   phcs.forEach(p => phcSel.innerHTML += `<option>${p}</option>`);
 
   const hscs = [...new Set(ALL.map(r=>r.h))].filter(Boolean).sort();
   const hscSel = document.getElementById('hscSel');
+  hscSel.innerHTML = '<option value="">All HSCs</option>';
   hscs.forEach(h => hscSel.innerHTML += `<option>${h}</option>`);
-
-  // Block dropdown in form
-  const blocks = [...new Set(ALL.map(r=>r.b))].sort();
-  const fBlock = document.getElementById('f_block');
-  blocks.forEach(b => fBlock.innerHTML += `<option>${b}</option>`);
 }
 
 function updatePHCDropdown(bl) {
@@ -1145,15 +1181,6 @@ function updatePHCDropdown(bl) {
   phcs.forEach(p => phcSel.innerHTML += `<option>${p}</option>`);
 }
 
-function updatePHCDrop() {
-  const bl = document.getElementById('f_block').value;
-  const phcSel = document.getElementById('f_phc');
-  phcSel.innerHTML = '<option value="">Select PHC</option>';
-  if(bl) {
-    const phcs = [...new Set(ALL.filter(r=>r.b===bl).map(r=>r.p))].sort();
-    phcs.forEach(p => phcSel.innerHTML += `<option>${p}</option>`);
-  }
-}
 
 // ============================================================
 // RISK CHIPS
@@ -1247,6 +1274,18 @@ function getFiltered() {
     if(sbMode === 'delivered' && r.ds !== 'Delivered') return false;
     if(sbMode === 'overdue' && !isOverdue(r)) return false;
     if(sbMode === 'highrisk' && (!r.r || r.r.length === 0)) return false;
+    if(sbMode === 'post42') {
+      // Delivered cases where delivery date was >42 days ago
+      if(r.ds !== 'Delivered' || !r.dd) return false;
+      const daysSinceDelivery = -daysUntil(r.dd);
+      if(daysSinceDelivery <= 42) return false;
+    }
+    if(sbMode === 'eddOverdue') {
+      // Active (not delivered) cases where EDD has already passed
+      if(r.ds === 'Delivered' || r.ds === 'Abortion') return false;
+      const d = daysUntil(r.e);
+      if(d === null || d >= 0) return false;
+    }
     if(sbMode === 'edd15') {
       if(r.ds === 'Delivered' || r.ds === 'Abortion') return false;
       const d = daysUntil(r.e);
@@ -1493,6 +1532,10 @@ function updateCards() {
   document.getElementById('sb-hr-badge').textContent = ALL.filter(r=>r.r&&r.r.length>0).length;
   const e15el = document.getElementById('sb-edd15-badge');
   if(e15el) e15el.textContent = ALL.filter(r=>{ const d=daysUntil(r.e); return r.ds!=='Delivered'&&r.ds!=='Abortion'&&d!==null&&d>=0&&d<=15; }).length;
+  const post42el = document.getElementById('sb-post42-badge');
+  if(post42el) post42el.textContent = ALL.filter(r=>r.ds==='Delivered'&&r.dd&&(-daysUntil(r.dd))>42).length;
+  const eddOvEl = document.getElementById('sb-edd-overdue-badge');
+  if(eddOvEl) eddOvEl.textContent = ALL.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion'&&r.e&&daysUntil(r.e)<0).length;
 }
 
 let cardFilterMode = '';
@@ -1607,48 +1650,51 @@ function closeDrawer() {
 let editIdx = -1;
 
 function openAdd() {
-  editIdx = -1;
-  document.getElementById('addModalTitle').textContent = 'Register New HRP Case';
-  clearForm();
-  buildRiskFlagsGrid();
-  calcLiveScore();
-  document.getElementById('addModal').classList.add('open');
+  showSnack('Adding new cases is disabled — cases are imported from Google Sheet');
 }
 
 function editRecord(idx) {
   editIdx = idx;
   const r = filteredCache[idx];
   document.getElementById('addModalTitle').textContent = 'Edit Record — ' + r.n;
-  clearForm();
-  document.getElementById('f_block').value = r.b;
-  updatePHCDrop();
-  document.getElementById('f_phc').value = r.p;
-  document.getElementById('f_hsc').value = r.h||'';
-  document.getElementById('f_picme').value = r.id||'';
-  document.getElementById('f_name').value = r.n;
-  document.getElementById('f_husband').value = r.hu||'';
-  document.getElementById('f_edd').value = r.e||'';
-  document.getElementById('f_age').value = r.a||'';
-  document.getElementById('f_phone').value = r.ph||'';
-  document.getElementById('f_gravida').value = r.g||'';
-  document.getElementById('f_para').value = r.pa||'';
+
+  // Populate read-only info section
+  const roFields = [
+    ['Mother Name', r.n],
+    ['Husband Name', r.hu||'—'],
+    ['PICME No.', r.id||'—'],
+    ['EDD', fmtDate(r.e)],
+    ['Block', r.b],
+    ['PHC', r.p],
+    ['HSC', r.h||'—'],
+    ['Age', r.a ? r.a + ' yrs' : '—'],
+    ['Mobile', r.ph||'—'],
+    ['Gravida/Para', `G${r.g||'—'} P${r.pa||'—'}`],
+  ];
+  document.getElementById('roInfoGrid').innerHTML = roFields.map(([k,v])=>
+    `<div style="padding:4px 0"><div style="font-size:10px;color:var(--txt3)">${k}</div><div style="font-size:12px;font-weight:500;color:var(--txt)">${v}</div></div>`
+  ).join('');
+
+  // Populate editable fields
+  document.getElementById('f_as').value = r.as||'';
+  document.getElementById('f_ds').value = r.ds||'';
+  document.getElementById('f_lv').value = r.lv||'';
+  document.getElementById('f_dd').value = r.dd||'';
+  document.getElementById('f_pd').value = r.pd||'';
+  document.getElementById('f_fp').value = r.fp||'';
   document.getElementById('f_pp').value = r.pp||'';
   document.getElementById('f_pt').value = r.pt||'';
-  document.getElementById('f_lv').value = r.lv||'';
-  document.getElementById('f_as').value = r.as||'';
-  document.getElementById('f_remarks').value = r.rm||'';
+  document.getElementById('f_mo').value = r.mo||'';
+  document.getElementById('f_mop').value = r.mop||'';
+
   buildRiskFlagsGrid(r.r||[]);
   calcLiveScore();
   document.getElementById('addModal').classList.add('open');
   closeDrawer();
 }
 
-function clearForm() {
-  ['f_block','f_phc','f_hsc','f_picme','f_name','f_husband','f_edd','f_age','f_phone','f_gravida','f_para','f_pp','f_pt','f_lv','f_as','f_remarks'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.value = '';
-  });
-}
+function clearForm() { /* no-op: add-new form removed */ }
+function updatePHCDrop() { /* no-op: add-new form removed */ }
 
 function buildRiskFlagsGrid(selected=[]) {
   const groups = [
@@ -1683,45 +1729,79 @@ function calcLiveScore() {
 }
 
 function saveRecord() {
-  const name = document.getElementById('f_name').value.trim();
-  const block = document.getElementById('f_block').value;
-  const phc = document.getElementById('f_phc').value;
-  if(!name || !block || !phc) { showSnack('Name, Block and PHC are required'); return; }
+  if(editIdx < 0) { showSnack('No record selected for editing'); return; }
 
   const flags = [...document.querySelectorAll('#riskFlagsGrid input:checked')].map(c=>c.value);
-  const rec = {
-    b: block, p: phc,
-    h: document.getElementById('f_hsc').value.trim(),
-    id: document.getElementById('f_picme').value.trim(),
-    n: name,
-    hu: document.getElementById('f_husband').value.trim(),
-    e: document.getElementById('f_edd').value,
-    a: parseInt(document.getElementById('f_age').value)||null,
-    ph: document.getElementById('f_phone').value.trim(),
-    g: document.getElementById('f_gravida').value,
-    pa: document.getElementById('f_para').value,
-    r: flags,
-    pp: document.getElementById('f_pp').value.trim(),
-    pt: document.getElementById('f_pt').value,
-    lv: document.getElementById('f_lv').value,
-    as: document.getElementById('f_as').value,
-    rm: document.getElementById('f_remarks').value.trim(),
-    ds: '', dd: '', fp: ''
+  const orig = filteredCache[editIdx];
+  const allIdx = ALL.findIndex(r=>r===orig);
+  if(allIdx < 0) { showSnack('Record not found'); return; }
+
+  // Merge: preserve all read-only base fields, only update editable ones
+  const updated = {
+    ...ALL[allIdx],
+    as:  document.getElementById('f_as').value,
+    ds:  document.getElementById('f_ds').value,
+    lv:  document.getElementById('f_lv').value,
+    dd:  document.getElementById('f_dd').value,
+    pd:  document.getElementById('f_pd').value,
+    fp:  document.getElementById('f_fp').value,
+    pp:  document.getElementById('f_pp').value,
+    pt:  document.getElementById('f_pt').value,
+    mo:  document.getElementById('f_mo').value,
+    mop: document.getElementById('f_mop').value,
+    r:   flags,
   };
 
-  if(editIdx >= 0) {
-    const orig = filteredCache[editIdx];
-    const allIdx = ALL.findIndex(r=>r===orig);
-    if(allIdx>=0) ALL[allIdx] = rec;
-    saveToFirestore(rec);
-    showSnack('Record updated');
-  } else {
-    ALL.unshift(rec);
-    saveToFirestore(rec);
-    showSnack(`${name} registered — Score: ${calcScore(flags)}`);
-  }
+  ALL[allIdx] = updated;
+  saveToFirestore(updated);
+  pushEditToSheet(updated);
+  showSnack('✓ Record updated and syncing to Sheet…');
   closeModal('addModal');
   applyFilters();
+}
+
+// Push edited record back to Google Sheet via Apps Script
+async function pushEditToSheet(rec) {
+  if(!rec.id && !rec.n) return;
+  try {
+    const payload = {
+      action: 'update',
+      picme: rec.id || '',
+      name: rec.n || '',
+      data: {
+        'ADMISSION STATUS': rec.as || '',
+        'DELIVERY STATUS': rec.ds || '',
+        'LAST FOLLOW UP/ VISIT DATE': rec.lv || '',
+        'DATE OF DELIVERY': rec.dd || '',
+        'PLACE OF DELIVERY': rec.pd || '',
+        'FAMILY PLANNING': rec.fp || '',
+        'PLANNED PLACE OF DELIVERY': rec.pp || '',
+        'PLANNED PLACE TYPE': rec.pt || '',
+        'MENTOR OG ALLOTTED': rec.mo || '',
+        'MENTOR OG OPINION': rec.mop || '',
+        'TYPE OF HIGH RISK': (rec.r||[]).join(', '),
+      }
+    };
+    const res = await fetch(SHEET_API_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' }, // Apps Script CORS workaround
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      if(json.status === 'ok') showSnack('✓ Sheet updated successfully');
+      else showSnack('⚠ Sheet sync: ' + (json.message||'Unknown error'));
+    } catch(e) {
+      // If response is not JSON, sheet may not support writes yet
+      console.log('Sheet write response:', text.substring(0,100));
+      showSnack('ℹ Sheet write: check Apps Script supports POST updates');
+    }
+  } catch(err) {
+    console.warn('Sheet push failed:', err.message);
+    showSnack('⚠ Sheet sync failed — saved locally');
+  }
 }
 
 // ============================================================
@@ -1831,7 +1911,7 @@ function parseImportRows(rows, status) {
       r: risks,
       pp: g(row,'planned place of delivery'),
       pt: g(row,'planned place type'),
-      lv: parseDate(g(row,'last follow up/ visit date (dd/mm/yyyy)','last visit date','last follow up')),
+      lv: parseDate(g(row,'last follow up/ visit date (dd/mm/yyyy)','last follow up/visit date','last follow up/ visit date','last visit date','last follow up','last visit')),
       rm: g(row,'remarks'),
       as: g(row,'admission status'),
       ds: g(row,'delivered','delivery status'),
@@ -2155,10 +2235,33 @@ function mapSheetRow(row) {
     ? String(riskRaw).split(/[;,|\n]/).map(s=>s.trim()).filter(Boolean)
     : [];
 
-  function d(v){ // date normaliser
+  function d(v){ // date normaliser — handles DD/MM/YYYY, YYYY-MM-DD, Excel serial
     if(!v) return '';
-    if(typeof v === 'string') return v.trim();
-    return v;
+    const s = String(v).trim();
+    if(!s) return '';
+    // Excel serial date (e.g. 45678)
+    const n = parseFloat(s);
+    if(!isNaN(n) && n > 40000 && n < 60000) {
+      const dt = new Date((n - 25569) * 86400000);
+      return dt.toISOString().split('T')[0];
+    }
+    // DD/MM/YYYY or D/M/YYYY
+    const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if(dmyMatch) {
+      const [,day,mon,yr] = dmyMatch;
+      return `${yr}-${mon.padStart(2,'0')}-${day.padStart(2,'0')}`;
+    }
+    // YYYY-MM-DD already
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
+    // MM/DD/YYYY
+    const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(mdyMatch) {
+      const [,mon,day,yr] = mdyMatch;
+      // Heuristic: if first number >12 it's day-first
+      if(parseInt(mdyMatch[1]) > 12) return `${yr}-${mdyMatch[2].padStart(2,'0')}-${mdyMatch[1].padStart(2,'0')}`;
+      return `${yr}-${mon.padStart(2,'0')}-${day.padStart(2,'0')}`;
+    }
+    return s;
   }
 
   // Helper: get first non-empty value from multiple possible column names
@@ -2194,7 +2297,7 @@ function mapSheetRow(row) {
     pp:  col("PLANNED PLACE OF DELIVERY","Planned Place","planned place of delivery"),
     pt:  col("PLANNED PLACE TYPE","Delivery Type","planned place type"),
     pd:  col("PLACE OF DELIVERY","Place of Delivery","place of delivery"),
-    lv:  d(col("LAST FOLLOW UP/ VISIT DATE","LAST VISIT DATE","Last Visit Date","last follow up/ visit date","last visit")),
+    lv:  d(col("LAST FOLLOW UP/ VISIT DATE","LAST FOLLOW UP/VISIT DATE","LAST FOLLOW UP / VISIT DATE","LAST VISIT DATE","Last Follow Up/ Visit Date","Last Follow Up/Visit Date","Last Visit Date","last follow up/ visit date","last follow up/visit date","last follow up/ visit date (dd/mm/yyyy)","last visit","LAST FOLLOW UP")),
     rm:  col("REMARKS","Remarks","remarks"),
     as:  col("ADMISSION STATUS","Admission Status","admission status"),
     ds:  dsVal,
@@ -3899,12 +4002,166 @@ function printReport() {
 
 
 // ============================================================
-// INIT — Google Sheet auto-sync + Firebase + Alert Scheduler
+// ACCESS CONTROL — Google Sign-In + Email Allowlist
 // ============================================================
+// Add authorised email addresses here (lowercase)
+const ALLOWED_EMAILS = [
+  // District Collector & admin
+  'collector.mayiladuthurai@tn.gov.in',
+  // CMHO & DPH officers
+  'cmho.mayiladuthurai@tn.gov.in',
+  // Add more emails as needed — use lowercase
+];
+
+// For development/testing: set to true to bypass auth (set false in production)
+const DEV_BYPASS_AUTH = false;
+
+let currentUser = null;
+
+function initAccessControl() {
+  if(DEV_BYPASS_AUTH) { grantAccess({ name:'Dev User', email:'dev@local', picture:null }); return; }
+
+  // Load Google Identity Services
+  const gisScript = document.createElement('script');
+  gisScript.src = 'https://accounts.google.com/gsi/client';
+  gisScript.async = true;
+  gisScript.defer = true;
+  gisScript.onload = setupGIS;
+  document.head.appendChild(gisScript);
+
+  // Check cached session
+  try {
+    const cached = sessionStorage.getItem('hrp_user');
+    if(cached) {
+      const u = JSON.parse(cached);
+      if(isEmailAllowed(u.email)) { grantAccess(u); return; }
+    }
+  } catch(e){}
+}
+
+function setupGIS() {
+  if(!window.google?.accounts?.id) return;
+  google.accounts.id.initialize({
+    client_id: '235401461436-m8kq3r7q0bv5h1b9e4p2n6m7t8u1l2s5.apps.googleusercontent.com',
+    callback: handleGoogleCredential,
+    auto_select: true,
+    cancel_on_tap_outside: false,
+  });
+}
+
+async function doGoogleSignIn() {
+  const btn = document.querySelector('.google-btn');
+  const origText = btn.innerHTML;
+  btn.innerHTML = '<span class="material-icons-round sync-spinning" style="font-size:18px">refresh</span> Signing in…';
+  btn.disabled = true;
+
+  try {
+    if(!window.google?.accounts?.id) {
+      // GIS not loaded yet — try manual OAuth popup
+      await signInWithPopup();
+      return;
+    }
+    google.accounts.id.prompt(notification => {
+      if(notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        // Fallback to button render
+        google.accounts.id.renderButton(
+          document.querySelector('.access-card'),
+          { theme:'outline', size:'large', text:'sign_in_with', width:280 }
+        );
+      }
+    });
+  } catch(e) {
+    showAccessErr('Sign-in failed: ' + e.message);
+  }
+  btn.innerHTML = origText;
+  btn.disabled = false;
+}
+
+async function signInWithPopup() {
+  // Use Firebase Auth Google Sign-In as fallback
+  try {
+    await initFirebase();
+    if(!window.firebase?.auth) {
+      // Load Firebase Auth
+      const authScript = document.createElement('script');
+      authScript.src = `https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth-compat.js`;
+      await new Promise((res,rej)=>{ authScript.onload=res; authScript.onerror=rej; document.head.appendChild(authScript); });
+    }
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+    handleUserInfo({ name: user.displayName, email: user.email.toLowerCase(), picture: user.photoURL });
+  } catch(e) {
+    showAccessErr('Google sign-in failed. Please ensure popups are allowed and try again.');
+  }
+}
+
+function handleGoogleCredential(response) {
+  try {
+    // Decode JWT payload (no verification needed client-side for display)
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    handleUserInfo({ name: payload.name, email: payload.email.toLowerCase(), picture: payload.picture });
+  } catch(e) {
+    showAccessErr('Could not read sign-in token. Please try again.');
+  }
+}
+
+function handleUserInfo(user) {
+  if(!isEmailAllowed(user.email)) {
+    showAccessErr(`Access denied for ${user.email}. Please contact the CMHO office to request access.`);
+    return;
+  }
+  sessionStorage.setItem('hrp_user', JSON.stringify(user));
+  grantAccess(user);
+}
+
+function isEmailAllowed(email) {
+  if(DEV_BYPASS_AUTH) return true;
+  const e = (email||'').toLowerCase().trim();
+  // Allow district-level TN government emails (tn.gov.in domain)
+  if(e.endsWith('@tn.gov.in')) return true;
+  return ALLOWED_EMAILS.includes(e);
+}
+
+function grantAccess(user) {
+  currentUser = user;
+  document.getElementById('accessOverlay').classList.add('hidden');
+  // Show user avatar in app bar
+  const slot = document.getElementById('userBarSlot');
+  if(slot) slot.innerHTML = `
+    <div class="access-user-bar" onclick="signOut()" title="Sign out: ${user.email}">
+      ${user.picture ? `<img src="${user.picture}" onerror="this.style.display='none'">` : '<span class="material-icons-round" style="font-size:18px">account_circle</span>'}
+      <span style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${user.name||user.email}</span>
+      <span class="material-icons-round" style="font-size:14px;opacity:.7">logout</span>
+    </div>`;
+}
+
+function signOut() {
+  if(!confirm('Sign out of HRP Tracker?')) return;
+  sessionStorage.removeItem('hrp_user');
+  currentUser = null;
+  document.getElementById('accessOverlay').classList.remove('hidden');
+  const slot = document.getElementById('userBarSlot');
+  if(slot) slot.innerHTML = '';
+  showSnack('Signed out');
+}
+
+function showAccessErr(msg) {
+  const el = document.getElementById('accessErr');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+
+
 buildTableHeader();
 buildRiskChips();
 loadSchedulesLocal();
 updateSchedBadge();
+// Start access control — show login overlay until authenticated
+initAccessControl();
 // Sync from sheet on load; fall back to demo data if sheet unavailable
 syncFromSheet(false).then(()=>{ startSyncTimer(); });
 // If sheet hasn't responded in 4 seconds, init with whatever is in ALL (demo data)
