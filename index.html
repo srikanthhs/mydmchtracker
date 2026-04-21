@@ -77,9 +77,10 @@ body{font-family:'Roboto',sans-serif;background:var(--sur2);color:var(--txt);dis
 
 /* SUMMARY CARDS */
 .cards-bar{padding:10px 16px;display:flex;gap:10px;flex-wrap:wrap;background:var(--sur2);flex-shrink:0}
-.sum-card{background:#fff;border-radius:var(--r-md);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh1);cursor:pointer;transition:box-shadow .2s;flex:1;min-width:110px}
-.sum-card:hover{box-shadow:var(--sh2)}
-.sum-card.active-card{box-shadow:0 0 0 2px var(--pri),var(--sh1)}
+.sum-card{background:#fff;border-radius:var(--r-md);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh1);cursor:pointer;transition:all .18s;flex:1;min-width:110px;border:2px solid transparent;position:relative}
+.sum-card:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
+.sum-card.active-card{box-shadow:var(--sh2);transform:translateY(-2px)}
+.sum-card.active-card::after{content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:32px;height:3px;border-radius:2px;background:var(--card-accent,var(--pri))}
 .sum-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sum-icon .material-icons-round{font-size:18px}
 .sum-val{font-family:'Google Sans',sans-serif;font-size:20px;font-weight:500;line-height:1}
@@ -355,7 +356,25 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 .access-user-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.15);border-radius:24px;color:#fff;font-size:12px;cursor:pointer}
 .access-user-bar img{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.5)}
 
-/* ── REPORTS MODAL ────────────────────────────────────────── */
+/* ── USER MANAGEMENT MODAL ───────────────────────────────── */
+.um-modal{background:#fff;border-radius:var(--r-xl);width:96%;max-width:780px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);animation:su .22s ease}
+.um-tabs{display:flex;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.um-tab{padding:10px 20px;font-size:13px;font-family:'Google Sans',sans-serif;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--txt2);transition:all .15s;white-space:nowrap}
+.um-tab.active{color:var(--pri);border-bottom-color:var(--pri)}
+.um-tab:hover{background:var(--sur2)}
+.um-body{flex:1;overflow-y:auto;padding:20px}
+.user-row{display:grid;grid-template-columns:2fr 1.5fr 1.2fr 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--bdr);font-size:13px}
+.user-row:last-child{border-bottom:none}
+.user-row:hover{background:var(--sur2)}
+.user-row-hdr{font-family:'Google Sans',sans-serif;font-size:11px;font-weight:500;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;background:var(--sur2);border-radius:var(--r-sm) var(--r-sm) 0 0}
+.role-pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.role-admin{background:#EDE9FE;color:#6D28D9}
+.role-dph{background:var(--pri-lt);color:var(--pri)}
+.role-bdo{background:var(--c-high-bg);color:var(--c-high)}
+.role-viewer{background:var(--sur3);color:var(--txt2)}
+.um-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.um-form-grid{grid-template-columns:1fr}.user-row{grid-template-columns:1fr 1fr;gap:6px}}
+
 .report-modal{background:#fff;border-radius:var(--r-xl);width:96%;max-width:900px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);animation:su .22s ease}
 .report-tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
 .report-tab{padding:10px 18px;font-size:12px;font-family:'Google Sans',sans-serif;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;color:var(--txt2);transition:all .15s}
@@ -394,25 +413,32 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <div class="access-card">
     <div class="access-logo"><span class="material-icons-round">pregnant_woman</span></div>
     <div class="access-title">HRP Tracker</div>
-    <div class="access-sub">Mayiladuthurai District · DPH Tamil Nadu<br>Enter your name and access code to continue</div>
+    <div class="access-sub">Mayiladuthurai District · DPH Tamil Nadu<br>Sign in with your username and password</div>
 
     <div style="margin-bottom:12px;text-align:left">
-      <label style="font-size:12px;font-weight:500;color:var(--txt2);display:block;margin-bottom:5px">Your Name / Designation</label>
-      <input id="loginName" type="text" placeholder="e.g. Dr. S. Ramesh, CMHO"
+      <label style="font-size:12px;font-weight:500;color:var(--txt2);display:block;margin-bottom:5px">Username</label>
+      <input id="loginUser" type="text" placeholder="Enter username" autocomplete="username"
         style="width:100%;padding:10px 14px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;font-family:'Roboto',sans-serif;outline:none"
-        onkeydown="if(event.key==='Enter') document.getElementById('loginCode').focus()">
+        onkeydown="if(event.key==='Enter') document.getElementById('loginPass').focus()">
     </div>
-    <div style="margin-bottom:16px;text-align:left">
-      <label style="font-size:12px;font-weight:500;color:var(--txt2);display:block;margin-bottom:5px">Access Code</label>
-      <input id="loginCode" type="password" placeholder="Enter access code"
-        style="width:100%;padding:10px 14px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;font-family:'Roboto',sans-serif;outline:none;letter-spacing:.15em"
-        onkeydown="if(event.key==='Enter') doPasscodeLogin()">
+    <div style="margin-bottom:20px;text-align:left">
+      <label style="font-size:12px;font-weight:500;color:var(--txt2);display:block;margin-bottom:5px">Password</label>
+      <div style="position:relative;display:flex;align-items:center">
+        <input id="loginPass" type="password" placeholder="Enter password" autocomplete="current-password"
+          style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;font-family:'Roboto',sans-serif;outline:none"
+          onkeydown="if(event.key==='Enter') doLogin()">
+        <button onclick="togglePassVis('loginPass','loginPassIcon')" type="button"
+          style="position:absolute;right:10px;background:none;border:none;cursor:pointer;padding:4px;color:var(--txt3)">
+          <span class="material-icons-round" id="loginPassIcon" style="font-size:18px">visibility</span>
+        </button>
+      </div>
     </div>
-    <button class="google-btn" onclick="doPasscodeLogin()" style="background:var(--pri);color:#fff;border-color:var(--pri);justify-content:center;font-size:14px">
-      <span class="material-icons-round" style="font-size:18px">lock_open</span>&nbsp;Access Tracker
+    <button class="google-btn" id="loginBtn" onclick="doLogin()" style="background:var(--pri);color:#fff;border-color:var(--pri);justify-content:center;font-size:14px">
+      <span class="material-icons-round" style="font-size:18px">login</span>&nbsp;Sign In
     </button>
     <div class="access-err" id="accessErr"></div>
-    <div style="margin-top:20px;font-size:11px;color:var(--txt3)">Access is restricted to authorised DPH / District personnel.<br>Contact CMHO office to obtain the access code.</div>
+    <div style="margin-top:18px;font-size:11px;color:var(--txt3)">Access restricted to authorised DPH / District personnel.<br>Contact the system admin to create your account.</div>
+    <div style="margin-top:8px;font-size:10px;color:var(--txt3);opacity:.7">Bootstrap admin: username <b>admin</b> · password <b>Admin@2026</b><br>(change after first login)</div>
   </div>
 </div>
 
@@ -424,6 +450,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div style="font-size:11px;opacity:.8;color:#fff">Mayiladuthurai District &nbsp;·&nbsp; EDD: March – June 2026 &nbsp;·&nbsp; DPH Tamil Nadu</div>
   </div>
   <button class="icon-btn" title="Import Data" onclick="openImport()"><span class="material-icons-round">upload_file</span></button>
+  <button class="icon-btn" id="userMgmtBtn" title="User Management" onclick="openUserMgmt()" style="display:none;background:rgba(255,255,255,.2)"><span class="material-icons-round">manage_accounts</span></button>
   <button class="icon-btn" title="Alert Scheduler" onclick="openAlertScheduler()" style="background:rgba(255,255,255,.18)"><span class="material-icons-round">alarm</span></button>
   <button class="icon-btn" title="Generate Report" onclick="openReports()"><span class="material-icons-round">bar_chart</span></button>
   <button class="icon-btn" title="DPH Report" onclick="openDPH()"><span class="material-icons-round">assessment</span></button>
@@ -941,6 +968,28 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
       Select date range above to generate report
     </div>
   </div>
+</div>
+</div>
+
+<!-- USER MANAGEMENT MODAL -->
+<div class="modal-ov" id="userMgmtModal" onclick="closeModalOv(event,'userMgmtModal')">
+<div class="um-modal">
+  <div class="modal-hdr" style="flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="material-icons-round" style="color:var(--pri)">manage_accounts</span>
+      <div>
+        <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500">User Management</div>
+        <div style="font-size:11px;color:var(--txt2)">Admin only · Changes saved to Firestore</div>
+      </div>
+    </div>
+    <button onclick="closeModal('userMgmtModal')" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+  </div>
+  <div class="um-tabs">
+    <div class="um-tab active" id="umTab0" onclick="switchUmTab(0)">👥 Users</div>
+    <div class="um-tab" id="umTab1" onclick="switchUmTab(1)">➕ Add User</div>
+    <div class="um-tab" id="umTab2" onclick="switchUmTab(2)">🔑 Change Password</div>
+  </div>
+  <div class="um-body" id="umBody"></div>
 </div>
 </div>
 
@@ -1514,27 +1563,33 @@ function goPage(p) {
 function updateCards() {
   const f = filteredCache;
   const active = f.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion');
-  const crit = active.filter(r=>calcScore(r.r)>=5);
-  const high = active.filter(r=>{const s=calcScore(r.r);return s>=3&&s<5;});
+  const crit    = active.filter(r=>calcScore(r.r)>=5);
+  const high    = active.filter(r=>{const s=calcScore(r.r);return s>=3&&s<5;});
   const overdue = active.filter(r=>isOverdue(r));
-  const eddSoon = active.filter(r=>r.e&&daysUntil(r.e)<=30&&daysUntil(r.e)>=0);
+  const edd15   = active.filter(r=>{ const d=daysUntil(r.e); return d!==null&&d>=0&&d<=15; });
 
-  const edd15 = active.filter(r=>{ const d=daysUntil(r.e); return d!==null&&d>=0&&d<=15; });
   const cards = [
-    {icon:'people',         color:'var(--pri)',    bg:'var(--pri-lt)',    val:f.length,       lbl:'Total shown',   filter:''},
-    {icon:'pregnant_woman', color:'var(--c-mod)',  bg:'var(--c-mod-bg)', val:active.length,  lbl:'Active',        filter:'active'},
-    {icon:'priority_high',  color:'var(--c-crit)', bg:'var(--c-crit-bg)',val:crit.length,    lbl:'Critical risk', filter:'crit'},
-    {icon:'warning',        color:'var(--c-high)', bg:'var(--c-high-bg)',val:high.length,     lbl:'High risk',     filter:'high'},
-    {icon:'running_with_errors',color:'var(--c-crit)',bg:'var(--c-crit-bg)',val:overdue.length,lbl:'Overdue visit',filter:'overdue'},
-    {icon:'event_upcoming', color:'var(--c-high)', bg:'var(--c-high-bg)',val:edd15.length,    lbl:'EDD ≤15 days',  filter:'edd15'},
+    {icon:'people',              color:'var(--pri)',     bg:'var(--pri-lt)',     val:f.length,       lbl:'Total shown',   filter:''},
+    {icon:'pregnant_woman',      color:'var(--c-mod)',   bg:'var(--c-mod-bg)',   val:active.length,  lbl:'Active',        filter:'active'},
+    {icon:'priority_high',       color:'var(--c-crit)',  bg:'var(--c-crit-bg)', val:crit.length,    lbl:'Critical risk', filter:'crit'},
+    {icon:'warning',             color:'var(--c-high)',  bg:'var(--c-high-bg)', val:high.length,    lbl:'High risk',     filter:'high'},
+    {icon:'running_with_errors', color:'var(--c-crit)',  bg:'var(--c-crit-bg)', val:overdue.length, lbl:'Overdue visit', filter:'overdue'},
+    {icon:'event_upcoming',      color:'var(--c-high)',  bg:'var(--c-high-bg)', val:edd15.length,   lbl:'EDD ≤15 days',  filter:'edd15'},
   ];
 
-  document.getElementById('cardsBar').innerHTML = cards.map(c=>
-    `<div class="sum-card" onclick="cardFilter('${c.filter}')">
-      <div class="sum-icon" style="background:${c.bg}"><span class="material-icons-round" style="color:${c.color}">${c.icon}</span></div>
-      <div><div class="sum-val" style="color:${c.color}">${c.val.toLocaleString()}</div><div class="sum-lbl">${c.lbl}</div></div>
-    </div>`
-  ).join('');
+  document.getElementById('cardsBar').innerHTML = cards.map(c=>{
+    const isActive = cardFilterMode === c.filter && c.filter !== '';
+    const activeCls = isActive ? 'active-card' : '';
+    const activeBorder = isActive ? `border-color:${c.color};background:${c.bg};` : '';
+    return `<div class="sum-card ${activeCls}" style="${activeBorder}--card-accent:${c.color}" onclick="cardFilter('${c.filter}')">
+      <div class="sum-icon" style="background:${isActive?c.color:c.bg}"><span class="material-icons-round" style="color:${isActive?'#fff':c.color}">${c.icon}</span></div>
+      <div>
+        <div class="sum-val" style="color:${c.color}">${c.val.toLocaleString()}</div>
+        <div class="sum-lbl" style="${isActive?'font-weight:500;color:'+c.color:''}">${c.lbl}</div>
+        ${isActive?`<div style="font-size:9px;color:${c.color};margin-top:1px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">● Filtered</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
 
   // Sidebar badges
   document.getElementById('sb-all-badge').textContent = ALL.length;
@@ -1552,13 +1607,21 @@ function updateCards() {
 
 let cardFilterMode = '';
 function cardFilter(f) {
+  // Toggle off if same card clicked again
+  if(cardFilterMode === f && f !== '') {
+    cardFilterMode = '';
+    activeRiskChip = ''; buildRiskChips();
+    sbMode = 'all'; setSbActive('sb-all');
+    applyFilters();
+    return;
+  }
   cardFilterMode = f;
   // Quick shortcut filters
-  if(f === 'crit') { activeRiskChip = 'Critical'; buildRiskChips(); applyFilters(); }
-  else if(f === 'high') { activeRiskChip = 'High'; buildRiskChips(); applyFilters(); }
-  else if(f === 'active') { sbMode='active'; setSbActive('sb-active'); applyFilters(); }
-  else if(f === 'overdue') { sbMode='overdue'; setSbActive('sb-overdue'); applyFilters(); }
-  else if(f === 'edd15') { sbMode='edd15'; setSbActive('sb-edd15'); applyFilters(); }
+  if(f === 'crit') { activeRiskChip = ''; sbMode='all'; setSbActive('sb-all'); buildRiskChips(); applyFilters(); }
+  else if(f === 'high') { activeRiskChip = ''; sbMode='all'; setSbActive('sb-all'); buildRiskChips(); applyFilters(); }
+  else if(f === 'active') { activeRiskChip = ''; sbMode='active'; setSbActive('sb-active'); buildRiskChips(); applyFilters(); }
+  else if(f === 'overdue') { activeRiskChip = ''; sbMode='overdue'; setSbActive('sb-overdue'); buildRiskChips(); applyFilters(); }
+  else if(f === 'edd15') { activeRiskChip = ''; sbMode='edd15'; setSbActive('sb-edd15'); buildRiskChips(); applyFilters(); }
   else { applyFilters(); }
 }
 
@@ -1641,7 +1704,7 @@ function openDrawer(key, idx) {
       ${r.rm ? `<div class="sec-title">Remarks</div>
       <div style="background:var(--sur2);border-radius:var(--r-md);padding:10px 14px;font-size:13px;color:var(--txt2)">${r.rm}</div>` : ''}
       <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
-        <button class="act-btn" onclick="editRecord(${idx})"><span class="material-icons-round">edit</span> Edit</button>
+        ${canEdit() ? `<button class="act-btn" onclick="editRecord(${idx})"><span class="material-icons-round">edit</span> Edit</button>` : '<span style="font-size:12px;color:var(--txt3);padding:4px 8px;background:var(--sur2);border-radius:20px">View only</span>'}
         ${r.ph ? `<a href="tel:${r.ph}" class="act-btn" style="text-decoration:none"><span class="material-icons-round">call</span> Call</a>` : ''}
         <button class="act-btn" onclick="navigator.clipboard.writeText('${r.n}, PICME: ${r.id||'-'}, EDD: ${r.e||'-'}, PHC: ${r.p}');showSnack('Copied to clipboard')"><span class="material-icons-round">content_copy</span> Copy</button>
       </div>
@@ -1969,8 +2032,8 @@ function openDPH() {
     const scores = active.map(r=>calcScore(r.r));
     const crit = scores.filter(s=>s>=10).length;
     const high = scores.filter(s=>s>=6&&s<10).length;
-    const mod = scores.filter(s=>s>=3&&s<6).length;
-    const low = scores.filter(s=>s>0&&s<3).length;
+    const mod  = scores.filter(s=>s>=3&&s<6).length;
+    const low  = scores.filter(s=>s>=1&&s<3).length;
     const noflag = scores.filter(s=>s===0).length;
     const od = active.filter(r=>isOverdue(r)).length;
     const edd30 = active.filter(r=>r.e&&daysUntil(r.e)<=30&&daysUntil(r.e)>=0).length;
@@ -1984,15 +2047,14 @@ function openDPH() {
 
   document.getElementById('dphBody').innerHTML = `
     <div style="text-align:center;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)">
-      <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500">Directorate of Public Health & Preventive Medicine, Tamil Nadu</div>
-      <div style="font-size:12px;color:var(--txt2)">High-Risk Pregnancy Register — District Monthly Report</div>
-      <div style="font-size:11px;color:var(--txt3)">Mayiladuthurai District &nbsp;·&nbsp; EDD: March–June 2026 &nbsp;·&nbsp; Report generated: 15 Apr 2026</div>
+      <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500">Health Department, Mayiladuthurai</div>
+      <div style="font-size:11px;color:var(--txt3);margin-top:3px">High-Risk Pregnancy Register &nbsp;·&nbsp; Report generated: ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
       ${[
         {v:ALL.length,l:'Total registered',c:'var(--pri)'},
         {v:ALL.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion').length,l:'Active',c:'var(--c-mod)'},
-        {v:ALL.filter(r=>calcScore(r.r)>=10&&r.ds!=='Delivered'&&r.ds!=='Abortion').length,l:'Critical risk',c:'var(--c-crit)'},
+        {v:ALL.filter(r=>calcScore(r.r)>=10&&r.ds!=='Delivered'&&r.ds!=='Abortion').length,l:'Critical (score ≥10)',c:'var(--c-crit)'},
         {v:ALL.filter(r=>isOverdue(r)).length,l:'Overdue visits',c:'var(--c-high)'},
       ].map(c=>`<div style="background:var(--sur2);border-radius:var(--r-md);padding:10px;text-align:center">
         <div style="font-family:'Google Sans',sans-serif;font-size:24px;font-weight:500;color:${c.c}">${c.v}</div>
@@ -4014,84 +4076,153 @@ function printReport() {
 
 
 // ============================================================
-// ACCESS CONTROL — Passcode-based (works on any domain)
+// ACCESS CONTROL — Role-based, Firestore-backed user accounts
 // ============================================================
-// To change the access code: update ACCESS_CODE below.
-// Use a strong code and share it only with authorised staff.
-// To add role-based codes, add entries to ACCESS_ROLES.
-const ACCESS_ROLES = {
-  'MYL@HRP2026':  'District Admin',
-  'CMHO@HRP2026': 'CMHO Office',
-  'DPH@HRP2026':  'DPH Officer',
-  'BDO@HRP2026':  'Block Officer',
-};
-// Session duration in hours (user auto-logged-out after this)
+// ROLES: admin | dph_officer | bdo | viewer
+// Bootstrap admin (change password after first login):
+const BOOTSTRAP = { username:'admin', password:'Admin@2026', name:'System Admin', role:'admin', block:'' };
 const SESSION_HOURS = 8;
+const PWD_SALT = 'hrp_myl_2026_v1';
 
-let currentUser = null;
+let currentUser = null; // { username, name, role, block }
 
+// ── Password hashing (Web Crypto SHA-256) ────────────────────
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function hashPwd(pwd) { return sha256(pwd + ':' + PWD_SALT); }
+
+// ── Init ─────────────────────────────────────────────────────
 function initAccessControl() {
   try {
     const raw = sessionStorage.getItem('hrp_session');
     if(raw) {
       const s = JSON.parse(raw);
-      const age = (Date.now() - s.ts) / 3600000; // hours
-      if(age < SESSION_HOURS && s.name && s.role) {
-        grantAccess(s.name, s.role);
-        return;
+      if((Date.now()-s.ts)/3600000 < SESSION_HOURS && s.username) {
+        grantAccess(s); return;
       }
     }
-  } catch(e) {}
+  } catch(e){}
   document.getElementById('accessOverlay').classList.remove('hidden');
-  setTimeout(() => document.getElementById('loginName').focus(), 300);
+  setTimeout(()=>{ const el=document.getElementById('loginUser'); if(el) el.focus(); },300);
 }
 
-function doPasscodeLogin() {
-  const name = (document.getElementById('loginName').value || '').trim();
-  const code = (document.getElementById('loginCode').value || '').trim();
+// ── Login ────────────────────────────────────────────────────
+async function doLogin() {
+  const uEl = document.getElementById('loginUser');
+  const pEl = document.getElementById('loginPass');
+  const btn = document.getElementById('loginBtn');
+  const username = (uEl.value||'').trim().toLowerCase();
+  const password = (pEl.value||'').trim();
   hideAccessErr();
 
-  if(!name) { showAccessErr('Please enter your name / designation.'); document.getElementById('loginName').focus(); return; }
-  if(!code) { showAccessErr('Please enter the access code.'); document.getElementById('loginCode').focus(); return; }
+  if(!username) { showAccessErr('Enter your username.'); uEl.focus(); return; }
+  if(!password) { showAccessErr('Enter your password.'); pEl.focus(); return; }
 
-  const role = ACCESS_ROLES[code];
-  if(!role) {
-    showAccessErr('Incorrect access code. Contact CMHO office if you need access.');
-    document.getElementById('loginCode').value = '';
-    document.getElementById('loginCode').focus();
-    return;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-icons-round sync-spinning" style="font-size:18px">refresh</span>&nbsp; Signing in\u2026';
+
+  try {
+    // 1. Check bootstrap admin (hardcoded, no Firestore needed)
+    if(username === BOOTSTRAP.username.toLowerCase() && password === BOOTSTRAP.password) {
+      const u = { username: BOOTSTRAP.username, name: BOOTSTRAP.name, role: BOOTSTRAP.role, block:'', ts: Date.now() };
+      sessionStorage.setItem('hrp_session', JSON.stringify(u));
+      grantAccess(u);
+      return;
+    }
+
+    // 2. Look up user in Firestore
+    await ensureFirestoreReady();
+    if(!db) { showAccessErr('Database not available. Check connection and try again.'); resetLoginBtn(btn); return; }
+
+    const snap = await db.collection('hrp_users').doc(username).get();
+    if(!snap.exists) { showAccessErr('Username not found. Contact admin to create your account.'); resetLoginBtn(btn); return; }
+
+    const userData = snap.data();
+    if(userData.active === false) { showAccessErr('Account is deactivated. Contact admin.'); resetLoginBtn(btn); return; }
+
+    const inputHash = await hashPwd(password);
+    if(inputHash !== userData.passwordHash) { showAccessErr('Incorrect password.'); pEl.value=''; pEl.focus(); resetLoginBtn(btn); return; }
+
+    const u = { username, name: userData.name, role: userData.role, block: userData.block||'', ts: Date.now() };
+    sessionStorage.setItem('hrp_session', JSON.stringify(u));
+
+    // Update last login
+    db.collection('hrp_users').doc(username).update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
+
+    grantAccess(u);
+
+  } catch(err) {
+    showAccessErr('Login failed: ' + (err.message || String(err)));
+    resetLoginBtn(btn);
   }
-
-  const session = { name, role, ts: Date.now() };
-  sessionStorage.setItem('hrp_session', JSON.stringify(session));
-  grantAccess(name, role);
 }
 
-function grantAccess(name, role) {
-  currentUser = { name, role };
+async function ensureFirestoreReady() {
+  if(db) return;
+  await loadFirebaseSDK();
+  if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  fbReady = true;
+}
+
+function resetLoginBtn(btn) {
+  btn.disabled = false;
+  btn.innerHTML = '<span class="material-icons-round" style="font-size:18px">login</span>&nbsp;Sign In';
+}
+
+// ── Grant access ─────────────────────────────────────────────
+function grantAccess(u) {
+  currentUser = u;
   document.getElementById('accessOverlay').classList.add('hidden');
+
+  // Show admin button only for admin role
+  const umBtn = document.getElementById('userMgmtBtn');
+  if(umBtn) umBtn.style.display = u.role === 'admin' ? '' : 'none';
+
+  // Update app bar user chip
   const slot = document.getElementById('userBarSlot');
+  const roleLabel = { admin:'Admin', dph_officer:'DPH Officer', bdo:'Block Officer', viewer:'Viewer' }[u.role] || u.role;
+  const roleCls   = { admin:'role-admin', dph_officer:'role-dph', bdo:'role-bdo', viewer:'role-viewer' }[u.role] || '';
   if(slot) slot.innerHTML = `
-    <div class="access-user-bar" onclick="signOut()" title="${role} — click to sign out">
+    <div class="access-user-bar" onclick="signOut()" title="${u.role} — click to sign out">
       <span class="material-icons-round" style="font-size:16px">account_circle</span>
-      <span style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>
-      <span style="font-size:10px;opacity:.7;background:rgba(255,255,255,.2);padding:1px 6px;border-radius:8px">${role}</span>
+      <span style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.name}</span>
+      <span class="role-pill ${roleCls}" style="font-size:10px">${roleLabel}</span>
       <span class="material-icons-round" style="font-size:14px;opacity:.7">logout</span>
     </div>`;
+
+  // If BDO role: auto-filter to their block
+  if(u.role === 'bdo' && u.block) {
+    sbBlock = u.block; sbMode = 'block';
+    updatePHCDropdown(u.block);
+    showSnack('Block filter applied: ' + u.block);
+  }
+  applyFilters();
 }
 
+// ── Sign out ─────────────────────────────────────────────────
 function signOut() {
   if(!confirm('Sign out of HRP Tracker?')) return;
   sessionStorage.removeItem('hrp_session');
   currentUser = null;
-  document.getElementById('loginCode').value = '';
   document.getElementById('accessOverlay').classList.remove('hidden');
   const slot = document.getElementById('userBarSlot');
   if(slot) slot.innerHTML = '';
-  setTimeout(() => document.getElementById('loginName').focus(), 300);
+  const pp = document.getElementById('loginPass');
+  if(pp) pp.value = '';
+  sbBlock=''; sbMode='all';
+  setTimeout(()=>{ const el=document.getElementById('loginUser'); if(el) el.focus(); },300);
   showSnack('Signed out');
 }
 
+// ── Permission helpers ────────────────────────────────────────
+function canEdit() {
+  return currentUser && ['admin','dph_officer','bdo'].includes(currentUser.role);
+}
+
+// ── Login overlay helpers ─────────────────────────────────────
 function showAccessErr(msg) {
   const el = document.getElementById('accessErr');
   if(!el) return;
@@ -4102,8 +4233,264 @@ function hideAccessErr() {
   const el = document.getElementById('accessErr');
   if(el) el.classList.remove('show');
 }
+function togglePassVis(inputId, iconId) {
+  const inp  = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if(!inp) return;
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  if(icon) icon.textContent = show ? 'visibility_off' : 'visibility';
+}
 
-// ─── stubs for old Firebase-auth helpers (no longer used) ───
+// ============================================================
+// USER MANAGEMENT — Admin panel (Firestore-backed)
+// ============================================================
+let umActiveTab = 0;
+let umEditingUser = null;
+
+const ROLE_OPTIONS = [
+  { value:'admin',       label:'District Admin',      cls:'role-admin' },
+  { value:'dph_officer', label:'DPH / CMHO Officer',  cls:'role-dph'   },
+  { value:'bdo',         label:'Block Officer (BDO)',  cls:'role-bdo'   },
+  { value:'viewer',      label:'View Only',            cls:'role-viewer'},
+];
+
+function openUserMgmt() {
+  if(!currentUser || currentUser.role !== 'admin') { showSnack('Admin access required'); return; }
+  umActiveTab = 0;
+  document.getElementById('userMgmtModal').classList.add('open');
+  switchUmTab(0);
+}
+
+function switchUmTab(n) {
+  umActiveTab = n;
+  [0,1,2].forEach(i => {
+    const t = document.getElementById('umTab'+i);
+    if(t) t.classList.toggle('active', i===n);
+  });
+  if(n===0) renderUserList();
+  else if(n===1) renderAddUser();
+  else if(n===2) renderChangePassword();
+}
+
+async function renderUserList() {
+  const body = document.getElementById('umBody');
+  body.innerHTML = '<div style="text-align:center;padding:32px;color:var(--txt3)"><span class="material-icons-round sync-spinning" style="font-size:32px;display:block;margin-bottom:8px">refresh</span>Loading users\u2026</div>';
+  try {
+    await ensureFirestoreReady();
+    const snap = await db.collection('hrp_users').get();
+    const users = [];
+    snap.forEach(d => users.push({ id:d.id, ...d.data() }));
+
+    const bootstrapRow = `<div class="user-row">
+      <div><b>admin</b><div style="font-size:10px;color:var(--txt3)">System Admin (bootstrap)</div></div>
+      <div>admin</div>
+      <div><span class="role-pill role-admin">Admin</span></div>
+      <div><span class="status-pill" style="background:var(--c-mod-bg);color:var(--c-mod)">Active</span></div>
+      <div style="font-size:11px;color:var(--txt3)">hardcoded</div>
+    </div>`;
+
+    const rows = users.length ? users.map(u => {
+      const rd = ROLE_OPTIONS.find(r=>r.value===u.role) || {label:u.role, cls:'role-viewer'};
+      const active = u.active !== false;
+      return `<div class="user-row">
+        <div><b>${u.name||'\u2014'}</b><div style="font-size:10px;color:var(--txt3)">${u.id}</div></div>
+        <div style="font-size:12px">${u.id}</div>
+        <div><span class="role-pill ${rd.cls}">${rd.label}</span>${u.block?'<div style="font-size:10px;color:var(--txt3);margin-top:2px">Block: '+u.block+'</div>':''}</div>
+        <div><span class="status-pill" style="background:${active?'var(--c-mod-bg)':'var(--c-none-bg)'};color:${active?'var(--c-mod)':'var(--c-none)'}">${active?'Active':'Inactive'}</span></div>
+        <div style="display:flex;gap:4px">
+          <button class="act-btn" style="padding:4px 8px" onclick="editUser('${u.id}')"><span class="material-icons-round" style="font-size:14px">edit</span></button>
+          <button class="act-btn" style="padding:4px 8px;color:${active?'var(--c-crit)':'var(--c-mod)'}" onclick="toggleUserActive('${u.id}',${!active})">
+            <span class="material-icons-round" style="font-size:14px">${active?'person_off':'person'}</span>
+          </button>
+        </div>
+      </div>`;
+    }).join('') : '<div style="padding:24px;text-align:center;color:var(--txt3);font-size:13px">No users yet. Use the Add User tab.</div>';
+
+    body.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:13px;color:var(--txt2)">${users.length} user(s) in Firestore + 1 bootstrap admin</div>
+      <button class="act-btn" onclick="renderUserList()"><span class="material-icons-round" style="font-size:14px">refresh</span> Refresh</button>
+    </div>
+    <div style="border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden">
+      <div class="user-row user-row-hdr"><div>Name</div><div>Username</div><div>Role</div><div>Status</div><div>Actions</div></div>
+      ${bootstrapRow}${rows}
+    </div>`;
+  } catch(err) {
+    body.innerHTML = '<div style="padding:20px;color:var(--c-crit);background:var(--c-crit-bg);border-radius:var(--r-md)">Failed to load users: '+err.message+'</div>';
+  }
+}
+
+function renderAddUser(prefill) {
+  umEditingUser = prefill ? prefill.id : null;
+  const editing = !!prefill;
+  const blocks = [...new Set(ALL.map(r=>r.b))].filter(Boolean).sort();
+  const blockOpts = blocks.map(b=>'<option value="'+b+'" '+(prefill&&prefill.block===b?'selected':'')+'>'+b+'</option>').join('');
+
+  document.getElementById('umBody').innerHTML = `<div style="font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;margin-bottom:16px;color:var(--txt)">
+    ${editing?'Edit User \u2014 '+prefill.id:'Create New User'}
+  </div>
+  <div class="um-form-grid">
+    <div class="fg"><label>Full Name *</label>
+      <input id="um_name" placeholder="e.g. Dr. S. Ramesh" value="${prefill?prefill.name||'':''}"></div>
+    <div class="fg"><label>Username * <span style="font-size:10px;color:var(--txt3)">(lowercase, no spaces)</span></label>
+      <input id="um_user" placeholder="e.g. sramesh" ${editing?'readonly style="background:var(--sur3)"':''} value="${prefill?prefill.id:''}"></div>
+    <div class="fg"><label>Role *</label>
+      <select id="um_role" onchange="toggleBlockField()">
+        ${ROLE_OPTIONS.map(r=>'<option value="'+r.value+'" '+(prefill&&prefill.role===r.value?'selected':'')+'>'+r.label+'</option>').join('')}
+      </select>
+    </div>
+    <div class="fg" id="um_block_field" style="display:${prefill&&prefill.role==='bdo'?'flex':'none'}">
+      <label>Assigned Block *</label>
+      <select id="um_block"><option value="">Select Block</option>${blockOpts}</select>
+    </div>
+    <div class="fg"><label>${editing?'New Password':'Password *'} ${editing?'<span style="font-size:10px;color:var(--txt3)">(leave blank to keep)</span>':''}</label>
+      <div style="position:relative;display:flex;align-items:center">
+        <input type="password" id="um_pass" placeholder="${editing?'Leave blank to keep current':'Min 6 characters'}"
+          style="width:100%;padding:9px 36px 9px 12px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;outline:none">
+        <button type="button" onclick="togglePassVis('um_pass','um_pass_icon')"
+          style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:var(--txt3);padding:2px">
+          <span class="material-icons-round" id="um_pass_icon" style="font-size:16px">visibility</span>
+        </button>
+      </div>
+    </div>
+    <div class="fg"><label>Confirm Password</label>
+      <input type="password" id="um_pass2" placeholder="Re-enter password"
+        style="padding:9px 12px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;outline:none;width:100%"></div>
+  </div>
+  <div id="um_form_err" style="display:none;margin-top:10px;padding:8px 12px;background:var(--c-crit-bg);border-radius:var(--r-sm);font-size:12px;color:var(--c-crit)"></div>
+  <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+    <button class="btn-outlined" onclick="switchUmTab(0)">Cancel</button>
+    <button class="btn-filled" onclick="saveUser(${editing})">
+      <span class="material-icons-round" style="font-size:15px;vertical-align:middle">${editing?'save':'person_add'}</span>
+      ${editing?'Save Changes':'Create User'}
+    </button>
+  </div>`;
+}
+
+function toggleBlockField() {
+  const role = document.getElementById('um_role')&&document.getElementById('um_role').value;
+  const field = document.getElementById('um_block_field');
+  if(field) field.style.display = role==='bdo'?'flex':'none';
+}
+
+async function saveUser(editing) {
+  const name     = (document.getElementById('um_name')&&document.getElementById('um_name').value||'').trim();
+  const username = (document.getElementById('um_user')&&document.getElementById('um_user').value||'').trim().toLowerCase().replace(/\s+/g,'');
+  const role     = document.getElementById('um_role')&&document.getElementById('um_role').value;
+  const block    = (document.getElementById('um_block')&&document.getElementById('um_block').value)||'';
+  const pass     = (document.getElementById('um_pass')&&document.getElementById('um_pass').value)||'';
+  const pass2    = (document.getElementById('um_pass2')&&document.getElementById('um_pass2').value)||'';
+
+  const errEl = document.getElementById('um_form_err');
+  const showErr = msg => { errEl.textContent=msg; errEl.style.display='block'; };
+  errEl.style.display='none';
+
+  if(!name)     return showErr('Full name is required.');
+  if(!username) return showErr('Username is required.');
+  if(!editing && username==='admin') return showErr('"admin" is reserved for the bootstrap account.');
+  if(!role)     return showErr('Select a role.');
+  if(role==='bdo' && !block) return showErr('Select the block for this BDO.');
+  if(!editing && !pass)  return showErr('Password is required for new users.');
+  if(pass && pass.length < 6) return showErr('Password must be at least 6 characters.');
+  if(pass && pass !== pass2) return showErr('Passwords do not match.');
+
+  try {
+    await ensureFirestoreReady();
+    if(!editing) {
+      const exists = await db.collection('hrp_users').doc(username).get();
+      if(exists.exists) return showErr('Username already exists. Choose a different one.');
+    }
+    const rec = { name, role, block, active:true,
+      createdBy: currentUser.username,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+    if(pass) rec.passwordHash = await hashPwd(pass);
+    if(!editing) rec.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    await db.collection('hrp_users').doc(username).set(rec, { merge:true });
+    showSnack('\u2713 User "'+username+'" '+(editing?'updated':'created')+' successfully');
+    switchUmTab(0);
+  } catch(err) { showErr('Save failed: '+err.message); }
+}
+
+async function editUser(uid) {
+  try {
+    await ensureFirestoreReady();
+    const snap = await db.collection('hrp_users').doc(uid).get();
+    if(!snap.exists) { showSnack('User not found'); return; }
+    switchUmTab(1);
+    setTimeout(()=> renderAddUser({ id:uid, ...snap.data() }), 50);
+  } catch(err) { showSnack('Error: '+err.message); }
+}
+
+async function toggleUserActive(uid, setActive) {
+  if(!confirm((setActive?'Activate':'Deactivate')+' user "'+uid+'"?')) return;
+  try {
+    await ensureFirestoreReady();
+    await db.collection('hrp_users').doc(uid).update({ active: setActive });
+    showSnack('User "'+uid+'" '+(setActive?'activated':'deactivated'));
+    renderUserList();
+  } catch(err) { showSnack('Error: '+err.message); }
+}
+
+function renderChangePassword() {
+  document.getElementById('umBody').innerHTML = `<div style="font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;margin-bottom:6px">Change Your Password</div>
+  <div style="font-size:12px;color:var(--txt2);margin-bottom:16px">Logged in as: <b>${currentUser&&currentUser.username}</b></div>
+  <div style="max-width:400px">
+    <div class="fg" style="margin-bottom:12px"><label>Current Password</label>
+      <input type="password" id="cp_old" placeholder="Current password"
+        style="padding:9px 12px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;outline:none;width:100%"></div>
+    <div class="fg" style="margin-bottom:12px"><label>New Password</label>
+      <div style="position:relative;display:flex;align-items:center">
+        <input type="password" id="cp_new" placeholder="Min 6 characters"
+          style="width:100%;padding:9px 36px 9px 12px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;outline:none">
+        <button type="button" onclick="togglePassVis('cp_new','cp_new_icon')"
+          style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:var(--txt3);padding:2px">
+          <span class="material-icons-round" id="cp_new_icon" style="font-size:16px">visibility</span>
+        </button>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:16px"><label>Confirm New Password</label>
+      <input type="password" id="cp_new2" placeholder="Re-enter new password"
+        style="padding:9px 12px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;outline:none;width:100%"></div>
+    <div id="cp_err" style="display:none;margin-bottom:10px;padding:8px 12px;background:var(--c-crit-bg);border-radius:var(--r-sm);font-size:12px;color:var(--c-crit)"></div>
+    <button class="btn-filled" onclick="doChangePassword()">
+      <span class="material-icons-round" style="font-size:15px;vertical-align:middle">lock_reset</span> Update Password
+    </button>
+  </div>`;
+}
+
+async function doChangePassword() {
+  const oldPwd  = (document.getElementById('cp_old')&&document.getElementById('cp_old').value)||'';
+  const newPwd  = (document.getElementById('cp_new')&&document.getElementById('cp_new').value)||'';
+  const newPwd2 = (document.getElementById('cp_new2')&&document.getElementById('cp_new2').value)||'';
+  const errEl   = document.getElementById('cp_err');
+  const showErr = msg => { errEl.textContent=msg; errEl.style.display='block'; };
+  errEl.style.display='none';
+
+  if(!oldPwd) return showErr('Enter your current password.');
+  if(newPwd.length < 6) return showErr('New password must be at least 6 characters.');
+  if(newPwd !== newPwd2) return showErr('New passwords do not match.');
+
+  try {
+    if(currentUser.username === BOOTSTRAP.username) {
+      if(oldPwd !== BOOTSTRAP.password) return showErr('Current password is incorrect.');
+      showSnack('Bootstrap admin is hardcoded \u2014 create a Firestore account to change password.');
+      return;
+    }
+    await ensureFirestoreReady();
+    const snap = await db.collection('hrp_users').doc(currentUser.username).get();
+    if(!snap.exists) return showErr('User record not found.');
+    const oldHash = await hashPwd(oldPwd);
+    if(oldHash !== snap.data().passwordHash) return showErr('Current password is incorrect.');
+    const newHash = await hashPwd(newPwd);
+    await db.collection('hrp_users').doc(currentUser.username).update({ passwordHash: newHash });
+    showSnack('\u2713 Password changed successfully');
+    ['cp_old','cp_new','cp_new2'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=''; });
+  } catch(err) { showErr('Error: '+err.message); }
+}
+
+// ─── Stubs for removed functions ─────────────────────────────
+function doPasscodeLogin() { doLogin(); }
+function toggleCodeVisibility() {}
 function doGoogleSignIn() {}
 function loadScript() { return Promise.resolve(); }
 function resetSignInBtn() {}
