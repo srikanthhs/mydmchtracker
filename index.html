@@ -4035,24 +4035,12 @@ async function doGoogleSignIn() {
   hideAccessErr();
 
   try {
-    // Ensure Firebase core is loaded
-    if(!window.firebase) {
-      await loadFirebaseSDK();
-      if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    } else if(!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
+    // Load SDKs sequentially — app → auth (Firestore not needed here)
+    await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app-compat.js`);
+    await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth-compat.js`);
 
-    // Load Firebase Auth compat if not already loaded
-    if(!firebase.auth) {
-      await new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = `https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth-compat.js`;
-        s.onload = resolve;
-        s.onerror = () => reject(new Error('Failed to load Firebase Auth SDK'));
-        document.head.appendChild(s);
-      });
-    }
+    // Initialise Firebase app if not already done
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
     const auth = firebase.auth();
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -4068,7 +4056,7 @@ async function doGoogleSignIn() {
 
     if(!isEmailAllowed(user.email)) {
       await auth.signOut();
-      showAccessErr(`Access denied for ${user.email}.\nThis email is not authorised. Contact the CMHO office to request access.`);
+      showAccessErr(`Access denied for ${user.email}. This email is not authorised. Contact the CMHO office to request access.`);
       resetSignInBtn(btn);
       return;
     }
@@ -4080,12 +4068,24 @@ async function doGoogleSignIn() {
     if(err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
       showAccessErr('Sign-in cancelled. Please try again.');
     } else if(err.code === 'auth/popup-blocked') {
-      showAccessErr('Pop-up was blocked by the browser. Please allow pop-ups for this page and try again.');
+      showAccessErr('Pop-up blocked by browser. Please allow pop-ups for this page and try again.');
     } else {
-      showAccessErr('Sign-in failed: ' + (err.message || err));
+      showAccessErr('Sign-in failed: ' + (err.message || String(err)));
     }
     resetSignInBtn(btn);
   }
+}
+
+// Simple sequential script loader (resolves immediately if already loaded)
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if(document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('Failed to load: ' + src));
+    document.head.appendChild(s);
+  });
 }
 
 function resetSignInBtn(btn) {
@@ -4116,7 +4116,8 @@ function grantAccess(user) {
 async function signOut() {
   if(!confirm('Sign out of HRP Tracker?')) return;
   try {
-    if(window.firebase?.auth) await firebase.auth().signOut();
+    // Only call firebase signOut if the auth SDK was actually loaded
+    if(window.firebase?.auth && firebase.apps.length) await firebase.auth().signOut();
   } catch(e){}
   sessionStorage.removeItem('hrp_user');
   currentUser = null;
