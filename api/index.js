@@ -63,8 +63,13 @@ app.use((err, _req, res, _next) => {
 let _dbReady = false;
 module.exports = async (req, res) => {
   if (!_dbReady) {
-    await require('../db/database').init();
-    _dbReady = true;
+    try {
+      await require('../db/database').init();
+      _dbReady = true;
+    } catch (e) {
+      console.error('[DB] Init failed:', e.message);
+      // Allow sheet proxy and health to work even without DB
+    }
   }
   return app(req, res);
 };

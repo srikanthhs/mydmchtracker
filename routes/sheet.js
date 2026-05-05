@@ -1,11 +1,9 @@
 'use strict';
 const router = require('express').Router();
-const { requireAuth } = require('../middleware/auth');
-
 const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbyuMWKMsn_gEvzxFy6FJF5gesNoXWdBBed75oSG94fx727XkhvxVR5DnqHAKUUO2e848Q/exec';
 
 // POST /api/sheet — proxy update to Google Apps Script (avoids browser CORS)
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const response = await fetch(SHEET_API_URL, {
       method: 'POST',
