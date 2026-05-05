@@ -1,6 +1,6 @@
 'use strict';
 const router = require('express').Router();
-const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbyuMWKMsn_gEvzxFy6FJF5gesNoXWdBBed75oSG94fx727XkhvxVR5DnqHAKUUO2e848Q/exec';
+const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxPRkCFzEg0hwjq2GPnKR-cBgZKVK8Lk1KAbLE4Gat5c354RgrpKPI1I_kz89woMfHDOw/exec';
 
 // POST /api/sheet — proxy update to Google Apps Script (avoids browser CORS)
 router.post('/', async (req, res) => {
