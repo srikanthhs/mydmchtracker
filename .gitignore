@@ -1,0 +1,4 @@
+node_modules/
+db/hrp.db
+.env
+*.db

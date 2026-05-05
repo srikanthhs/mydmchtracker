@@ -1,0 +1,27 @@
+{
+  "name": "hrp-tracker",
+  "version": "1.0.0",
+  "description": "High-Risk Pregnancy Tracker — Mayiladuthurai District (Three-Tier Architecture)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/seed.js",
+    "setup": "node scripts/seed.js && node server.js",
+    "migrate": "node scripts/migrate-neon.js",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "express-rate-limit": "^7.2.0",
+    "firebase-admin": "^13.8.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "sql.js": "^1.12.0"
+  }
+}
