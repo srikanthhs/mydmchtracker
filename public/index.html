@@ -2185,7 +2185,7 @@ document.getElementById('fileInput').addEventListener('change', function(e) {
 // ============================================================
 // GOOGLE SHEET AUTO-SYNC
 // ============================================================
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwDiSPRb9dZ-Ri3t3E4hzOtl2M57JAapSyXMeaYirNmgknzqdcOt-O-XTqAJZhVFzi-eQ/exec";
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyuMWKMsn_gEvzxFy6FJF5gesNoXWdBBed75oSG94fx727XkhvxVR5DnqHAKUUO2e848Q/exec";
 const SYNC_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 let syncTimer = null;
 
@@ -3445,7 +3445,7 @@ function checkDueAlerts() {
   });
 }
 
-function fireScheduledAlert(sched) {
+async function fireScheduledAlert(sched) {
   // Apply block/risk filter, then open Google Messages queue
   const alertIdx = sched.alertIdx || 0;
   const alert = MSG_ALERTS[alertIdx];
@@ -4378,6 +4378,7 @@ async function doChangePassword() {
 }
 
 // ─── Stubs for removed functions ─────────────────────────────
+function savePassword() { doChangePassword(); }
 function doPasscodeLogin() { doLogin(); }
 function toggleCodeVisibility() {}
 function doGoogleSignIn() {}
