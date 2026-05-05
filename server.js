@@ -41,6 +41,7 @@ app.use('/api/patients',  require('./routes/patients'));
 app.use('/api/users',     require('./routes/users'));
 app.use('/api/schedules', require('./routes/schedules'));
 app.use('/api/reports',   require('./routes/reports'));
+app.use('/api/sheet',     require('./routes/sheet'));
 app.get('/api/health',    (_req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
 
 // ── Frontend (Tier 1 — Presentation Layer) ────────────────────

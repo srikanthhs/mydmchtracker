@@ -1856,22 +1856,9 @@ async function pushEditToSheet(rec) {
         'TYPE OF HIGH RISK': (rec.r||[]).join(', '),
       }
     };
-    const res = await fetch(SHEET_API_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain' }, // Apps Script CORS workaround
-      body: JSON.stringify(payload)
-    });
-    const text = await res.text();
-    try {
-      const json = JSON.parse(text);
-      if(json.status === 'ok') showSnack('✓ Sheet updated successfully');
-      else showSnack('⚠ Sheet sync: ' + (json.message||'Unknown error'));
-    } catch(e) {
-      // If response is not JSON, sheet may not support writes yet
-      console.log('Sheet write response:', text.substring(0,100));
-      showSnack('ℹ Sheet write: check Apps Script supports POST updates');
-    }
+    const json = await _api('POST', '/sheet', payload);
+    if(json && json.status === 'ok') showSnack('✓ Sheet updated successfully');
+    else showSnack('⚠ Sheet sync: ' + (json && json.message || 'Unknown error'));
   } catch(err) {
     console.warn('Sheet push failed:', err.message);
     showSnack('⚠ Sheet sync failed — saved locally');
