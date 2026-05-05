@@ -3390,6 +3390,7 @@ async function deleteSchedule(id) {
 }
 
 async function loadSchedulesFromAPI() {
+  if (!sessionStorage.getItem('hrp_jwt')) return; // skip if not logged in
   try {
     const data = await _api('GET', '/schedules');
     if (Array.isArray(data)) {
@@ -4371,6 +4372,11 @@ function toggleCodeVisibility() {}
 function doGoogleSignIn() {}
 function loadScript() { return Promise.resolve(); }
 function resetSignInBtn() {}
+function resetLoginBtn(btn) {
+  if (!btn) return;
+  btn.disabled = false;
+  btn.innerHTML = '<span class="material-icons-round" style="font-size:18px">login</span>&nbsp;Sign In';
+}
 
 
 

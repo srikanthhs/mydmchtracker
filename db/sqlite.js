@@ -17,7 +17,9 @@ let _flushTimer = null;
 async function init() {
   if (_db) return;
   const initSqlJs = require('sql.js');
-  _SQL = await initSqlJs();
+  _SQL = await initSqlJs({
+    locateFile: file => path.join(__dirname, '..', 'node_modules', 'sql.js', 'dist', file)
+  });
   _db  = fs.existsSync(DB_PATH)
     ? new _SQL.Database(fs.readFileSync(DB_PATH))
     : new _SQL.Database();
