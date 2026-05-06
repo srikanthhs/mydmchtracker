@@ -89,6 +89,10 @@ async function query(sql, params = []) {
     const snap = await _db.collection('hrp_patients').orderBy('e').get();
     return snap.docs.map(d => _docToPatientRow({ ...d.data(), id: d.id }));
   }
+  if (/SELECT \* FROM patients WHERE b = \? AND p = \?/.test(sql)) {
+    const snap = await _db.collection('hrp_patients').where('b', '==', params[0]).where('p', '==', params[1]).orderBy('e').get();
+    return snap.docs.map(d => _docToPatientRow({ ...d.data(), id: d.id }));
+  }
   if (/SELECT \* FROM patients WHERE b = \?/.test(sql)) {
     const snap = await _db.collection('hrp_patients').where('b', '==', params[0]).orderBy('e').get();
     return snap.docs.map(d => _docToPatientRow({ ...d.data(), id: d.id }));
@@ -206,16 +210,18 @@ async function run(sql, params = []) {
 
   // ── Users ──────────────────────────────────────────────────
   if (/INSERT INTO users/.test(sql)) {
-    const [username,name,role,block,password_hash] = params;
+    // params: [username, name, role, block, phc, password_hash]
+    const [username,name,role,block,phc,password_hash] = params;
     await _db.collection('hrp_users').doc(username).set({
-      username,name,role,block,password_hash,active:true,created_at:now,updated_at:now,
+      username,name,role,block,phc:phc||'',password_hash,active:true,created_at:now,updated_at:now,
     }); return;
   }
   if (/UPDATE users SET name/.test(sql)) {
+    // params: [name, role, block, phc, password_hash, active, username]
     const username = params[params.length - 1];
-    const [name,role,block,password_hash,active] = params;
+    const [name,role,block,phc,password_hash,active] = params;
     await _db.collection('hrp_users').doc(username).update({
-      name,role,block,password_hash,active:!!active,updated_at:now,
+      name,role,block,phc:phc||'',password_hash,active:!!active,updated_at:now,
     }); return;
   }
   if (/UPDATE users SET last_login/.test(sql)) {
