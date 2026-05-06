@@ -644,6 +644,9 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
         <select id="f_mop"><option value="">—</option><option>Normal</option><option>High Risk - Refer</option><option>High Risk - Continue PHC</option><option>Review after investigation</option><option>Admitted for observation</option></select>
       </div>
     </div>
+    <div class="form-row">
+      <div class="fg" style="flex:1 1 100%"><label>Remarks</label><textarea id="f_rm" rows="2" placeholder="Any remarks or notes about this patient" style="width:100%;resize:vertical;font-size:13px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;color:var(--txt1);background:var(--surface)"></textarea></div>
+    </div>
     <div style="font-family:'Google Sans',sans-serif;font-size:11px;font-weight:600;color:var(--c-crit);text-transform:uppercase;letter-spacing:.08em;margin:10px 0 8px;display:flex;align-items:center;gap:6px">
       <span class="material-icons-round" style="font-size:14px">warning</span>High-Risk Flags — TN DPH Criteria
     </div>
@@ -1302,10 +1305,11 @@ const COLS = [
   {key:'a',    label:'Age',             sortable:true,  w:'50px'},
   {key:'g',    label:'G/P',             sortable:false, w:'55px'},
   {key:'e',    label:'EDD',             sortable:true},
-  {key:'r',    label:'Risk Flags',      sortable:false},
-  {key:'score',label:'Risk Score',      sortable:true},
   {key:'lv',   label:'Last Visit',      sortable:true},
   {key:'nv',   label:'Next Visit Due',  sortable:true},
+  {key:'rm',   label:'Remarks',         sortable:false},
+  {key:'r',    label:'Risk Flags',      sortable:false},
+  {key:'score',label:'Risk Score',      sortable:true},
   {key:'as',   label:'Adm. Status',     sortable:true},
   {key:'ds',   label:'Delivery Status', sortable:true},
   {key:'dd',   label:'Delivery Date',   sortable:true},
@@ -1479,10 +1483,11 @@ function renderTable() {
         <td style="text-align:center">${r.a||'—'}</td>
         <td style="text-align:center">${r.g||'—'}/${r.pa||'—'}</td>
         <td><b>${fmtDate(r.e)}</b></td>
+        <td style="color:var(--txt2);font-size:11px">${fmtDate(r.lv)||'—'}</td>
+        <td>${nvStr}</td>
+        <td style="font-size:11px;color:var(--txt2);max-width:120px;white-space:normal">${r.rm||'—'}</td>
         <td>${flags}${more}</td>
         <td>${scoreHtml}</td>
-        <td style="color:var(--txt2)">${fmtDate(r.lv)||'—'}</td>
-        <td>${nvStr}</td>
         <td>${admPill}</td>
         <td>${delPill}</td>
         <td style="font-size:11px;color:var(--txt2)">${r.dd?fmtDate(r.dd):'—'}</td>
@@ -1793,6 +1798,7 @@ function editRecord(idx) {
   document.getElementById('f_pt').value = r.pt||'';
   document.getElementById('f_mo').value = r.mo||'';
   document.getElementById('f_mop').value = r.mop||'';
+  document.getElementById('f_rm').value = r.rm||'';
 
   buildRiskFlagsGrid(r.r||[]);
   calcLiveScore();
@@ -1856,6 +1862,7 @@ function saveRecord() {
     pt:  document.getElementById('f_pt').value,
     mo:  document.getElementById('f_mo').value,
     mop: document.getElementById('f_mop').value,
+    rm:  document.getElementById('f_rm').value,
     r:   flags,
   };
 
