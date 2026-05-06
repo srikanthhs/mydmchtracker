@@ -3969,29 +3969,25 @@ function renderDeliveryReport(data, body) {
     </div>` : ''}`;
 }
 
-function renderEddAlertReport(body) {
-  const days = parseInt(document.getElementById('edd_alert_days')?.value || '15');
-  const block = document.getElementById('rpt_block')?.value || '';
-
-  // Always use full ALL data — active patients only, filtered by block
+function _eddAlertData(maxDays, blockFilter) {
   let base = ALL.filter(r => r.ds !== 'Delivered' && r.ds !== 'Abortion');
-  if (block) base = base.filter(r => r.b === block);
+  if (blockFilter) base = base.filter(r => r.b === blockFilter);
+  return base.filter(r => { const d = daysUntil(r.e); return d !== null && d >= 0 && d <= maxDays; })
+             .sort((a, b) => daysUntil(a.e) - daysUntil(b.e));
+}
 
-  // Filter to patients with EDD within the selected number of days
-  const alertPats = base.filter(r => {
-    const d = daysUntil(r.e);
-    return d !== null && d >= 0 && d <= days;
-  }).sort((a, b) => daysUntil(a.e) - daysUntil(b.e));
+function _groupByHospital(pats) {
+  const g = {};
+  pats.forEach(r => { const k = (r.pp || 'Not Planned / Unknown').trim(); if (!g[k]) g[k]=[]; g[k].push(r); });
+  return g;
+}
 
-  // Group by planned place of delivery
-  const groups = {};
-  alertPats.forEach(r => {
-    const place = (r.pp || 'Not Planned / Unknown').trim();
-    if (!groups[place]) groups[place] = [];
-    groups[place].push(r);
-  });
-
-  const today = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+function renderEddAlertReport(body) {
+  const days  = parseInt(document.getElementById('edd_alert_days')?.value || '15');
+  const block = document.getElementById('rpt_block')?.value || '';
+  const alertPats = _eddAlertData(days, block);
+  const groups    = _groupByHospital(alertPats);
+  const today     = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
 
   const daysBadge = d => {
     const bg = d <= 7 ? 'var(--c-crit-bg)' : d <= 15 ? 'var(--c-high-bg)' : 'var(--c-low-bg)';
@@ -4011,60 +4007,54 @@ function renderEddAlertReport(body) {
           <span style="font-size:12px;padding:2px 10px;border-radius:12px;background:var(--c-crit-bg);color:var(--c-crit);font-weight:600">${pts.length} patient${pts.length>1?'s':''}</span>
         </div>
         <table class="rpt-table">
-          <thead><tr>
-            <th>#</th>
-            <th>Mother Name</th>
-            <th>PICME No.</th>
-            <th>Block / PHC</th>
-            <th>EDD</th>
-            <th>Days Left</th>
-            <th>Risk</th>
-            <th>Mobile</th>
-          </tr></thead>
+          <thead><tr><th>#</th><th>Mother Name</th><th>PICME No.</th><th>Block / PHC</th><th>EDD</th><th>Days Left</th><th>Risk</th><th>Mobile</th></tr></thead>
           <tbody>${pts.map((r, i) => {
-            const d = daysUntil(r.e);
-            const cat = riskCat(calcScore(r.r));
+            const d = daysUntil(r.e); const cat = riskCat(calcScore(r.r));
             return `<tr style="border-left:3px solid ${cat.color}">
-              <td style="color:var(--txt3);font-size:11px">${i + 1}</td>
+              <td style="color:var(--txt3);font-size:11px">${i+1}</td>
               <td style="font-weight:500">${r.n}</td>
-              <td style="font-size:11px;color:var(--txt2)">${r.id || '—'}</td>
+              <td style="font-size:11px;color:var(--txt2)">${r.id||'—'}</td>
               <td style="font-size:11px">${r.b}<br><span style="color:var(--txt2)">${r.p}</span></td>
               <td><b>${fmtDate(r.e)}</b></td>
               <td style="text-align:center">${daysBadge(d)}</td>
               <td><span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd};font-size:10px">${calcScore(r.r)} ${cat.label}</span></td>
-              <td style="font-size:12px;color:var(--txt2)">${r.ph || '—'}</td>
+              <td style="font-size:12px;color:var(--txt2)">${r.ph||'—'}</td>
             </tr>`;
           }).join('')}</tbody>
         </table>
       </div>`).join('');
 
-  // Summary by hospital (top table)
-  const summaryRows = Object.entries(groups)
-    .sort((a, b) => b[1].length - a[1].length)
-    .map(([place, pts]) => {
-      const within7 = pts.filter(r => daysUntil(r.e) <= 7).length;
-      return `<tr>
-        <td style="font-weight:500">${place}</td>
-        <td style="text-align:center;font-weight:600;color:var(--c-crit)">${within7 || '—'}</td>
-        <td style="text-align:center;font-weight:600">${pts.length}</td>
-      </tr>`;
-    }).join('');
+  const summaryRows = Object.entries(groups).sort((a,b)=>b[1].length-a[1].length).map(([place,pts]) => {
+    const w7=pts.filter(r=>daysUntil(r.e)<=7).length, w15=pts.filter(r=>daysUntil(r.e)<=15).length;
+    return `<tr>
+      <td style="font-weight:500">${place}</td>
+      <td style="text-align:center;font-weight:600;color:#C5221F">${w7||'—'}</td>
+      <td style="text-align:center;font-weight:600;color:#E37400">${w15||'—'}</td>
+      <td style="text-align:center;font-weight:600">${pts.length}</td>
+    </tr>`;
+  }).join('');
 
   body.innerHTML = `
     <div class="rpt-section" style="background:var(--c-crit-bg);border:1px solid var(--c-crit-bd);border-radius:var(--r-md);padding:12px 16px;margin-bottom:0">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="material-icons-round" style="color:var(--c-crit);font-size:22px">alarm</span>
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--c-crit)">EDD Alert — ${alertPats.length} patient${alertPats.length!==1?'s':''} due within
-            <select id="edd_alert_days" onchange="renderEddAlertReport(document.getElementById('reportBody'))"
-              style="margin:0 4px;padding:2px 6px;border:1px solid var(--c-crit-bd);border-radius:6px;font-size:13px;font-weight:600;background:var(--c-crit-bg);color:var(--c-crit);cursor:pointer">
-              <option value="7"  ${days===7 ?'selected':''}>7 days</option>
-              <option value="15" ${days===15?'selected':''}>15 days</option>
-              <option value="30" ${days===30?'selected':''}>30 days</option>
-            </select>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="material-icons-round" style="color:var(--c-crit);font-size:22px">alarm</span>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--c-crit)">EDD Alert — ${alertPats.length} patient${alertPats.length!==1?'s':''} due within
+              <select id="edd_alert_days" onchange="renderEddAlertReport(document.getElementById('reportBody'))"
+                style="margin:0 4px;padding:2px 6px;border:1px solid var(--c-crit-bd);border-radius:6px;font-size:13px;font-weight:600;background:var(--c-crit-bg);color:var(--c-crit);cursor:pointer">
+                <option value="7"  ${days===7 ?'selected':''}>7 days</option>
+                <option value="15" ${days===15?'selected':''}>15 days</option>
+                <option value="30" ${days===30?'selected':''}>30 days</option>
+              </select>
+            </div>
+            <div style="font-size:11px;color:var(--c-crit);opacity:.8">As of ${today}${block?' · Block: '+block:''}</div>
           </div>
-          <div style="font-size:11px;color:var(--c-crit);opacity:.8">As of ${today}${block?' · Block: '+block:''}</div>
         </div>
+        <button class="btn-filled" onclick="printEddAlertPDF()"
+          style="height:34px;padding:0 14px;font-size:12px;display:flex;align-items:center;gap:6px;background:#C5221F;border-color:#C5221F">
+          <span class="material-icons-round" style="font-size:15px">picture_as_pdf</span> Print / PDF
+        </button>
       </div>
     </div>
 
@@ -4077,13 +4067,182 @@ function renderEddAlertReport(body) {
       <table class="rpt-table">
         <thead><tr>
           <th>Planned Place of Delivery</th>
-          <th style="color:var(--c-crit)">Within 7 Days</th>
-          <th>Within ${days} Days</th>
+          <th style="color:#C5221F">≤ 7 Days</th>
+          <th style="color:#E37400">≤ 15 Days</th>
+          <th>≤ ${days} Days</th>
         </tr></thead>
         <tbody>${summaryRows}</tbody>
       </table>
     </div>
     ${hospitalSections}`}`;
+}
+
+function printEddAlertPDF() {
+  const block   = document.getElementById('rpt_block')?.value || '';
+  const today   = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  const pats15  = _eddAlertData(15, block);
+  const pats30  = _eddAlertData(30, block).filter(r => daysUntil(r.e) > 15);
+  const allPats = [...pats15, ...pats30];
+  const grp15   = _groupByHospital(pats15);
+  const grp30   = _groupByHospital(pats30);
+
+  const CSS = `
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Roboto',sans-serif;font-size:11px;color:#202124;background:#fff}
+    .page{padding:18mm 15mm 14mm;min-height:297mm;position:relative}
+    .cover-hdr{border-bottom:3px solid #1A73E8;padding-bottom:10px;margin-bottom:14px}
+    .cover-hdr h1{font-size:18px;font-weight:700;color:#1A73E8;font-family:'Google Sans',sans-serif}
+    .cover-hdr h2{font-size:13px;font-weight:500;color:#5F6368;margin-top:2px}
+    .meta{font-size:10px;color:#5F6368;margin-top:4px}
+    .summary-box{background:#FEF7E0;border:1px solid #FBBC04;border-radius:6px;padding:10px 14px;margin-bottom:14px}
+    .summary-box h3{font-size:12px;font-weight:600;color:#E37400;margin-bottom:6px}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:10px}
+    th{background:#F8F9FA;padding:5px 7px;text-align:left;border:1px solid #DADCE0;font-weight:600;font-size:10px}
+    td{padding:4px 7px;border:1px solid #DADCE0;vertical-align:middle}
+    tr:nth-child(even) td{background:#FAFAFA}
+    .sec-hdr{font-size:14px;font-weight:700;font-family:'Google Sans',sans-serif;padding:8px 12px;border-radius:6px;margin:16px 0 10px;display:flex;align-items:center;gap:6px}
+    .sec-hdr.red{background:#FCE8E6;color:#C5221F;border-left:4px solid #C5221F}
+    .sec-hdr.orange{background:#FEF7E0;color:#E37400;border-left:4px solid #E37400}
+    .hosp-hdr{background:#E8F0FE;border-left:3px solid #1A73E8;padding:4px 10px;font-weight:600;font-size:11px;margin:10px 0 4px;display:flex;justify-content:space-between;align-items:center}
+    .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:700}
+    .badge.red{background:#FCE8E6;color:#C5221F}
+    .badge.orange{background:#FEF7E0;color:#E37400}
+    .badge.blue{background:#E8F0FE;color:#1557B0}
+    .risk-crit{color:#C5221F;font-weight:600}
+    .risk-high{color:#E37400;font-weight:600}
+    .risk-mod{color:#188038}
+    .footer{position:fixed;bottom:8mm;left:15mm;right:15mm;font-size:9px;color:#9AA0A6;display:flex;justify-content:space-between;border-top:1px solid #DADCE0;padding-top:4px}
+    @media print{
+      body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .page-break{page-break-before:always}
+      .no-break{page-break-inside:avoid}
+    }`;
+
+  const patRow = (r, i) => {
+    const d = daysUntil(r.e);
+    const sc = calcScore(r.r);
+    const cat = riskCat(sc);
+    const badgeCls = d <= 7 ? 'red' : d <= 15 ? 'orange' : 'blue';
+    const riskCls  = cat.label==='Critical'?'risk-crit':cat.label==='High'?'risk-high':cat.label==='Moderate'?'risk-mod':'';
+    return `<tr>
+      <td style="color:#9AA0A6;text-align:center">${i+1}</td>
+      <td><b>${r.n}</b></td>
+      <td style="color:#5F6368">${r.id||'—'}</td>
+      <td>${r.b}<br><span style="color:#5F6368;font-size:9px">${r.p}</span></td>
+      <td style="font-weight:600">${fmtDate(r.e)}</td>
+      <td style="text-align:center"><span class="badge ${badgeCls}">${d}d</span></td>
+      <td class="${riskCls}">${sc} ${cat.label}</td>
+      <td style="color:#5F6368">${r.ph||'—'}</td>
+    </tr>`;
+  };
+
+  const hospSection = (grp, badgeCls) => Object.entries(grp).sort((a,b)=>a[0].localeCompare(b[0])).map(([place, pts]) => `
+    <div class="no-break">
+      <div class="hosp-hdr">
+        <span>🏥 ${place}</span>
+        <span class="badge ${badgeCls}">${pts.length} patient${pts.length>1?'s':''}</span>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Mother Name</th><th>PICME No.</th><th>Block / PHC</th><th>EDD</th><th>Days Left</th><th>Risk</th><th>Mobile</th></tr></thead>
+        <tbody>${pts.map((r,i)=>patRow(r,i)).join('')}</tbody>
+      </table>
+    </div>`).join('');
+
+  // Summary table all hospitals
+  const allGroups = _groupByHospital(allPats);
+  const summaryTable = `
+    <table>
+      <thead><tr><th>Planned Place of Delivery</th><th style="text-align:center">≤ 7 Days</th><th style="text-align:center">≤ 15 Days</th><th style="text-align:center">16–30 Days</th><th style="text-align:center">Total ≤ 30 Days</th></tr></thead>
+      <tbody>${Object.entries(allGroups).sort((a,b)=>b[1].length-a[1].length).map(([place,pts])=>{
+        const w7=pts.filter(r=>daysUntil(r.e)<=7).length;
+        const w15=pts.filter(r=>daysUntil(r.e)<=15).length;
+        const w30=pts.filter(r=>daysUntil(r.e)>15).length;
+        return `<tr>
+          <td><b>${place}</b></td>
+          <td style="text-align:center;color:#C5221F;font-weight:700">${w7||'—'}</td>
+          <td style="text-align:center;color:#E37400;font-weight:700">${w15||'—'}</td>
+          <td style="text-align:center;font-weight:600">${w30||'—'}</td>
+          <td style="text-align:center;font-weight:700">${pts.length}</td>
+        </tr>`;
+      }).join('')}
+      <tr style="background:#F8F9FA;font-weight:700">
+        <td>TOTAL</td>
+        <td style="text-align:center;color:#C5221F">${pats15.filter(r=>daysUntil(r.e)<=7).length}</td>
+        <td style="text-align:center;color:#E37400">${pats15.length}</td>
+        <td style="text-align:center">${pats30.length}</td>
+        <td style="text-align:center">${allPats.length}</td>
+      </tr>
+      </tbody>
+    </table>`;
+
+  const html = `<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>EDD Alert Report — Mayiladuthurai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>${CSS}</style>
+  </head><body>
+    <div class="footer">
+      <span>HRP Tracker — Mayiladuthurai District · DPH Tamil Nadu</span>
+      <span>Generated: ${today} by ${currentUser?.name||'Admin'}</span>
+    </div>
+
+    <!-- Cover / Summary Page -->
+    <div class="page">
+      <div class="cover-hdr">
+        <h1>EDD Alert Report</h1>
+        <h2>Mayiladuthurai District — High-Risk Pregnancy Tracker</h2>
+        <div class="meta">
+          Report Date: <b>${today}</b>${block?' &nbsp;·&nbsp; Block: <b>'+block+'</b>':''}
+          &nbsp;·&nbsp; Generated by: <b>${currentUser?.name||'Admin'}</b> (${currentUser?.role||''})
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h3>⚠ Alert Summary</h3>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:11px">
+          <div><span style="font-size:20px;font-weight:700;color:#C5221F">${pats15.filter(r=>daysUntil(r.e)<=7).length}</span><br>Due within 7 days</div>
+          <div><span style="font-size:20px;font-weight:700;color:#E37400">${pats15.length}</span><br>Due within 15 days</div>
+          <div><span style="font-size:20px;font-weight:700;color:#1A73E8">${allPats.length}</span><br>Due within 30 days</div>
+          <div><span style="font-size:20px;font-weight:700;color:#5F6368">${Object.keys(allGroups).length}</span><br>Hospitals involved</div>
+        </div>
+      </div>
+
+      <div style="font-weight:600;font-size:12px;margin-bottom:8px;color:#5F6368">HOSPITAL-WISE SUMMARY</div>
+      ${summaryTable}
+
+      <div style="margin-top:10px;font-size:10px;color:#9AA0A6">
+        * Active patients only (Delivered and Abortion cases excluded) &nbsp;·&nbsp; Days count as of ${today}
+      </div>
+    </div>
+
+    ${pats15.length ? `
+    <!-- Section 1: Due within 15 days -->
+    <div class="page page-break">
+      <div class="cover-hdr">
+        <h1>Section 1 — Due within 15 Days (Urgent)</h1>
+        <div class="meta">${pats15.length} patients · Hospital-wise · ${today}${block?' · Block: '+block:''}</div>
+      </div>
+      <div class="sec-hdr red">🚨 Urgent — EDD within 15 days (${pats15.length} patients)</div>
+      ${hospSection(grp15, 'red')}
+    </div>` : ''}
+
+    ${pats30.length ? `
+    <!-- Section 2: Due in 16–30 days -->
+    <div class="page page-break">
+      <div class="cover-hdr">
+        <h1>Section 2 — Due in 16 – 30 Days (Upcoming)</h1>
+        <div class="meta">${pats30.length} patients · Hospital-wise · ${today}${block?' · Block: '+block:''}</div>
+      </div>
+      <div class="sec-hdr orange">📅 Upcoming — EDD in 16–30 days (${pats30.length} patients)</div>
+      ${hospSection(grp30, 'orange')}
+    </div>` : ''}
+
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 800);
 }
 
 function exportReportCSV() {
