@@ -11,7 +11,7 @@ router.use(requireAuth);
 router.get('/', requireAdmin, async (_req, res) => {
   try {
     const rows = await db.query(
-      'SELECT username,name,role,block,active,last_login,created_at FROM users ORDER BY created_at ASC'
+      'SELECT username,name,role,block,phc,active,last_login,created_at FROM users ORDER BY created_at ASC'
     );
     res.json(rows.map(u => ({ ...u, active: u.active === 1 || u.active === true })));
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -20,7 +20,7 @@ router.get('/', requireAdmin, async (_req, res) => {
 router.get('/:username', requireAdmin, async (req, res) => {
   try {
     const u = await db.queryOne(
-      'SELECT username,name,role,block,active,last_login FROM users WHERE username = ?',
+      'SELECT username,name,role,block,phc,active,last_login FROM users WHERE username = ?',
       [req.params.username]
     );
     if (!u) return res.status(404).json({ error: 'User not found' });
@@ -30,7 +30,7 @@ router.get('/:username', requireAdmin, async (req, res) => {
 
 router.post('/', requireAdmin, async (req, res) => {
   try {
-    const { username, name, role, block, password } = req.body || {};
+    const { username, name, role, block, phc, password } = req.body || {};
     if (!username || !name || !role || !password)
       return res.status(400).json({ error: 'username, name, role and password are required' });
     if (password.length < 6) return res.status(400).json({ error: 'Password must be ≥ 6 characters' });
@@ -42,8 +42,8 @@ router.post('/', requireAdmin, async (req, res) => {
 
     const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
     await db.run(
-      'INSERT INTO users (username,name,role,block,password_hash,active) VALUES (?,?,?,?,?,1)',
-      [uname, name, role, block || '', hash]
+      'INSERT INTO users (username,name,role,block,phc,password_hash,active) VALUES (?,?,?,?,?,?,1)',
+      [uname, name, role, block || '', phc || '', hash]
     );
     res.status(201).json({ ok: true, username: uname });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -53,16 +53,17 @@ router.put('/:username', requireAdmin, async (req, res) => {
   try {
     const u = await db.queryOne('SELECT * FROM users WHERE username = ?', [req.params.username]);
     if (!u) return res.status(404).json({ error: 'User not found' });
-    const { name, role, block, password, active } = req.body || {};
+    const { name, role, block, phc, password, active } = req.body || {};
     let hash = u.password_hash;
     if (password) {
       if (password.length < 6) return res.status(400).json({ error: 'Password must be ≥ 6 characters' });
       hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
     }
     await db.run(
-      `UPDATE users SET name=?,role=?,block=?,password_hash=?,active=?,updated_at=datetime('now') WHERE username=?`,
+      `UPDATE users SET name=?,role=?,block=?,phc=?,password_hash=?,active=?,updated_at=datetime('now') WHERE username=?`,
       [name ?? u.name, role ?? u.role,
        block !== undefined ? block : u.block,
+       phc !== undefined ? phc : (u.phc || ''),
        hash,
        active !== undefined ? (active ? 1 : 0) : u.active,
        u.username]

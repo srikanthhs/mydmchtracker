@@ -26,6 +26,8 @@ async function init() {
   _db.run('PRAGMA journal_mode = WAL');
   _db.run('PRAGMA foreign_keys = ON');
   _createSchema();
+  // Migration: add phc column if missing
+  try { _db.run("ALTER TABLE users ADD COLUMN phc TEXT DEFAULT ''"); } catch {}
   await _ensureAdmin();
   _flush();
 }
@@ -52,6 +54,7 @@ function _createSchema() {
     CREATE TABLE IF NOT EXISTS users (
       username TEXT PRIMARY KEY, name TEXT NOT NULL,
       role TEXT NOT NULL DEFAULT 'viewer', block TEXT DEFAULT '',
+      phc TEXT DEFAULT '',
       password_hash TEXT NOT NULL, active INTEGER DEFAULT 1,
       last_login TEXT,
       created_at TEXT DEFAULT (datetime('now')),

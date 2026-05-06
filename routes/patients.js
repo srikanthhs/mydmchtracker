@@ -26,9 +26,15 @@ router.get('/stats/summary', async (_req, res) => {
 // GET /api/patients
 router.get('/', async (req, res) => {
   try {
-    const rows = req.user.role === 'bdo' && req.user.block
-      ? await db.query('SELECT * FROM patients WHERE b = ? ORDER BY e ASC', [req.user.block])
-      : await db.query('SELECT * FROM patients ORDER BY e ASC');
+    let rows;
+    const { role, block, phc } = req.user;
+    if (role === 'phc_officer' && block && phc) {
+      rows = await db.query('SELECT * FROM patients WHERE b = ? AND hu = ? ORDER BY e ASC', [block, phc]);
+    } else if ((role === 'bdo' || role === 'phc_officer') && block) {
+      rows = await db.query('SELECT * FROM patients WHERE b = ? ORDER BY e ASC', [block]);
+    } else {
+      rows = await db.query('SELECT * FROM patients ORDER BY e ASC');
+    }
     res.json(rows.map(db.patientFromRow));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

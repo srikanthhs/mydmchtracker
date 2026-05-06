@@ -24,7 +24,7 @@ router.post('/login', async (req, res) => {
 
     await db.run("UPDATE users SET last_login = datetime('now') WHERE username = ?", [u.username]);
 
-    const payload = { username: u.username, name: u.name, role: u.role, block: u.block || '' };
+    const payload = { username: u.username, name: u.name, role: u.role, block: u.block || '', phc: u.phc || '' };
     const token   = jwt.sign(payload, JWT_SECRET, { expiresIn: EXPIRES_IN });
     return res.json({ token, user: payload });
   } catch (e) {

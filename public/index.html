@@ -371,6 +371,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 .role-admin{background:#EDE9FE;color:#6D28D9}
 .role-dph{background:var(--pri-lt);color:var(--pri)}
 .role-bdo{background:var(--c-high-bg);color:var(--c-high)}
+.role-phc{background:#E0F2F1;color:#00695C}
 .role-viewer{background:var(--sur3);color:var(--txt2)}
 .um-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:600px){.um-form-grid{grid-template-columns:1fr}.user-row{grid-template-columns:1fr 1fr;gap:6px}}
@@ -4077,8 +4078,8 @@ function grantAccess(u) {
 
   // Update app bar user chip
   const slot = document.getElementById('userBarSlot');
-  const roleLabel = { admin:'Admin', dph_officer:'DPH Officer', bdo:'Block Officer', viewer:'Viewer' }[u.role] || u.role;
-  const roleCls   = { admin:'role-admin', dph_officer:'role-dph', bdo:'role-bdo', viewer:'role-viewer' }[u.role] || '';
+  const roleLabel = { admin:'Admin', dph_officer:'DPH Officer', bdo:'Block Officer', phc_officer:'PHC Officer', viewer:'Viewer' }[u.role] || u.role;
+  const roleCls   = { admin:'role-admin', dph_officer:'role-dph', bdo:'role-bdo', phc_officer:'role-phc', viewer:'role-viewer' }[u.role] || '';
   if(slot) slot.innerHTML = `
     <div class="access-user-bar" onclick="signOut()" title="${u.role} — click to sign out">
       <span class="material-icons-round" style="font-size:16px">account_circle</span>
@@ -4087,12 +4088,33 @@ function grantAccess(u) {
       <span class="material-icons-round" style="font-size:14px;opacity:.7">logout</span>
     </div>`;
 
-  // If BDO role: auto-filter to their block
-  if(u.role === 'bdo' && u.block) {
+  // Auto-filter and lock sidebar for restricted roles
+  if (u.role === 'bdo' && u.block) {
     sbBlock = u.block; sbMode = 'block';
     updatePHCDropdown(u.block);
     showSnack('Block filter applied: ' + u.block);
+  } else if (u.role === 'phc_officer' && u.block) {
+    sbBlock = u.block; sbMode = u.phc ? 'phc' : 'block';
+    sbPHC = u.phc || '';
+    updatePHCDropdown(u.block);
+    if (u.phc) {
+      const phcSel = document.getElementById('phcSel');
+      if (phcSel) phcSel.value = u.phc;
+    }
+    showSnack('PHC filter applied: ' + (u.phc || u.block));
   }
+
+  // Lock sidebar block/PHC items for restricted roles
+  const locked = u.role === 'bdo' || u.role === 'phc_officer';
+  if (locked) {
+    setTimeout(() => {
+      document.querySelectorAll('.sb-block-item,.sb-phc-item,[onclick^="sbSelectBlock"],[onclick^="sbSelectPHC"],[onclick^="sbSelect("],[onclick^="sbFilter"]').forEach(el => {
+        el.style.pointerEvents = 'none';
+        el.style.opacity = '0.5';
+      });
+    }, 500);
+  }
+
   applyFilters();
 }
 
@@ -4114,7 +4136,7 @@ function signOut() {
 
 // ── Permission helpers ────────────────────────────────────────
 function canEdit() {
-  return currentUser && ['admin','dph_officer','bdo'].includes(currentUser.role);
+  return currentUser && ['admin','dph_officer','bdo','phc_officer'].includes(currentUser.role);
 }
 
 // ── Login overlay helpers ─────────────────────────────────────
@@ -4147,6 +4169,7 @@ const ROLE_OPTIONS = [
   { value:'admin',       label:'District Admin',      cls:'role-admin' },
   { value:'dph_officer', label:'DPH / CMHO Officer',  cls:'role-dph'   },
   { value:'bdo',         label:'Block Officer (BDO)',  cls:'role-bdo'   },
+  { value:'phc_officer', label:'PHC Officer',          cls:'role-phc'   },
   { value:'viewer',      label:'View Only',            cls:'role-viewer'},
 ];
 
@@ -4189,7 +4212,7 @@ async function renderUserList() {
       return `<div class="user-row">
         <div><b>${u.name || '—'}</b><div style="font-size:10px;color:var(--txt3)">${u.username}</div></div>
         <div style="font-size:12px">${u.username}</div>
-        <div><span class="role-pill ${rd.cls}">${rd.label}</span>${u.block?'<div style="font-size:10px;color:var(--txt3);margin-top:2px">Block: '+u.block+'</div>':''}</div>
+        <div><span class="role-pill ${rd.cls}">${rd.label}</span>${u.block?'<div style="font-size:10px;color:var(--txt3);margin-top:2px">Block: '+u.block+(u.phc?' · PHC: '+u.phc:'')+'</div>':''}</div>
         <div><span class="status-pill" style="background:${active?'var(--c-mod-bg)':'var(--c-none-bg)'};color:${active?'var(--c-mod)':'var(--c-none)'}">
           ${active?'Active':'Inactive'}</span></div>
         <div style="display:flex;gap:4px">
@@ -4222,6 +4245,10 @@ function renderAddUser(prefill) {
   const editing = !!prefill;
   const blocks = [...new Set(ALL.map(r=>r.b))].filter(Boolean).sort();
   const blockOpts = blocks.map(b=>'<option value="'+b+'" '+(prefill&&prefill.block===b?'selected':'')+'>'+b+'</option>').join('');
+  const showBlock = prefill && (prefill.role==='bdo'||prefill.role==='phc_officer');
+  const showPhc   = prefill && prefill.role==='phc_officer';
+  const phcs = prefill&&prefill.block ? [...new Set(ALL.filter(r=>r.b===prefill.block).map(r=>r.hu))].filter(Boolean).sort() : [];
+  const phcOpts = phcs.map(h=>'<option value="'+h+'" '+(prefill&&prefill.phc===h?'selected':'')+'>'+h+'</option>').join('');
 
   document.getElementById('umBody').innerHTML = `<div style="font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;margin-bottom:16px;color:var(--txt)">
     ${editing?'Edit User \u2014 '+prefill.id:'Create New User'}
@@ -4236,9 +4263,13 @@ function renderAddUser(prefill) {
         ${ROLE_OPTIONS.map(r=>'<option value="'+r.value+'" '+(prefill&&prefill.role===r.value?'selected':'')+'>'+r.label+'</option>').join('')}
       </select>
     </div>
-    <div class="fg" id="um_block_field" style="display:${prefill&&prefill.role==='bdo'?'flex':'none'}">
+    <div class="fg" id="um_block_field" style="display:${showBlock?'flex':'none'}">
       <label>Assigned Block *</label>
-      <select id="um_block"><option value="">Select Block</option>${blockOpts}</select>
+      <select id="um_block" onchange="togglePhcField()"><option value="">Select Block</option>${blockOpts}</select>
+    </div>
+    <div class="fg" id="um_phc_field" style="display:${showPhc?'flex':'none'}">
+      <label>Assigned PHC *</label>
+      <select id="um_phc"><option value="">Select PHC</option>${phcOpts}</select>
     </div>
     <div class="fg"><label>${editing?'New Password':'Password *'} ${editing?'<span style="font-size:10px;color:var(--txt3)">(leave blank to keep)</span>':''}</label>
       <div style="position:relative;display:flex;align-items:center">
@@ -4265,9 +4296,23 @@ function renderAddUser(prefill) {
 }
 
 function toggleBlockField() {
-  const role = document.getElementById('um_role')&&document.getElementById('um_role').value;
-  const field = document.getElementById('um_block_field');
-  if(field) field.style.display = role==='bdo'?'flex':'none';
+  const role = document.getElementById('um_role')?.value;
+  const blockField = document.getElementById('um_block_field');
+  const phcField   = document.getElementById('um_phc_field');
+  if (blockField) blockField.style.display = (role==='bdo'||role==='phc_officer') ? 'flex' : 'none';
+  if (phcField)   phcField.style.display   = role==='phc_officer' ? 'flex' : 'none';
+  if (role !== 'phc_officer') {
+    const phcSel = document.getElementById('um_phc');
+    if (phcSel) phcSel.innerHTML = '<option value="">Select PHC</option>';
+  }
+}
+
+function togglePhcField() {
+  const block = document.getElementById('um_block')?.value;
+  const phcSel = document.getElementById('um_phc');
+  if (!phcSel) return;
+  const phcs = block ? [...new Set(ALL.filter(r=>r.b===block).map(r=>r.hu))].filter(Boolean).sort() : [];
+  phcSel.innerHTML = '<option value="">Select PHC</option>' + phcs.map(h=>'<option value="'+h+'">'+h+'</option>').join('');
 }
 
 async function saveUser(editing) {
@@ -4281,23 +4326,26 @@ async function saveUser(editing) {
   const showErr  = msg => { errEl.textContent = msg; errEl.style.display = 'block'; };
   errEl.style.display = 'none';
 
+  const phc = document.getElementById('um_phc')?.value || '';
+
   if (!name)     return showErr('Full name is required.');
   if (!username) return showErr('Username is required.');
   if (!editing && username === 'admin') return showErr('"admin" is reserved for the bootstrap account.');
   if (!role)     return showErr('Select a role.');
-  if (role === 'bdo' && !block) return showErr('Select the block for this BDO.');
+  if ((role === 'bdo' || role === 'phc_officer') && !block) return showErr('Select the block for this user.');
+  if (role === 'phc_officer' && !phc) return showErr('Select the PHC for this officer.');
   if (!editing && !pass) return showErr('Password is required for new users.');
   if (pass && pass.length < 6) return showErr('Password must be at least 6 characters.');
   if (pass && pass !== pass2) return showErr('Passwords do not match.');
 
   try {
     if (editing) {
-      const body = { name, role, block };
+      const body = { name, role, block, phc };
       if (pass) body.password = pass;
       await _api('PUT', '/users/' + umEditingUser, body);
       showSnack('✓ User updated');
     } else {
-      await _api('POST', '/users', { username, name, role, block, password: pass });
+      await _api('POST', '/users', { username, name, role, block, phc, password: pass });
       showSnack('✓ User created: ' + username);
     }
     switchUmTab(0);
@@ -4310,7 +4358,7 @@ async function editUser(uid) {
   try {
     const u = await _api('GET', '/users/' + uid);
     if (!u) return;
-    renderAddUser({ id: u.username, name: u.name, role: u.role, block: u.block || '' });
+    renderAddUser({ id: u.username, name: u.name, role: u.role, block: u.block || '', phc: u.phc || '' });
     switchUmTab(1);
   } catch(e) {
     showSnack('Failed to load user: ' + e.message);
