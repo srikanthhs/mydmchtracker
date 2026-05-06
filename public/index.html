@@ -1437,10 +1437,26 @@ function renderTable() {
       const nvStr = vs ? `<span class="status-pill ${vs.cls}">${vs.label}</span>` : '—';
       const scoreHtml = score > 0 ? `<span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd}"><b>${score}</b> ${cat.label}</span>` : '<span class="rbadge" style="background:var(--c-none-bg);color:var(--c-none)">No flag</span>';
       const admPill = r.as ? `<span class="status-pill" style="background:${r.as==='Admitted'?'#E8F0FE':r.as==='Discharged'?'var(--c-none-bg)':'var(--c-mod-bg)'};color:${r.as==='Admitted'?'#1A73E8':r.as==='Discharged'?'var(--c-none)':'var(--c-mod)'}">${r.as}</span>` : '<span style="color:var(--txt3);font-size:11px">—</span>';
-      const delPill = r.ds ? `<span class="status-pill" style="background:${r.ds==='Delivered'?'var(--c-mod-bg)':r.ds==='Abortion'?'var(--c-none-bg)':'#FEF7E0'};color:${r.ds==='Delivered'?'var(--c-mod)':r.ds==='Abortion'?'var(--c-none)':'var(--c-high)'}">${r.ds}</span>` : '<span style="color:var(--txt3);font-size:11px">Active</span>';
+      const dsColors = {
+        'Delivered':        { bg:'#1E8C3A', color:'#fff' },
+        'Undelivered':      { bg:'#F9A825', color:'#fff' },
+        'Scan EDD Differs': { bg:'#E65100', color:'#fff' },
+        'Abortion':         { bg:'#6D4C41', color:'#fff' },
+      };
+      const dsRowBg = {
+        'Delivered':        '#E8F5E9',
+        'Undelivered':      '#FFFDE7',
+        'Scan EDD Differs': '#FFF3E0',
+        'Abortion':         '#EFEBE9',
+      };
+      const dsc = dsColors[r.ds] || null;
+      const delPill = r.ds && dsc
+        ? `<span class="status-pill" style="background:${dsc.bg};color:${dsc.color};font-weight:600">${r.ds}</span>`
+        : '<span style="color:var(--txt3);font-size:11px">Active</span>';
+      const rowBg = dsRowBg[r.ds] ? `background:${dsRowBg[r.ds]};` : '';
       const moCell = r.mo ? `<span style="font-size:11px">${r.mo}</span>` : '—';
       const mopCell = r.mop ? `<span style="font-size:11px;color:${r.mop.toLowerCase().includes('normal')?'var(--c-mod)':r.mop.toLowerCase().includes('risk')||r.mop.toLowerCase().includes('high')?'var(--c-crit)':'var(--txt2)'}">${r.mop}</span>` : '—';
-      return `<tr class="data-row ${cat.cls}" onclick="openDrawer('${(r.id||r.n).replace(/'/g,'\'')}',${start+i})">
+      return `<tr class="data-row ${cat.cls}" style="${rowBg}" onclick="openDrawer('${(r.id||r.n).replace(/'/g,'\'')}',${start+i})">
         <td style="color:var(--txt3)">${start+i+1}</td>
         <td style="font-size:11px">${r.b||'—'}</td>
         <td style="font-weight:500;font-size:11px">${r.p||'—'}</td>
