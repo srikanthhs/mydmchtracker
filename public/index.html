@@ -485,7 +485,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
       <span class="sb-badge" id="sb-all-badge">0</span>
     </div>
     <div class="sb-item" id="sb-active" onclick="sbFilter('active')">
-      <span class="material-icons-round">pregnant_woman</span> Active Cases
+      <span class="material-icons-round">pregnant_woman</span> Undelivered Cases
       <span class="sb-badge" id="sb-active-badge">0</span>
     </div>
     <div class="sb-item" id="sb-del" onclick="sbFilter('delivered')">
@@ -550,11 +550,10 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     </select>
     <select class="md-sel" id="statusSel" onchange="applyFilters()">
       <option value="">All statuses</option>
-      <option value="active">Active</option>
+      <option value="active">Undelivered</option>
       <option value="Admitted">Admitted</option>
       <option value="Discharged">Discharged</option>
       <option value="Delivered">Delivered</option>
-      <option value="Undelivered">Undelivered</option>
       <option value="Abortion">Abortion</option>
       <option value="Scan EDD Differs">Scan EDD Differs</option>
     </select>
@@ -619,7 +618,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
         <select id="f_as"><option value="">Active</option><option>Admitted</option><option>Discharged</option></select>
       </div>
       <div class="fg"><label>Delivery Status</label>
-        <select id="f_ds"><option value="">Active</option><option>Delivered</option><option>Undelivered</option><option>Abortion</option><option>Scan EDD Differs</option></select>
+        <select id="f_ds"><option value="">Undelivered</option><option>Delivered</option><option>Abortion</option><option>Scan EDD Differs</option></select>
       </div>
     </div>
     <div class="form-row">
@@ -959,9 +958,8 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
         <label>Status</label>
         <select id="rpt_status" onchange="generateReport()">
           <option value="">All</option>
-          <option value="active">Active only</option>
+          <option value="active">Undelivered</option>
           <option value="Delivered">Delivered</option>
-          <option value="Undelivered">Undelivered</option>
           <option value="Abortion">Abortion</option>
           <option value="Scan EDD Differs">Scan EDD Differs</option>
           <option value="Admitted">Admitted</option>
@@ -1428,7 +1426,7 @@ function statusCell(r) {
   if(ds === 'Abortion') return `<span class="status-pill" style="background:var(--c-none-bg);color:var(--c-none)">Abortion</span>`;
   if(as === 'Admitted') return `<span class="status-pill" style="background:#E8F0FE;color:#1A73E8">Admitted</span>`;
   if(as === 'Discharged') return `<span class="status-pill" style="background:var(--c-none-bg);color:var(--c-none)">Discharged</span>`;
-  return `<span class="status-pill" style="background:#E6F4EA;color:#188038">Active</span>`;
+  return `<span class="status-pill" style="background:#E6F4EA;color:#188038">Undelivered</span>`;
 }
 
 let filteredCache = [];
@@ -1469,7 +1467,7 @@ function renderTable() {
       const dsc = dsColors[r.ds] || null;
       const delPill = r.ds && dsc
         ? `<span class="status-pill" style="background:${dsc.bg};color:${dsc.color};font-weight:600">${r.ds}</span>`
-        : '<span style="color:var(--txt3);font-size:11px">Active</span>';
+        : '<span style="color:var(--txt3);font-size:11px">Undelivered</span>';
       const rowBg = dsRowBg[r.ds] ? `background:${dsRowBg[r.ds]};` : '';
       const moCell = r.mo ? `<span style="font-size:11px">${r.mo}</span>` : '—';
       const mopCell = r.mop ? `<span style="font-size:11px;color:${r.mop.toLowerCase().includes('normal')?'var(--c-mod)':r.mop.toLowerCase().includes('risk')||r.mop.toLowerCase().includes('high')?'var(--c-crit)':'var(--txt2)'}">${r.mop}</span>` : '—';
@@ -1608,7 +1606,7 @@ function updateCards() {
 
   const cards = [
     {icon:'people',              color:'var(--pri)',     bg:'var(--pri-lt)',     val:f.length,       lbl:'Total shown',   filter:''},
-    {icon:'pregnant_woman',      color:'var(--c-mod)',   bg:'var(--c-mod-bg)',   val:active.length,  lbl:'Active',        filter:'active'},
+    {icon:'pregnant_woman',      color:'var(--c-mod)',   bg:'var(--c-mod-bg)',   val:active.length,  lbl:'Undelivered',   filter:'active'},
     {icon:'priority_high',       color:'var(--c-crit)',  bg:'var(--c-crit-bg)', val:crit.length,    lbl:'Critical risk', filter:'crit'},
     {icon:'warning',             color:'var(--c-high)',  bg:'var(--c-high-bg)', val:high.length,    lbl:'High risk',     filter:'high'},
     {icon:'running_with_errors', color:'var(--c-crit)',  bg:'var(--c-crit-bg)', val:overdue.length, lbl:'Overdue visit', filter:'overdue'},
@@ -1724,7 +1722,7 @@ function openDrawer(key, idx) {
         <div class="dg"><label>Last visit</label><div class="v">${fmtDate(r.lv)}</div></div>
         <div class="dg"><label>Next visit due</label><div class="v" style="color:${vs?('var(--c-'+(vs.cls==='overdue-tag'?'crit':vs.cls==='due-soon-tag'?'high':'mod')+')'):''}">${vs?vs.label:'—'}</div></div>
         <div class="dg"><label>Visit interval</label><div class="v">Every ${score_interval} days</div></div>
-        <div class="dg"><label>Status</label><div class="v">${r.ds||r.as||'Active'}</div></div>
+        <div class="dg"><label>Status</label><div class="v">${r.ds||r.as||'Undelivered'}</div></div>
       </div>
       <div class="sec-title">Risk score breakdown</div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
@@ -2080,7 +2078,7 @@ function openDPH() {
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
       ${[
         {v:ALL.length,l:'Total registered',c:'var(--pri)'},
-        {v:ALL.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion').length,l:'Active',c:'var(--c-mod)'},
+        {v:ALL.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion').length,l:'Undelivered',c:'var(--c-mod)'},
         {v:ALL.filter(r=>calcScore(r.r)>=10&&r.ds!=='Delivered'&&r.ds!=='Abortion').length,l:'Critical (score ≥10)',c:'var(--c-crit)'},
         {v:ALL.filter(r=>isOverdue(r)).length,l:'Overdue visits',c:'var(--c-high)'},
       ].map(c=>`<div style="background:var(--sur2);border-radius:var(--r-md);padding:10px;text-align:center">
@@ -2092,7 +2090,7 @@ function openDPH() {
       <thead><tr style="background:var(--sur2)">
         <th style="padding:8px;text-align:left;border-bottom:1px solid var(--bdr)">Block</th>
         <th style="padding:8px;text-align:center;border-bottom:1px solid var(--bdr)">Total</th>
-        <th style="padding:8px;text-align:center;border-bottom:1px solid var(--bdr)">Active</th>
+        <th style="padding:8px;text-align:center;border-bottom:1px solid var(--bdr)">Undelivered</th>
         <th style="padding:8px;text-align:center;border-bottom:1px solid var(--bdr);color:var(--c-crit)">Critical</th>
         <th style="padding:8px;text-align:center;border-bottom:1px solid var(--bdr);color:var(--c-high)">High</th>
         <th style="padding:8px;text-align:center;border-bottom:1px solid var(--bdr);color:var(--c-mod)">Moderate</th>
@@ -3762,7 +3760,7 @@ function renderSummaryReport(data, body) {
       <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">summarize</span>Summary Statistics · ${data.length} records</div>
       <div class="rpt-stat-grid">
         ${statCard(data.length, 'Total Records', 'var(--pri)')}
-        ${statCard(active.length, 'Active', 'var(--c-mod)')}
+        ${statCard(active.length, 'Undelivered', 'var(--c-mod)')}
         ${statCard(crit.length, 'Critical Risk', 'var(--c-crit)')}
         ${statCard(high.length, 'High Risk', 'var(--c-high)')}
         ${statCard(del.length, 'Delivered', 'var(--c-mod)')}
@@ -3776,7 +3774,7 @@ function renderSummaryReport(data, body) {
       <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">location_on</span>Block-wise Breakdown</div>
       <table class="rpt-table">
         <thead><tr>
-          <th>Block</th><th>Total</th><th>Active</th>
+          <th>Block</th><th>Total</th><th>Undelivered</th>
           <th style="color:var(--c-crit)">Critical</th>
           <th style="color:var(--c-high)">High</th>
           <th style="color:var(--c-mod)">Delivered</th>
@@ -4069,7 +4067,7 @@ function renderEddAlertReport(body) {
 
     ${alertPats.length === 0 ? `<div style="text-align:center;padding:40px;color:var(--txt3)">
       <span class="material-icons-round" style="font-size:40px;display:block;margin-bottom:8px">check_circle</span>
-      No active patients with EDD within ${days} days${block?' in '+block+' block':''}.
+      No undelivered patients with EDD within ${days} days${block?' in '+block+' block':''}.
     </div>` : `
     <div class="rpt-section">
       <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">local_hospital</span>Hospital-wise Summary</div>
