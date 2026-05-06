@@ -4317,9 +4317,23 @@ function toggleBlockField() {
   const role = document.getElementById('um_role')?.value;
   const blockField = document.getElementById('um_block_field');
   const phcField   = document.getElementById('um_phc_field');
-  if (blockField) blockField.style.display = (role==='bdo'||role==='phc_officer') ? 'flex' : 'none';
-  if (phcField)   phcField.style.display   = role==='phc_officer' ? 'flex' : 'none';
-  if (role !== 'phc_officer') {
+  const needsBlock = role === 'bdo' || role === 'phc_officer';
+
+  if (blockField) {
+    blockField.style.display = needsBlock ? 'flex' : 'none';
+    if (needsBlock) {
+      // Refresh block options from current patient data
+      const blockSel = document.getElementById('um_block');
+      if (blockSel) {
+        const blocks = [...new Set(ALL.map(r => r.b))].filter(Boolean).sort();
+        const cur = blockSel.value;
+        blockSel.innerHTML = '<option value="">Select Block</option>' +
+          blocks.map(b => `<option value="${b}" ${b===cur?'selected':''}>${b}</option>`).join('');
+      }
+    }
+  }
+  if (phcField) phcField.style.display = role === 'phc_officer' ? 'flex' : 'none';
+  if (!needsBlock || role !== 'phc_officer') {
     const phcSel = document.getElementById('um_phc');
     if (phcSel) phcSel.innerHTML = '<option value="">Select PHC</option>';
   }
