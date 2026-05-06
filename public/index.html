@@ -2229,30 +2229,34 @@ async function syncFromSheet(silent=false) {
       throw new Error('0 records mapped. Sheet columns found: [' + sample + ']');
     }
 
+    const filtered = filterByRole(mapped);
     ALL.length = 0;
-    ALL.push(...mapped);
+    ALL.push(...filtered);
     buildSidebar();
     buildDropdowns();
     applyFilters();
 
     const time = new Date(json.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     if(dot) dot.className = 'sync-dot';
-    if(ts)  ts.textContent = mapped.length + ' rec · ' + time;
+    if(ts)  ts.textContent = filtered.length + ' rec · ' + time;
     localStorage.setItem('hrp_last_sync', json.ts);
-    localStorage.setItem('hrp_cache', JSON.stringify(mapped));
-    if(!silent) showSnack('✓ Synced ' + mapped.length + ' records from Google Sheet');
-    return { ok: true, count: mapped.length };
+    // Only cache unfiltered data for admin/dph; restricted roles skip cache
+    if (!currentUser || ['admin','dph_officer'].includes(currentUser.role)) {
+      localStorage.setItem('hrp_cache', JSON.stringify(mapped));
+    }
+    if(!silent) showSnack('✓ Synced ' + filtered.length + ' records from Google Sheet');
+    return { ok: true, count: filtered.length };
   } catch(err) {
     if(dot) dot.className = 'sync-dot err';
     if(ts)  ts.textContent = 'Sync failed';
     if(!silent) showSnack('⚠ Sync failed — tap ⟳ for details');
     // Show diagnostic modal on manual sync
     if(!silent) showSyncDiag(err, rawText);
-    // Fall back to localStorage cache if available
+    // Fall back to localStorage cache if available (only for unrestricted roles)
     const cache = localStorage.getItem('hrp_cache');
     if(cache && ALL.length === 0) {
       try {
-        const cached = JSON.parse(cache);
+        const cached = filterByRole(JSON.parse(cache));
         ALL.push(...cached);
         buildSidebar(); buildDropdowns(); applyFilters();
         showSnack('Loaded ' + cached.length + ' records from local cache');
@@ -4123,6 +4127,8 @@ function signOut() {
   if (!confirm('Sign out of HRP Tracker?')) return;
   sessionStorage.removeItem('hrp_session');
   sessionStorage.removeItem('hrp_jwt');
+  localStorage.removeItem('hrp_cache');
+  ALL.length = 0;
   currentUser = null;
   document.getElementById('accessOverlay').classList.remove('hidden');
   const slot = document.getElementById('userBarSlot');
@@ -4137,6 +4143,18 @@ function signOut() {
 // ── Permission helpers ────────────────────────────────────────
 function canEdit() {
   return currentUser && ['admin','dph_officer','bdo','phc_officer'].includes(currentUser.role);
+}
+
+function filterByRole(data) {
+  if (!currentUser) return data;
+  const { role, block, phc } = currentUser;
+  if (role === 'phc_officer' && block && phc) {
+    return data.filter(r => r.b === block && r.p === phc);
+  }
+  if ((role === 'bdo' || role === 'phc_officer') && block) {
+    return data.filter(r => r.b === block);
+  }
+  return data;
 }
 
 // ── Login overlay helpers ─────────────────────────────────────
@@ -4247,7 +4265,7 @@ function renderAddUser(prefill) {
   const blockOpts = blocks.map(b=>'<option value="'+b+'" '+(prefill&&prefill.block===b?'selected':'')+'>'+b+'</option>').join('');
   const showBlock = prefill && (prefill.role==='bdo'||prefill.role==='phc_officer');
   const showPhc   = prefill && prefill.role==='phc_officer';
-  const phcs = prefill&&prefill.block ? [...new Set(ALL.filter(r=>r.b===prefill.block).map(r=>r.hu))].filter(Boolean).sort() : [];
+  const phcs = prefill&&prefill.block ? [...new Set(ALL.filter(r=>r.b===prefill.block).map(r=>r.p))].filter(Boolean).sort() : [];
   const phcOpts = phcs.map(h=>'<option value="'+h+'" '+(prefill&&prefill.phc===h?'selected':'')+'>'+h+'</option>').join('');
 
   document.getElementById('umBody').innerHTML = `<div style="font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;margin-bottom:16px;color:var(--txt)">
@@ -4311,7 +4329,7 @@ function togglePhcField() {
   const block = document.getElementById('um_block')?.value;
   const phcSel = document.getElementById('um_phc');
   if (!phcSel) return;
-  const phcs = block ? [...new Set(ALL.filter(r=>r.b===block).map(r=>r.hu))].filter(Boolean).sort() : [];
+  const phcs = block ? [...new Set(ALL.filter(r=>r.b===block).map(r=>r.p))].filter(Boolean).sort() : [];
   phcSel.innerHTML = '<option value="">Select PHC</option>' + phcs.map(h=>'<option value="'+h+'">'+h+'</option>').join('');
 }
 
@@ -4460,7 +4478,7 @@ initAccessControl();
   try {
     const data = await _api('GET', '/patients');
     if (Array.isArray(data) && data.length) {
-      ALL = data;
+      ALL = filterByRole(data);
       buildSidebar(); buildDropdowns(); applyFilters();
     }
   } catch(e) {

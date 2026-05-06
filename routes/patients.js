@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
     let rows;
     const { role, block, phc } = req.user;
     if (role === 'phc_officer' && block && phc) {
-      rows = await db.query('SELECT * FROM patients WHERE b = ? AND hu = ? ORDER BY e ASC', [block, phc]);
+      rows = await db.query('SELECT * FROM patients WHERE b = ? AND p = ? ORDER BY e ASC', [block, phc]);
     } else if ((role === 'bdo' || role === 'phc_officer') && block) {
       rows = await db.query('SELECT * FROM patients WHERE b = ? ORDER BY e ASC', [block]);
     } else {
