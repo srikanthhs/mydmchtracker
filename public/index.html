@@ -916,6 +916,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div class="report-tab" onclick="setReportTab(3,this)">Patient List</div>
     <div class="report-tab" onclick="setReportTab(4,this)">Delivery Report</div>
     <div class="report-tab" onclick="setReportTab(5,this)" style="color:var(--c-crit)">🏥 EDD Alert</div>
+    <div class="report-tab" onclick="setReportTab(6,this)" style="color:#7B3F00">👨‍⚕️ Mentor OG</div>
   </div>
 
   <!-- Filter Bar -->
@@ -3726,6 +3727,7 @@ function renderReportTab() {
   else if (reportTabIdx === 3) renderPatientListReport(data, body);
   else if (reportTabIdx === 4) renderDeliveryReport(data, body);
   else if (reportTabIdx === 5) renderEddAlertReport(body);
+  else if (reportTabIdx === 6) renderMentorOGReport(data, body);
 }
 
 function statCard(num, lbl, color) {
@@ -4244,6 +4246,325 @@ function printEddAlertPDF() {
       ${hospSection(grp30, 'orange')}
     </div>` : ''}
 
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 800);
+}
+
+// ============================================================
+// MENTOR OG REPORT
+// ============================================================
+function _groupByMentor(data) {
+  const grp = {};
+  data.forEach(r => {
+    const mo = (r.mo || '').trim() || 'Unassigned';
+    if (!grp[mo]) grp[mo] = [];
+    grp[mo].push(r);
+  });
+  return grp;
+}
+
+function renderMentorOGReport(data, body) {
+  const groups = _groupByMentor(data);
+  const today  = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  const total  = data.length;
+  const assigned = data.filter(r => (r.mo||'').trim()).length;
+  const unassigned = total - assigned;
+
+  const mopColor = op => {
+    if (!op) return 'var(--txt3)';
+    const l = op.toLowerCase();
+    if (l.includes('high risk') || l.includes('refer')) return 'var(--c-crit)';
+    if (l.includes('high risk')) return 'var(--c-high)';
+    if (l.includes('review')) return 'var(--c-mod)';
+    if (l.includes('normal')) return 'var(--c-low)';
+    return 'var(--txt2)';
+  };
+
+  const mentorSections = Object.entries(groups)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([mo, pts]) => {
+      const crit  = pts.filter(r => riskCat(calcScore(r.r)).label === 'Critical').length;
+      const high  = pts.filter(r => riskCat(calcScore(r.r)).label === 'High').length;
+      const refer = pts.filter(r => (r.mop||'').toLowerCase().includes('refer')).length;
+      const admitted = pts.filter(r => r.as === 'Admitted').length;
+      return `
+      <div class="rpt-section">
+        <div class="rpt-section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <span style="display:flex;align-items:center;gap:8px">
+            <span class="material-icons-round" style="font-size:16px;color:#7B3F00">person</span>
+            <b>${mo}</b>
+          </span>
+          <span style="display:flex;gap:6px;flex-wrap:wrap">
+            <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#FFF3E0;color:#E65100;font-weight:600">${pts.length} patients</span>
+            ${crit  ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--c-crit-bg);color:var(--c-crit);font-weight:600">${crit} critical</span>` : ''}
+            ${high  ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--c-high-bg);color:var(--c-high);font-weight:600">${high} high</span>` : ''}
+            ${refer ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#FCE8E6;color:#C5221F;font-weight:600">${refer} referral</span>` : ''}
+            ${admitted ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#E8F0FE;color:#1A73E8;font-weight:600">${admitted} admitted</span>` : ''}
+          </span>
+        </div>
+        <table class="rpt-table">
+          <thead><tr><th>#</th><th>Mother Name</th><th>PICME No.</th><th>Block / PHC</th><th>EDD</th><th>Risk</th><th>Mentor Opinion</th><th>Remarks</th></tr></thead>
+          <tbody>${pts.map((r, i) => {
+            const sc = calcScore(r.r); const cat = riskCat(sc);
+            const vs = visitStatus(r);
+            const nvHtml = vs ? `<br><span class="status-pill ${vs.cls}" style="font-size:9px">${vs.label}</span>` : '';
+            return `<tr>
+              <td style="color:var(--txt3);font-size:11px">${i+1}</td>
+              <td style="font-weight:500">${r.n}${r.as==='Admitted'?` <span style="font-size:9px;color:#1A73E8;font-weight:600">[Admitted]</span>`:''}</td>
+              <td style="font-size:11px;color:var(--txt2)">${r.id||'—'}</td>
+              <td style="font-size:11px">${r.b}<br><span style="color:var(--txt2)">${r.p}</span></td>
+              <td style="font-size:11px"><b>${fmtDate(r.e)||'—'}</b>${nvHtml}</td>
+              <td><span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd};font-size:10px">${sc} ${cat.label}</span></td>
+              <td style="font-size:11px;color:${mopColor(r.mop)}">${r.mop||'—'}</td>
+              <td style="font-size:11px;color:var(--txt2);max-width:140px;white-space:normal">${r.rm||'—'}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
+    }).join('');
+
+  const summaryRows = Object.entries(groups)
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([mo, pts]) => {
+      const sc  = pts.map(r => calcScore(r.r));
+      const crit = pts.filter(r => riskCat(calcScore(r.r)).label === 'Critical').length;
+      const high = pts.filter(r => riskCat(calcScore(r.r)).label === 'High').length;
+      const refer = pts.filter(r => (r.mop||'').toLowerCase().includes('refer')).length;
+      const normal = pts.filter(r => (r.mop||'').toLowerCase() === 'normal').length;
+      return `<tr>
+        <td style="font-weight:500">${mo}</td>
+        <td style="text-align:center;font-weight:600">${pts.length}</td>
+        <td style="text-align:center;color:var(--c-crit);font-weight:600">${crit||'—'}</td>
+        <td style="text-align:center;color:var(--c-high);font-weight:600">${high||'—'}</td>
+        <td style="text-align:center;color:#C5221F;font-weight:600">${refer||'—'}</td>
+        <td style="text-align:center;color:var(--c-low)">${normal||'—'}</td>
+      </tr>`;
+    }).join('');
+
+  body.innerHTML = `
+    <div class="rpt-section" style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:var(--r-md);padding:12px 16px;margin-bottom:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="material-icons-round" style="color:#E65100;font-size:22px">medical_services</span>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#E65100">Mentor OG Report — ${total} patient${total!==1?'s':''} · ${Object.keys(groups).length} mentor${Object.keys(groups).length!==1?'s':''}</div>
+            <div style="font-size:11px;color:#BF360C;opacity:.9">As of ${today}${unassigned ? ` · ${unassigned} unassigned` : ''}</div>
+          </div>
+        </div>
+        <button class="btn-filled" onclick="printMentorOGPDF()"
+          style="height:34px;padding:0 14px;font-size:12px;display:flex;align-items:center;gap:6px;background:#E65100;border-color:#E65100">
+          <span class="material-icons-round" style="font-size:15px">picture_as_pdf</span> Print / PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">medical_services</span>Mentor-wise Summary</div>
+      <table class="rpt-table">
+        <thead><tr>
+          <th>Mentor OG</th><th style="text-align:center">Total</th>
+          <th style="text-align:center;color:var(--c-crit)">Critical</th>
+          <th style="text-align:center;color:var(--c-high)">High Risk</th>
+          <th style="text-align:center;color:#C5221F">Referral</th>
+          <th style="text-align:center;color:var(--c-low)">Normal</th>
+        </tr></thead>
+        <tbody>${summaryRows}</tbody>
+      </table>
+    </div>
+    ${mentorSections}`;
+}
+
+function printMentorOGPDF() {
+  const data   = reportData;
+  const block  = document.getElementById('rpt_block')?.value || '';
+  const today  = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  const from   = document.getElementById('rpt_from')?.value || '';
+  const to     = document.getElementById('rpt_to')?.value   || '';
+  const groups = _groupByMentor(data);
+  const total  = data.length;
+
+  const CSS = `
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Roboto',sans-serif;font-size:11px;color:#202124;background:#fff}
+    .page{padding:18mm 15mm 14mm;min-height:297mm;position:relative}
+    .cover-hdr{border-bottom:3px solid #E65100;padding-bottom:10px;margin-bottom:14px}
+    .cover-hdr h1{font-size:18px;font-weight:700;color:#E65100;font-family:'Google Sans',sans-serif}
+    .cover-hdr h2{font-size:13px;font-weight:500;color:#5F6368;margin-top:2px}
+    .meta{font-size:10px;color:#5F6368;margin-top:4px}
+    .summary-box{background:#FFF3E0;border:1px solid #FFB74D;border-radius:6px;padding:10px 14px;margin-bottom:14px}
+    .summary-box h3{font-size:12px;font-weight:600;color:#E65100;margin-bottom:6px}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:10px}
+    th{background:#F8F9FA;padding:5px 7px;text-align:left;border:1px solid #DADCE0;font-weight:600;font-size:10px}
+    td{padding:4px 7px;border:1px solid #DADCE0;vertical-align:middle}
+    tr:nth-child(even) td{background:#FAFAFA}
+    .sec-hdr{font-size:14px;font-weight:700;font-family:'Google Sans',sans-serif;padding:8px 12px;border-radius:6px;margin:16px 0 10px;display:flex;align-items:center;gap:6px;background:#FFF3E0;color:#E65100;border-left:4px solid #E65100}
+    .mentor-hdr{background:#FFF3E0;border-left:3px solid #E65100;padding:5px 10px;font-weight:600;font-size:11px;margin:12px 0 4px;display:flex;justify-content:space-between;align-items:center}
+    .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:700}
+    .badge.orange{background:#FFF3E0;color:#E65100}
+    .badge.red{background:#FCE8E6;color:#C5221F}
+    .badge.blue{background:#E8F0FE;color:#1557B0}
+    .badge.green{background:#E6F4EA;color:#188038}
+    .risk-crit{color:#C5221F;font-weight:600}
+    .risk-high{color:#E37400;font-weight:600}
+    .risk-mod{color:#188038}
+    .mop-refer{color:#C5221F;font-weight:600}
+    .mop-normal{color:#188038}
+    .mop-review{color:#E37400}
+    .footer{position:fixed;bottom:8mm;left:15mm;right:15mm;font-size:9px;color:#9AA0A6;display:flex;justify-content:space-between;border-top:1px solid #DADCE0;padding-top:4px}
+    @media print{
+      body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .page-break{page-break-before:always}
+      .no-break{page-break-inside:avoid}
+    }`;
+
+  const patRow = (r, i) => {
+    const sc = calcScore(r.r); const cat = riskCat(sc);
+    const riskCls = cat.label==='Critical'?'risk-crit':cat.label==='High'?'risk-high':cat.label==='Moderate'?'risk-mod':'';
+    const mopL = (r.mop||'').toLowerCase();
+    const mopCls = mopL.includes('refer')?'mop-refer':mopL==='normal'?'mop-normal':mopL.includes('review')?'mop-review':'';
+    const dLeft = r.e ? daysUntil(r.e) : null;
+    const eddBadge = dLeft !== null && dLeft <= 30
+      ? ` <span class="badge ${dLeft<=7?'red':dLeft<=15?'orange':'blue'}">${dLeft}d</span>` : '';
+    return `<tr>
+      <td style="color:#9AA0A6;text-align:center">${i+1}</td>
+      <td><b>${r.n}</b>${r.as==='Admitted'?' <span class="badge blue">Admitted</span>':''}</td>
+      <td style="color:#5F6368">${r.id||'—'}</td>
+      <td>${r.b}<br><span style="color:#5F6368;font-size:9px">${r.p}</span></td>
+      <td>${fmtDate(r.e)||'—'}${eddBadge}</td>
+      <td class="${riskCls}">${sc} ${cat.label}</td>
+      <td class="${mopCls}">${r.mop||'—'}</td>
+      <td style="color:#5F6368;max-width:100px;word-wrap:break-word">${r.rm||'—'}</td>
+    </tr>`;
+  };
+
+  // Summary table
+  const summaryTable = `
+    <table>
+      <thead><tr>
+        <th>Mentor OG</th>
+        <th style="text-align:center">Total</th>
+        <th style="text-align:center;color:#C5221F">Critical</th>
+        <th style="text-align:center;color:#E37400">High Risk</th>
+        <th style="text-align:center;color:#C5221F">Referral</th>
+        <th style="text-align:center;color:#188038">Normal</th>
+        <th style="text-align:center">Admitted</th>
+      </tr></thead>
+      <tbody>
+        ${Object.entries(groups).sort((a,b)=>b[1].length-a[1].length).map(([mo,pts])=>{
+          const crit    = pts.filter(r=>riskCat(calcScore(r.r)).label==='Critical').length;
+          const high    = pts.filter(r=>riskCat(calcScore(r.r)).label==='High').length;
+          const refer   = pts.filter(r=>(r.mop||'').toLowerCase().includes('refer')).length;
+          const normal  = pts.filter(r=>(r.mop||'').toLowerCase()==='normal').length;
+          const admitted= pts.filter(r=>r.as==='Admitted').length;
+          return `<tr>
+            <td><b>${mo}</b></td>
+            <td style="text-align:center;font-weight:700">${pts.length}</td>
+            <td style="text-align:center;color:#C5221F;font-weight:600">${crit||'—'}</td>
+            <td style="text-align:center;color:#E37400;font-weight:600">${high||'—'}</td>
+            <td style="text-align:center;color:#C5221F;font-weight:600">${refer||'—'}</td>
+            <td style="text-align:center;color:#188038">${normal||'—'}</td>
+            <td style="text-align:center">${admitted||'—'}</td>
+          </tr>`;
+        }).join('')}
+        <tr style="background:#F8F9FA;font-weight:700">
+          <td>TOTAL</td>
+          <td style="text-align:center">${total}</td>
+          <td style="text-align:center;color:#C5221F">${data.filter(r=>riskCat(calcScore(r.r)).label==='Critical').length||'—'}</td>
+          <td style="text-align:center;color:#E37400">${data.filter(r=>riskCat(calcScore(r.r)).label==='High').length||'—'}</td>
+          <td style="text-align:center;color:#C5221F">${data.filter(r=>(r.mop||'').toLowerCase().includes('refer')).length||'—'}</td>
+          <td style="text-align:center;color:#188038">${data.filter(r=>(r.mop||'').toLowerCase()==='normal').length||'—'}</td>
+          <td style="text-align:center">${data.filter(r=>r.as==='Admitted').length||'—'}</td>
+        </tr>
+      </tbody>
+    </table>`;
+
+  const mentorPages = Object.entries(groups)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([mo, pts], idx) => {
+      const crit  = pts.filter(r=>riskCat(calcScore(r.r)).label==='Critical').length;
+      const high  = pts.filter(r=>riskCat(calcScore(r.r)).label==='High').length;
+      const refer = pts.filter(r=>(r.mop||'').toLowerCase().includes('refer')).length;
+      return `
+    <div class="page page-break">
+      <div class="cover-hdr">
+        <h1>Mentor OG: ${mo}</h1>
+        <h2>Mayiladuthurai District — High-Risk Pregnancy Tracker</h2>
+        <div class="meta">
+          Report Date: <b>${today}</b>${block?' &nbsp;·&nbsp; Block: <b>'+block+'</b>':''}
+          ${from||to ? ` &nbsp;·&nbsp; Period: <b>${from?fmtDate(from):'Any'} → ${to?fmtDate(to):'Any'}</b>` : ''}
+        </div>
+      </div>
+      <div class="summary-box">
+        <h3>📊 ${mo} — At a Glance</h3>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:11px">
+          <div><span style="font-size:20px;font-weight:700;color:#E65100">${pts.length}</span><br>Total Patients</div>
+          ${crit  ? `<div><span style="font-size:20px;font-weight:700;color:#C5221F">${crit}</span><br>Critical</div>` : ''}
+          ${high  ? `<div><span style="font-size:20px;font-weight:700;color:#E37400">${high}</span><br>High Risk</div>` : ''}
+          ${refer ? `<div><span style="font-size:20px;font-weight:700;color:#C5221F">${refer}</span><br>Need Referral</div>` : ''}
+          <div><span style="font-size:20px;font-weight:700;color:#188038">${pts.filter(r=>(r.mop||'').toLowerCase()==='normal').length}</span><br>Normal</div>
+        </div>
+      </div>
+      <div class="no-break">
+        <div class="mentor-hdr">
+          <span>👨‍⚕️ ${mo} — Patient List (${pts.length})</span>
+          <span>${crit?`<span class="badge red">${crit} Critical</span> `:''} ${refer?`<span class="badge red">${refer} Referral</span>`:''}</span>
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>Mother Name</th><th>PICME No.</th><th>Block / PHC</th><th>EDD</th><th>Risk</th><th>Mentor Opinion</th><th>Remarks</th></tr></thead>
+          <tbody>${pts.map((r, i) => patRow(r, i)).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+    }).join('');
+
+  const html = `<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Mentor OG Report — Mayiladuthurai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>${CSS}</style>
+  </head><body>
+    <div class="footer">
+      <span>HRP Tracker — Mayiladuthurai District · DPH Tamil Nadu</span>
+      <span>Generated: ${today} by ${currentUser?.name||'Admin'}</span>
+    </div>
+
+    <!-- Cover / Summary Page -->
+    <div class="page">
+      <div class="cover-hdr">
+        <h1>Mentor OG Wise Report</h1>
+        <h2>Mayiladuthurai District — High-Risk Pregnancy Tracker</h2>
+        <div class="meta">
+          Report Date: <b>${today}</b>
+          ${block ? ` &nbsp;·&nbsp; Block: <b>${block}</b>` : ''}
+          ${from||to ? ` &nbsp;·&nbsp; Period: <b>${from?fmtDate(from):'Any'} → ${to?fmtDate(to):'Any'}</b>` : ''}
+          &nbsp;·&nbsp; Generated by: <b>${currentUser?.name||'Admin'}</b> (${currentUser?.role||''})
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h3>📊 District Overview</h3>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:11px">
+          <div><span style="font-size:20px;font-weight:700;color:#E65100">${total}</span><br>Total Patients</div>
+          <div><span style="font-size:20px;font-weight:700;color:#1A73E8">${Object.keys(groups).length}</span><br>Mentor OGs</div>
+          <div><span style="font-size:20px;font-weight:700;color:#C5221F">${data.filter(r=>riskCat(calcScore(r.r)).label==='Critical').length}</span><br>Critical</div>
+          <div><span style="font-size:20px;font-weight:700;color:#E37400">${data.filter(r=>riskCat(calcScore(r.r)).label==='High').length}</span><br>High Risk</div>
+          <div><span style="font-size:20px;font-weight:700;color:#C5221F">${data.filter(r=>(r.mop||'').toLowerCase().includes('refer')).length}</span><br>Need Referral</div>
+        </div>
+      </div>
+
+      <div style="font-weight:600;font-size:12px;margin-bottom:8px;color:#5F6368">MENTOR-WISE SUMMARY</div>
+      ${summaryTable}
+
+      <div style="margin-top:8px;font-size:10px;color:#9AA0A6">
+        * Active patients (Delivered / Abortion cases may be included based on filters applied) &nbsp;·&nbsp; Data as of ${today}
+      </div>
+    </div>
+
+    ${mentorPages}
   </body></html>`;
 
   const w = window.open('', '_blank');
