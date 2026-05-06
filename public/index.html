@@ -912,6 +912,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div class="report-tab" onclick="setReportTab(2,this)">Risk Analysis</div>
     <div class="report-tab" onclick="setReportTab(3,this)">Patient List</div>
     <div class="report-tab" onclick="setReportTab(4,this)">Delivery Report</div>
+    <div class="report-tab" onclick="setReportTab(5,this)" style="color:var(--c-crit)">🏥 EDD Alert</div>
   </div>
 
   <!-- Filter Bar -->
@@ -3717,6 +3718,7 @@ function renderReportTab() {
   else if (reportTabIdx === 2) renderRiskReport(data, body);
   else if (reportTabIdx === 3) renderPatientListReport(data, body);
   else if (reportTabIdx === 4) renderDeliveryReport(data, body);
+  else if (reportTabIdx === 5) renderEddAlertReport(body);
 }
 
 function statCard(num, lbl, color) {
@@ -3965,6 +3967,123 @@ function renderDeliveryReport(data, body) {
         </tr>`).join('')}</tbody>
       </table>
     </div>` : ''}`;
+}
+
+function renderEddAlertReport(body) {
+  const days = parseInt(document.getElementById('edd_alert_days')?.value || '15');
+  const block = document.getElementById('rpt_block')?.value || '';
+
+  // Always use full ALL data — active patients only, filtered by block
+  let base = ALL.filter(r => r.ds !== 'Delivered' && r.ds !== 'Abortion');
+  if (block) base = base.filter(r => r.b === block);
+
+  // Filter to patients with EDD within the selected number of days
+  const alertPats = base.filter(r => {
+    const d = daysUntil(r.e);
+    return d !== null && d >= 0 && d <= days;
+  }).sort((a, b) => daysUntil(a.e) - daysUntil(b.e));
+
+  // Group by planned place of delivery
+  const groups = {};
+  alertPats.forEach(r => {
+    const place = (r.pp || 'Not Planned / Unknown').trim();
+    if (!groups[place]) groups[place] = [];
+    groups[place].push(r);
+  });
+
+  const today = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+
+  const daysBadge = d => {
+    const bg = d <= 7 ? 'var(--c-crit-bg)' : d <= 15 ? 'var(--c-high-bg)' : 'var(--c-low-bg)';
+    const cl = d <= 7 ? 'var(--c-crit)'    : d <= 15 ? 'var(--c-high)'    : 'var(--c-low)';
+    return `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;background:${bg};color:${cl}">${d}d</span>`;
+  };
+
+  const hospitalSections = Object.entries(groups)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([place, pts]) => `
+      <div class="rpt-section">
+        <div class="rpt-section-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:8px">
+            <span class="material-icons-round" style="font-size:16px;color:var(--c-crit)">local_hospital</span>
+            <b>${place}</b>
+          </span>
+          <span style="font-size:12px;padding:2px 10px;border-radius:12px;background:var(--c-crit-bg);color:var(--c-crit);font-weight:600">${pts.length} patient${pts.length>1?'s':''}</span>
+        </div>
+        <table class="rpt-table">
+          <thead><tr>
+            <th>#</th>
+            <th>Mother Name</th>
+            <th>PICME No.</th>
+            <th>Block / PHC</th>
+            <th>EDD</th>
+            <th>Days Left</th>
+            <th>Risk</th>
+            <th>Mobile</th>
+          </tr></thead>
+          <tbody>${pts.map((r, i) => {
+            const d = daysUntil(r.e);
+            const cat = riskCat(calcScore(r.r));
+            return `<tr style="border-left:3px solid ${cat.color}">
+              <td style="color:var(--txt3);font-size:11px">${i + 1}</td>
+              <td style="font-weight:500">${r.n}</td>
+              <td style="font-size:11px;color:var(--txt2)">${r.id || '—'}</td>
+              <td style="font-size:11px">${r.b}<br><span style="color:var(--txt2)">${r.p}</span></td>
+              <td><b>${fmtDate(r.e)}</b></td>
+              <td style="text-align:center">${daysBadge(d)}</td>
+              <td><span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd};font-size:10px">${calcScore(r.r)} ${cat.label}</span></td>
+              <td style="font-size:12px;color:var(--txt2)">${r.ph || '—'}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`).join('');
+
+  // Summary by hospital (top table)
+  const summaryRows = Object.entries(groups)
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([place, pts]) => {
+      const within7 = pts.filter(r => daysUntil(r.e) <= 7).length;
+      return `<tr>
+        <td style="font-weight:500">${place}</td>
+        <td style="text-align:center;font-weight:600;color:var(--c-crit)">${within7 || '—'}</td>
+        <td style="text-align:center;font-weight:600">${pts.length}</td>
+      </tr>`;
+    }).join('');
+
+  body.innerHTML = `
+    <div class="rpt-section" style="background:var(--c-crit-bg);border:1px solid var(--c-crit-bd);border-radius:var(--r-md);padding:12px 16px;margin-bottom:0">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="material-icons-round" style="color:var(--c-crit);font-size:22px">alarm</span>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--c-crit)">EDD Alert — ${alertPats.length} patient${alertPats.length!==1?'s':''} due within
+            <select id="edd_alert_days" onchange="renderEddAlertReport(document.getElementById('reportBody'))"
+              style="margin:0 4px;padding:2px 6px;border:1px solid var(--c-crit-bd);border-radius:6px;font-size:13px;font-weight:600;background:var(--c-crit-bg);color:var(--c-crit);cursor:pointer">
+              <option value="7"  ${days===7 ?'selected':''}>7 days</option>
+              <option value="15" ${days===15?'selected':''}>15 days</option>
+              <option value="30" ${days===30?'selected':''}>30 days</option>
+            </select>
+          </div>
+          <div style="font-size:11px;color:var(--c-crit);opacity:.8">As of ${today}${block?' · Block: '+block:''}</div>
+        </div>
+      </div>
+    </div>
+
+    ${alertPats.length === 0 ? `<div style="text-align:center;padding:40px;color:var(--txt3)">
+      <span class="material-icons-round" style="font-size:40px;display:block;margin-bottom:8px">check_circle</span>
+      No active patients with EDD within ${days} days${block?' in '+block+' block':''}.
+    </div>` : `
+    <div class="rpt-section">
+      <div class="rpt-section-title"><span class="material-icons-round" style="font-size:16px;color:var(--pri)">local_hospital</span>Hospital-wise Summary</div>
+      <table class="rpt-table">
+        <thead><tr>
+          <th>Planned Place of Delivery</th>
+          <th style="color:var(--c-crit)">Within 7 Days</th>
+          <th>Within ${days} Days</th>
+        </tr></thead>
+        <tbody>${summaryRows}</tbody>
+      </table>
+    </div>
+    ${hospitalSections}`}`;
 }
 
 function exportReportCSV() {
