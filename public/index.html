@@ -4078,7 +4078,7 @@ function grantAccess(u) {
 
   // Update app bar user chip
   const slot = document.getElementById('userBarSlot');
-  const roleLabel = { admin:'Admin', dph_officer:'DPH Officer', bdo:'Block Officer', phc_officer:'PHC Officer', viewer:'Viewer' }[u.role] || u.role;
+  const roleLabel = { admin:'Admin', dph_officer:'DPH Officer', bdo:'Block Officer', phc_officer:'PHC Medical Officer', viewer:'Viewer' }[u.role] || u.role;
   const roleCls   = { admin:'role-admin', dph_officer:'role-dph', bdo:'role-bdo', phc_officer:'role-phc', viewer:'role-viewer' }[u.role] || '';
   if(slot) slot.innerHTML = `
     <div class="access-user-bar" onclick="signOut()" title="${u.role} — click to sign out">
@@ -4169,7 +4169,7 @@ const ROLE_OPTIONS = [
   { value:'admin',       label:'District Admin',      cls:'role-admin' },
   { value:'dph_officer', label:'DPH / CMHO Officer',  cls:'role-dph'   },
   { value:'bdo',         label:'Block Officer (BDO)',  cls:'role-bdo'   },
-  { value:'phc_officer', label:'PHC Officer',          cls:'role-phc'   },
+  { value:'phc_officer', label:'PHC Medical Officer',   cls:'role-phc'   },
   { value:'viewer',      label:'View Only',            cls:'role-viewer'},
 ];
 
