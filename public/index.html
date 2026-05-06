@@ -414,7 +414,17 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <div class="access-card">
     <div class="access-logo"><span class="material-icons-round">pregnant_woman</span></div>
     <div class="access-title">HRP Tracker</div>
-    <div class="access-sub">Mayiladuthurai District · DPH Tamil Nadu<br>Sign in with your username and password</div>
+    <div class="access-sub">Mayiladuthurai District · DPH Tamil Nadu</div>
+
+    <!-- Google Sign-In button (shown when client ID is configured) -->
+    <div id="googleSignInWrap" style="display:none;margin-bottom:16px">
+      <div id="googleSignInBtn" style="display:flex;justify-content:center"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin:14px 0 2px">
+        <div style="flex:1;height:1px;background:var(--bdr)"></div>
+        <span style="font-size:11px;color:var(--txt3)">or sign in with username</span>
+        <div style="flex:1;height:1px;background:var(--bdr)"></div>
+      </div>
+    </div>
 
     <div style="margin-bottom:12px;text-align:left">
       <label style="font-size:12px;font-weight:500;color:var(--txt2);display:block;margin-bottom:5px">Username</label>
@@ -4028,6 +4038,48 @@ async function sha256(str) {
 }
 async function hashPwd(pwd) { return sha256(pwd + ':' + PWD_SALT); }
 
+// ── Google Sign-In ────────────────────────────────────────────
+async function initGoogleSignIn() {
+  try {
+    const cfg = await _api('GET', '/auth/config');
+    if (!cfg || !cfg.googleClientId) return;
+    // Load Google Identity Services script dynamically
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://accounts.google.com/gsi/client';
+      s.async = true; s.defer = true;
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+    google.accounts.id.initialize({
+      client_id: cfg.googleClientId,
+      callback: handleGoogleCredential,
+      auto_select: false,
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('googleSignInBtn'),
+      { theme: 'outline', size: 'large', width: 300, text: 'signin_with', shape: 'rectangular' }
+    );
+    document.getElementById('googleSignInWrap').style.display = '';
+  } catch(e) {
+    console.warn('[Google Sign-In] Not configured:', e.message);
+  }
+}
+
+async function handleGoogleCredential(response) {
+  hideAccessErr();
+  try {
+    const data = await _api('POST', '/auth/google', { credential: response.credential });
+    if (!data) return;
+    sessionStorage.setItem('hrp_jwt', data.token);
+    const u = { ...data.user, ts: Date.now() };
+    sessionStorage.setItem('hrp_session', JSON.stringify(u));
+    grantAccess(u);
+  } catch(err) {
+    showAccessErr(err.message || 'Google login failed');
+  }
+}
+
 // ── Init ─────────────────────────────────────────────────────
 function initAccessControl() {
   try {
@@ -4041,6 +4093,7 @@ function initAccessControl() {
   } catch(e){}
   document.getElementById('accessOverlay').classList.remove('hidden');
   setTimeout(()=>{ const el=document.getElementById('loginUser'); if(el) el.focus(); },300);
+  initGoogleSignIn();
 }
 
 // ── Login ────────────────────────────────────────────────────
@@ -4276,6 +4329,8 @@ function renderAddUser(prefill) {
       <input id="um_name" placeholder="e.g. Dr. S. Ramesh" value="${prefill?prefill.name||'':''}"></div>
     <div class="fg"><label>Username * <span style="font-size:10px;color:var(--txt3)">(lowercase, no spaces)</span></label>
       <input id="um_user" placeholder="e.g. sramesh" ${editing?'readonly style="background:var(--sur3)"':''} value="${prefill?prefill.id:''}"></div>
+    <div class="fg" style="grid-column:1/-1"><label>Gmail Address <span style="font-size:10px;color:var(--txt3)">(optional — enables Google sign-in for this user)</span></label>
+      <input id="um_email" type="email" placeholder="e.g. ramesh@gmail.com" value="${prefill?prefill.email||'':''}"></div>
     <div class="fg"><label>Role *</label>
       <select id="um_role" onchange="toggleBlockField()">
         ${ROLE_OPTIONS.map(r=>'<option value="'+r.value+'" '+(prefill&&prefill.role===r.value?'selected':'')+'>'+r.label+'</option>').join('')}
@@ -4358,7 +4413,8 @@ async function saveUser(editing) {
   const showErr  = msg => { errEl.textContent = msg; errEl.style.display = 'block'; };
   errEl.style.display = 'none';
 
-  const phc = document.getElementById('um_phc')?.value || '';
+  const phc   = document.getElementById('um_phc')?.value || '';
+  const email = (document.getElementById('um_email')?.value || '').trim().toLowerCase();
 
   if (!name)     return showErr('Full name is required.');
   if (!username) return showErr('Username is required.');
@@ -4372,12 +4428,12 @@ async function saveUser(editing) {
 
   try {
     if (editing) {
-      const body = { name, role, block, phc };
+      const body = { name, email, role, block, phc };
       if (pass) body.password = pass;
       await _api('PUT', '/users/' + umEditingUser, body);
       showSnack('✓ User updated');
     } else {
-      await _api('POST', '/users', { username, name, role, block, phc, password: pass });
+      await _api('POST', '/users', { username, name, email, role, block, phc, password: pass });
       showSnack('✓ User created: ' + username);
     }
     switchUmTab(0);
@@ -4390,7 +4446,7 @@ async function editUser(uid) {
   try {
     const u = await _api('GET', '/users/' + uid);
     if (!u) return;
-    renderAddUser({ id: u.username, name: u.name, role: u.role, block: u.block || '', phc: u.phc || '' });
+    renderAddUser({ id: u.username, name: u.name, email: u.email || '', role: u.role, block: u.block || '', phc: u.phc || '' });
     switchUmTab(1);
   } catch(e) {
     showSnack('Failed to load user: ' + e.message);

@@ -144,6 +144,10 @@ async function query(sql, params = []) {
     const doc = await _db.collection('hrp_users').doc(params[0]).get();
     return doc.exists ? [{ ...doc.data(), username: doc.id }] : [];
   }
+  if (/SELECT \* FROM users WHERE email = \?/.test(sql)) {
+    const snap = await _db.collection('hrp_users').where('email', '==', params[0]).limit(1).get();
+    return snap.docs.map(d => ({ ...d.data(), username: d.id }));
+  }
   // SELECT * FROM schedules
   if (/SELECT \* FROM schedules ORDER BY date/.test(sql)) {
     const snap = await _db.collection('hrp_alert_schedules').orderBy('date').get();
@@ -210,18 +214,18 @@ async function run(sql, params = []) {
 
   // ── Users ──────────────────────────────────────────────────
   if (/INSERT INTO users/.test(sql)) {
-    // params: [username, name, role, block, phc, password_hash]
-    const [username,name,role,block,phc,password_hash] = params;
+    // params: [username, name, email, role, block, phc, password_hash]
+    const [username,name,email,role,block,phc,password_hash] = params;
     await _db.collection('hrp_users').doc(username).set({
-      username,name,role,block,phc:phc||'',password_hash,active:true,created_at:now,updated_at:now,
+      username,name,email:email||'',role,block,phc:phc||'',password_hash,active:true,created_at:now,updated_at:now,
     }); return;
   }
   if (/UPDATE users SET name/.test(sql)) {
-    // params: [name, role, block, phc, password_hash, active, username]
+    // params: [name, email, role, block, phc, password_hash, active, username]
     const username = params[params.length - 1];
-    const [name,role,block,phc,password_hash,active] = params;
+    const [name,email,role,block,phc,password_hash,active] = params;
     await _db.collection('hrp_users').doc(username).update({
-      name,role,block,phc:phc||'',password_hash,active:!!active,updated_at:now,
+      name,email:email||'',role,block,phc:phc||'',password_hash,active:!!active,updated_at:now,
     }); return;
   }
   if (/UPDATE users SET last_login/.test(sql)) {

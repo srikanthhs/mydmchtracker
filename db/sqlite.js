@@ -26,8 +26,9 @@ async function init() {
   _db.run('PRAGMA journal_mode = WAL');
   _db.run('PRAGMA foreign_keys = ON');
   _createSchema();
-  // Migration: add phc column if missing
+  // Migrations: add columns if missing
   try { _db.run("ALTER TABLE users ADD COLUMN phc TEXT DEFAULT ''"); } catch {}
+  try { _db.run("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''"); } catch {}
   await _ensureAdmin();
   _flush();
 }

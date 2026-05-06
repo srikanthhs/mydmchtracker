@@ -8,6 +8,11 @@ const { requireAuth, JWT_SECRET } = require('../middleware/auth');
 const EXPIRES_IN    = process.env.JWT_EXPIRES_IN || '8h';
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '10');
 
+// GET /api/auth/config — returns public config (Google Client ID)
+router.get('/config', (_req, res) => {
+  res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || '' });
+});
+
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
@@ -30,6 +35,43 @@ router.post('/login', async (req, res) => {
   } catch (e) {
     console.error('[auth/login]', e.message);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// POST /api/auth/google — verify Google ID token and return app JWT
+router.post('/google', async (req, res) => {
+  try {
+    const { credential } = req.body || {};
+    if (!credential) return res.status(400).json({ error: 'No credential provided' });
+
+    // Verify with Google tokeninfo
+    const r = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+    if (!r.ok) return res.status(401).json({ error: 'Invalid Google token' });
+    const info = await r.json();
+
+    // Validate audience matches our client ID
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (clientId && info.aud !== clientId) {
+      return res.status(401).json({ error: 'Token audience mismatch' });
+    }
+
+    const email = (info.email || '').toLowerCase();
+    if (!email || info.email_verified !== 'true') {
+      return res.status(401).json({ error: 'Google email not verified' });
+    }
+
+    const u = await db.queryOne('SELECT * FROM users WHERE email = ?', [email]);
+    if (!u) return res.status(401).json({ error: 'No account linked to ' + email + '. Contact admin.' });
+    if (!u.active) return res.status(401).json({ error: 'Account deactivated. Contact admin.' });
+
+    await db.run("UPDATE users SET last_login = datetime('now') WHERE username = ?", [u.username]);
+
+    const payload = { username: u.username, name: u.name, role: u.role, block: u.block || '', phc: u.phc || '' };
+    const token   = jwt.sign(payload, JWT_SECRET, { expiresIn: EXPIRES_IN });
+    return res.json({ token, user: payload });
+  } catch (e) {
+    console.error('[auth/google]', e.message);
+    res.status(500).json({ error: 'Google login failed' });
   }
 });
 
