@@ -1438,16 +1438,16 @@ function renderTable() {
       const scoreHtml = score > 0 ? `<span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd}"><b>${score}</b> ${cat.label}</span>` : '<span class="rbadge" style="background:var(--c-none-bg);color:var(--c-none)">No flag</span>';
       const admPill = r.as ? `<span class="status-pill" style="background:${r.as==='Admitted'?'#E8F0FE':r.as==='Discharged'?'var(--c-none-bg)':'var(--c-mod-bg)'};color:${r.as==='Admitted'?'#1A73E8':r.as==='Discharged'?'var(--c-none)':'var(--c-mod)'}">${r.as}</span>` : '<span style="color:var(--txt3);font-size:11px">—</span>';
       const dsColors = {
-        'Delivered':        { bg:'#1E8C3A', color:'#fff' },
-        'Undelivered':      { bg:'#F9A825', color:'#fff' },
-        'Scan EDD Differs': { bg:'#E65100', color:'#fff' },
-        'Abortion':         { bg:'#6D4C41', color:'#fff' },
+        'Delivered':        { bg:'#1B5E20', color:'#fff' },
+        'Undelivered':      { bg:'#F57F17', color:'#fff' },
+        'Scan EDD Differs': { bg:'#BF360C', color:'#fff' },
+        'Abortion':         { bg:'#4E342E', color:'#fff' },
       };
       const dsRowBg = {
-        'Delivered':        '#E8F5E9',
-        'Undelivered':      '#FFFDE7',
-        'Scan EDD Differs': '#FFF3E0',
-        'Abortion':         '#EFEBE9',
+        'Delivered':        '#C8E6C9',
+        'Undelivered':      '#FFF9C4',
+        'Scan EDD Differs': '#FFE0B2',
+        'Abortion':         '#D7CCC8',
       };
       const dsc = dsColors[r.ds] || null;
       const delPill = r.ds && dsc
