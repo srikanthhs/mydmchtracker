@@ -932,6 +932,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div class="report-tab" onclick="setReportTab(4,this)">Delivery Report</div>
     <div class="report-tab" onclick="setReportTab(5,this)" style="color:var(--c-crit)">🏥 EDD Alert</div>
     <div class="report-tab" onclick="setReportTab(6,this)" style="color:#7B3F00">👨‍⚕️ Mentor OG</div>
+    <div class="report-tab" onclick="setReportTab(7,this)" style="color:var(--pri);font-weight:600">📋 Comprehensive</div>
   </div>
 
   <!-- Filter Bar -->
@@ -3723,11 +3724,25 @@ function generateReport() {
   renderReportTab();
 }
 
+// ── REPORT_SECTIONS registry ─────────────────────────────────
+// To add a new report tab: (1) add a tab button in HTML above, (2) push an entry here.
+// The Comprehensive report automatically includes every entry in this array.
+const REPORT_SECTIONS = [
+  { label:'District Summary', icon:'summarize',        color:'#1A73E8', fn:(d,el)=>renderSummaryReport(d,el)     },
+  { label:'Block-wise',       icon:'location_on',      color:'#1A73E8', fn:(d,el)=>renderBlockReport(d,el)       },
+  { label:'Risk Analysis',    icon:'analytics',        color:'#C5221F', fn:(d,el)=>renderRiskReport(d,el)        },
+  { label:'Patient List',     icon:'list_alt',         color:'#1A73E8', fn:(d,el)=>renderPatientListReport(d,el) },
+  { label:'Delivery Report',  icon:'child_friendly',   color:'#188038', fn:(d,el)=>renderDeliveryReport(d,el)    },
+  { label:'EDD Alert',        icon:'alarm',            color:'#C5221F', fn:(_,el)=>renderEddAlertReport(el)      },
+  { label:'Mentor OG',        icon:'medical_services', color:'#E65100', fn:(d,el)=>renderMentorOGReport(d,el)    },
+];
+
 function renderReportTab() {
   const body = document.getElementById('reportBody');
   const data = reportData;
 
-  if (!data.length) {
+  // EDD Alert (index 5) uses ALL data, not filtered reportData — allow empty data
+  if (!data.length && reportTabIdx !== 5 && reportTabIdx < REPORT_SECTIONS.length) {
     body.innerHTML = `<div style="text-align:center;padding:40px;color:var(--txt3)">
       <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:8px">search_off</span>
       No records match the selected filters. Adjust date range or filters above.
@@ -3735,13 +3750,11 @@ function renderReportTab() {
     return;
   }
 
-  if (reportTabIdx === 0) renderSummaryReport(data, body);
-  else if (reportTabIdx === 1) renderBlockReport(data, body);
-  else if (reportTabIdx === 2) renderRiskReport(data, body);
-  else if (reportTabIdx === 3) renderPatientListReport(data, body);
-  else if (reportTabIdx === 4) renderDeliveryReport(data, body);
-  else if (reportTabIdx === 5) renderEddAlertReport(body);
-  else if (reportTabIdx === 6) renderMentorOGReport(data, body);
+  if (reportTabIdx < REPORT_SECTIONS.length) {
+    REPORT_SECTIONS[reportTabIdx].fn(data, body);
+  } else {
+    renderComprehensiveReport(data, body);
+  }
 }
 
 function statCard(num, lbl, color) {
@@ -4585,6 +4598,454 @@ function printMentorOGPDF() {
   w.document.write(html);
   w.document.close();
   setTimeout(() => w.print(), 800);
+}
+
+// ============================================================
+// COMPREHENSIVE REPORT
+// ============================================================
+function renderComprehensiveReport(data, body) {
+  const today = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  const chips = getActiveFilterChips();
+
+  // Render each section into a temp div and collect the HTML
+  const tmp = document.createElement('div');
+  let sectionsHtml = '';
+  REPORT_SECTIONS.forEach((sec, i) => {
+    tmp.innerHTML = '';
+    sec.fn(data, tmp);
+    sectionsHtml += `
+      <div style="margin-bottom:4px">
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:${sec.color}18;border-left:4px solid ${sec.color};border-radius:0 var(--r-md) var(--r-md) 0;cursor:pointer;user-select:none"
+             onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none';this.querySelector('.comp-toggle').textContent=this.nextElementSibling.style.display===''?'expand_less':'expand_more'">
+          <span class="material-icons-round" style="font-size:18px;color:${sec.color}">${sec.icon}</span>
+          <span style="font-weight:600;font-size:13px;color:${sec.color};flex:1">Section ${i+1} — ${sec.label}</span>
+          <span class="material-icons-round comp-toggle" style="font-size:18px;color:${sec.color}">expand_less</span>
+        </div>
+        <div class="comp-section-body">${tmp.innerHTML}</div>
+      </div>`;
+  });
+
+  body.innerHTML = `
+    <div style="background:linear-gradient(135deg,#1A73E8 0%,#0D47A1 100%);border-radius:var(--r-md);padding:14px 18px;margin-bottom:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px">
+          <span class="material-icons-round" style="font-size:20px">description</span>
+          Comprehensive Report — All ${REPORT_SECTIONS.length} Sections
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px">
+          ${data.length} records · ${today}
+          ${chips.length ? ' · Filters: ' + chips.join(', ') : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-filled" onclick="toggleAllCompSections(true)"
+          style="height:32px;padding:0 12px;font-size:12px;background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.4)">
+          <span class="material-icons-round" style="font-size:14px;vertical-align:middle">unfold_more</span> Expand All
+        </button>
+        <button class="btn-filled" onclick="toggleAllCompSections(false)"
+          style="height:32px;padding:0 12px;font-size:12px;background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.4)">
+          <span class="material-icons-round" style="font-size:14px;vertical-align:middle">unfold_less</span> Collapse All
+        </button>
+        <button class="btn-filled" onclick="printComprehensivePDF()"
+          style="height:32px;padding:0 14px;font-size:12px;display:flex;align-items:center;gap:6px;background:#fff;color:#1A73E8;border-color:#fff">
+          <span class="material-icons-round" style="font-size:15px">picture_as_pdf</span> Print / PDF
+        </button>
+      </div>
+    </div>
+    <div style="margin-top:8px">${sectionsHtml}</div>`;
+}
+
+function toggleAllCompSections(open) {
+  document.querySelectorAll('#reportBody .comp-section-body').forEach(el => {
+    el.style.display = open ? '' : 'none';
+  });
+  document.querySelectorAll('#reportBody .comp-toggle').forEach(el => {
+    el.textContent = open ? 'expand_less' : 'expand_more';
+  });
+}
+
+function printComprehensivePDF() {
+  const data  = reportData;
+  const block = document.getElementById('rpt_block')?.value || '';
+  const from  = document.getElementById('rpt_from')?.value  || '';
+  const to    = document.getElementById('rpt_to')?.value    || '';
+  const today = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  const chips = getActiveFilterChips();
+
+  // ── Shared helpers ─────────────────────────────────────────
+  const fmtD  = v => { if(!v) return '—'; const d=new Date(v); return isNaN(d)?v:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); };
+  const rCat  = sc => sc>=10?{l:'Critical',c:'#C5221F',bg:'#FCE8E6'}:sc>=5?{l:'High',c:'#E37400',bg:'#FEF7E0'}:sc>=3?{l:'Moderate',c:'#188038',bg:'#E6F4EA'}:sc>0?{l:'Low',c:'#1A73E8',bg:'#E8F0FE'}:{l:'No Flag',c:'#9AA0A6',bg:'#F1F3F4'};
+
+  const CSS = `
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Roboto',sans-serif;font-size:11px;color:#202124;background:#fff}
+    .page{padding:16mm 14mm 12mm;position:relative}
+    h1{font-size:18px;font-weight:700;font-family:'Google Sans',sans-serif}
+    h2{font-size:13px;font-weight:500;color:#5F6368;margin-top:2px}
+    .meta{font-size:10px;color:#5F6368;margin-top:4px}
+    .cover-hdr{border-bottom:3px solid #1A73E8;padding-bottom:10px;margin-bottom:14px}
+    .cover-hdr h1{color:#1A73E8}
+    .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+    .stat-box{background:#F8F9FA;border-radius:6px;padding:8px 10px;text-align:center}
+    .stat-num{font-size:22px;font-weight:700;font-family:'Google Sans',sans-serif}
+    .stat-lbl{font-size:9px;color:#5F6368;margin-top:2px}
+    table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:10px}
+    th{background:#F8F9FA;padding:5px 7px;text-align:left;border:1px solid #DADCE0;font-weight:600;font-size:10px}
+    td{padding:4px 7px;border:1px solid #DADCE0;vertical-align:middle}
+    tr:nth-child(even) td{background:#FAFAFA}
+    .sec-hdr{font-size:14px;font-weight:700;font-family:'Google Sans',sans-serif;padding:7px 12px;border-radius:6px;margin:0 0 10px;display:flex;align-items:center;gap:6px}
+    .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:700}
+    .page-break{page-break-before:always}
+    .no-break{page-break-inside:avoid}
+    .footer{position:fixed;bottom:8mm;left:14mm;right:14mm;font-size:9px;color:#9AA0A6;display:flex;justify-content:space-between;border-top:1px solid #DADCE0;padding-top:4px}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}`;
+
+  // ── Compute shared data ────────────────────────────────────
+  const active   = data.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion');
+  const delivered= data.filter(r=>r.ds==='Delivered');
+  const abortion = data.filter(r=>r.ds==='Abortion');
+  const admitted = data.filter(r=>r.as==='Admitted');
+  const crit     = data.filter(r=>calcScore(r.r)>=10);
+  const high     = data.filter(r=>{const s=calcScore(r.r);return s>=5&&s<10;});
+  const edd15    = active.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=15;});
+  const overdue  = data.filter(r=>isOverdue(r));
+  const blocks   = [...new Set(data.map(r=>r.b))].sort();
+
+  // ── Section 1: Cover ───────────────────────────────────────
+  const coverPage = `
+  <div class="page">
+    <div class="cover-hdr">
+      <h1>📋 Comprehensive HRP Report</h1>
+      <h2>Mayiladuthurai District — High-Risk Pregnancy Tracker</h2>
+      <div class="meta">
+        Report Date: <b>${today}</b>
+        ${block?' &nbsp;·&nbsp; Block: <b>'+block+'</b>':''}
+        ${from||to?` &nbsp;·&nbsp; Period: <b>${from?fmtD(from):'Any'} → ${to?fmtD(to):'Any'}</b>`:''}
+        &nbsp;·&nbsp; Generated by: <b>${currentUser?.name||'Admin'}</b> (${currentUser?.role||''})
+        ${chips.length?' &nbsp;·&nbsp; Filters: '+chips.join('; '):''}
+      </div>
+    </div>
+
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">District Overview</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" style="color:#1A73E8">${data.length}</div><div class="stat-lbl">Total Records</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#F57F17">${active.length}</div><div class="stat-lbl">Undelivered</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#C5221F">${crit.length}</div><div class="stat-lbl">Critical Risk</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#E37400">${high.length}</div><div class="stat-lbl">High Risk</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#188038">${delivered.length}</div><div class="stat-lbl">Delivered</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#C5221F">${overdue.length}</div><div class="stat-lbl">Overdue Visit</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#E37400">${edd15.length}</div><div class="stat-lbl">EDD ≤ 15 Days</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#1A73E8">${admitted.length}</div><div class="stat-lbl">Admitted</div></div>
+    </div>
+
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Block-wise Summary</div>
+    <table>
+      <thead><tr><th>Block</th><th style="text-align:center">Total</th><th style="text-align:center">Undelivered</th><th style="text-align:center;color:#C5221F">Critical</th><th style="text-align:center;color:#E37400">High</th><th style="text-align:center;color:#188038">Delivered</th></tr></thead>
+      <tbody>
+        ${blocks.map(bl=>{
+          const bd=data.filter(r=>r.b===bl);
+          return `<tr>
+            <td><b>${bl}</b></td>
+            <td style="text-align:center">${bd.length}</td>
+            <td style="text-align:center">${bd.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion').length}</td>
+            <td style="text-align:center;color:#C5221F;font-weight:600">${bd.filter(r=>calcScore(r.r)>=10).length||'—'}</td>
+            <td style="text-align:center;color:#E37400;font-weight:600">${bd.filter(r=>{const s=calcScore(r.r);return s>=5&&s<10;}).length||'—'}</td>
+            <td style="text-align:center;color:#188038">${bd.filter(r=>r.ds==='Delivered').length||'—'}</td>
+          </tr>`;
+        }).join('')}
+        <tr style="background:#F8F9FA;font-weight:700">
+          <td>TOTAL</td>
+          <td style="text-align:center">${data.length}</td>
+          <td style="text-align:center">${active.length}</td>
+          <td style="text-align:center;color:#C5221F">${crit.length||'—'}</td>
+          <td style="text-align:center;color:#E37400">${high.length||'—'}</td>
+          <td style="text-align:center;color:#188038">${delivered.length||'—'}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 6px">Report Index</div>
+    ${REPORT_SECTIONS.map((s,i)=>`<div style="font-size:11px;padding:3px 0;border-bottom:1px solid #F1F3F4;display:flex;justify-content:space-between">
+      <span>Section ${i+2} — ${s.label}</span>
+      <span style="color:#9AA0A6">page ${i+2}</span>
+    </div>`).join('')}
+  </div>`;
+
+  // ── Section 2: Block-wise (PHC breakdown) ──────────────────
+  const blockPage = `
+  <div class="page page-break">
+    <div class="cover-hdr"><h1 style="color:#1A73E8">Section 2 — Block-wise Breakdown</h1><div class="meta">${data.length} records · ${today}</div></div>
+    <div class="sec-hdr" style="background:#E8F0FE;color:#1A73E8;border-left:4px solid #1A73E8">📍 PHC-wise breakdown per block</div>
+    ${blocks.map(bl=>{
+      const bd=data.filter(r=>r.b===bl);
+      const phcs=[...new Set(bd.map(r=>r.p))].sort();
+      return `<div class="no-break" style="margin-bottom:12px">
+        <div style="background:#E8F0FE;border-left:3px solid #1A73E8;padding:4px 10px;font-weight:600;font-size:11px;margin-bottom:4px;display:flex;justify-content:space-between">
+          <span>📍 ${bl} Block</span><span class="badge" style="background:#E8F0FE;color:#1A73E8">${bd.length} patients</span>
+        </div>
+        <table>
+          <thead><tr><th>PHC</th><th style="text-align:center">Total</th><th style="text-align:center;color:#C5221F">Critical</th><th style="text-align:center;color:#E37400">High</th><th style="text-align:center;color:#C5221F">Overdue</th><th style="text-align:center;color:#188038">Delivered</th></tr></thead>
+          <tbody>${phcs.map(ph=>{
+            const pd=bd.filter(r=>r.p===ph);
+            return `<tr>
+              <td>${ph}</td>
+              <td style="text-align:center">${pd.length}</td>
+              <td style="text-align:center;color:#C5221F">${pd.filter(r=>calcScore(r.r)>=10).length||'—'}</td>
+              <td style="text-align:center;color:#E37400">${pd.filter(r=>{const s=calcScore(r.r);return s>=5&&s<10;}).length||'—'}</td>
+              <td style="text-align:center;color:#C5221F">${pd.filter(r=>isOverdue(r)).length||'—'}</td>
+              <td style="text-align:center;color:#188038">${pd.filter(r=>r.ds==='Delivered').length||'—'}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  // ── Section 3: Risk Analysis ───────────────────────────────
+  const riskCats = [
+    {min:10,max:999,l:'Critical', c:'#C5221F',bg:'#FCE8E6'},
+    {min:5, max:9,  l:'High',     c:'#E37400',bg:'#FEF7E0'},
+    {min:3, max:4,  l:'Moderate', c:'#188038',bg:'#E6F4EA'},
+    {min:1, max:2,  l:'Low',      c:'#1A73E8',bg:'#E8F0FE'},
+    {min:0, max:0,  l:'No Flag',  c:'#9AA0A6',bg:'#F1F3F4'},
+  ];
+  const topFlags = Object.entries(
+    data.flatMap(r=>r.r||[]).reduce((acc,f)=>{acc[f]=(acc[f]||0)+1;return acc;},{})
+  ).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  const riskPage = `
+  <div class="page page-break">
+    <div class="cover-hdr"><h1 style="color:#C5221F">Section 3 — Risk Analysis</h1><div class="meta">${data.length} records · ${today}</div></div>
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Risk Category Distribution</div>
+    <table style="margin-bottom:14px">
+      <thead><tr><th>Risk Category</th><th style="text-align:center">Count</th><th style="text-align:center">% of Total</th></tr></thead>
+      <tbody>${riskCats.map(rc=>{
+        const cnt=data.filter(r=>{const s=calcScore(r.r);return s>=rc.min&&s<=rc.max;}).length;
+        return `<tr>
+          <td><span class="badge" style="background:${rc.bg};color:${rc.c}">${rc.l}</span></td>
+          <td style="text-align:center;font-weight:600">${cnt}</td>
+          <td style="text-align:center">${data.length?Math.round(cnt/data.length*100)+'%':'—'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+    ${topFlags.length?`
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Top 10 Risk Conditions</div>
+    <table>
+      <thead><tr><th>Risk Condition</th><th style="text-align:center">Patients</th><th style="text-align:center">%</th></tr></thead>
+      <tbody>${topFlags.map(([f,c])=>`<tr>
+        <td>${f}</td>
+        <td style="text-align:center;font-weight:600">${c}</td>
+        <td style="text-align:center">${Math.round(c/data.length*100)}%</td>
+      </tr>`).join('')}</tbody>
+    </table>`:''}
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 8px">Critical &amp; High Risk Patients</div>
+    <table>
+      <thead><tr><th>#</th><th>Mother Name</th><th>PHC / Block</th><th>EDD</th><th>Score</th><th>Key Flags</th><th>Mobile</th></tr></thead>
+      <tbody>${data.filter(r=>calcScore(r.r)>=5).sort((a,b)=>calcScore(b.r)-calcScore(a.r)).map((r,i)=>{
+        const sc=calcScore(r.r);const rc=rCat(sc);
+        return `<tr>
+          <td style="color:#9AA0A6">${i+1}</td>
+          <td><b>${r.n}</b></td>
+          <td>${r.p}<br><span style="color:#5F6368;font-size:9px">${r.b}</span></td>
+          <td>${fmtD(r.e)}</td>
+          <td><span class="badge" style="background:${rc.bg};color:${rc.c}">${sc} ${rc.l}</span></td>
+          <td style="font-size:9px">${(r.r||[]).slice(0,2).join('; ')}${r.r&&r.r.length>2?' …':''}</td>
+          <td style="color:#5F6368">${r.ph||'—'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+  </div>`;
+
+  // ── Section 4: Patient List ────────────────────────────────
+  const patientPage = `
+  <div class="page page-break">
+    <div class="cover-hdr"><h1 style="color:#1A73E8">Section 4 — Complete Patient List</h1><div class="meta">${data.length} records · ${today}</div></div>
+    <table>
+      <thead><tr><th>#</th><th>Mother Name</th><th>PICME</th><th>PHC / Block</th><th>EDD</th><th>Risk</th><th>Last Visit</th><th>Del. Status</th><th>Mobile</th></tr></thead>
+      <tbody>${getSorted(data).map((r,i)=>{
+        const sc=calcScore(r.r);const rc=rCat(sc);
+        return `<tr>
+          <td style="color:#9AA0A6">${i+1}</td>
+          <td><b>${r.n}</b></td>
+          <td style="color:#5F6368">${r.id||'—'}</td>
+          <td>${r.p}<br><span style="color:#5F6368;font-size:9px">${r.b}</span></td>
+          <td>${fmtD(r.e)}</td>
+          <td><span class="badge" style="background:${rc.bg};color:${rc.c}">${sc} ${rc.l}</span></td>
+          <td>${fmtD(r.lv)||'—'}</td>
+          <td>${r.ds||'Undelivered'}</td>
+          <td style="color:#5F6368">${r.ph||'—'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+  </div>`;
+
+  // ── Section 5: Delivery Report ────────────────────────────
+  const placeGrp = delivered.reduce((a,r)=>{const k=r.pd||r.pp||'Unknown';a[k]=(a[k]||0)+1;return a;},{});
+  const fpGrp    = delivered.reduce((a,r)=>{const k=r.fp||'Not recorded';a[k]=(a[k]||0)+1;return a;},{});
+  const edd30    = active.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=30;});
+
+  const deliveryPage = `
+  <div class="page page-break">
+    <div class="cover-hdr"><h1 style="color:#188038">Section 5 — Delivery Report</h1><div class="meta">${today}</div></div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" style="color:#188038">${delivered.length}</div><div class="stat-lbl">Delivered</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#C5221F">${edd15.length}</div><div class="stat-lbl">EDD ≤ 15 Days</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#E37400">${edd30.length}</div><div class="stat-lbl">EDD ≤ 30 Days</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#5F6368">${abortion.length}</div><div class="stat-lbl">Abortion</div></div>
+    </div>
+    ${edd30.length?`
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Upcoming Deliveries — EDD ≤ 30 Days</div>
+    <table>
+      <thead><tr><th>#</th><th>Mother Name</th><th>PHC / Block</th><th>EDD</th><th>Days Left</th><th>Risk</th><th>Planned Place</th><th>Mobile</th></tr></thead>
+      <tbody>${edd30.sort((a,b)=>daysUntil(a.e)-daysUntil(b.e)).map((r,i)=>{
+        const d=daysUntil(r.e);const rc=rCat(calcScore(r.r));
+        return `<tr>
+          <td style="color:#9AA0A6">${i+1}</td>
+          <td><b>${r.n}</b></td>
+          <td>${r.p}<br><span style="color:#5F6368;font-size:9px">${r.b}</span></td>
+          <td>${fmtD(r.e)}</td>
+          <td style="text-align:center"><span class="badge" style="background:${d<=15?'#FCE8E6':'#FEF7E0'};color:${d<=15?'#C5221F':'#E37400'}">${d}d</span></td>
+          <td><span class="badge" style="background:${rc.bg};color:${rc.c}">${calcScore(r.r)} ${rc.l}</span></td>
+          <td>${r.pp||'—'}</td>
+          <td style="color:#5F6368">${r.ph||'—'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`:''}
+    ${Object.keys(placeGrp).length?`
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Delivery by Place</div>
+    <table>
+      <thead><tr><th>Place</th><th style="text-align:center">Count</th><th style="text-align:center">%</th></tr></thead>
+      <tbody>${Object.entries(placeGrp).sort((a,b)=>b[1]-a[1]).map(([p,c])=>`<tr>
+        <td>${p}</td><td style="text-align:center;font-weight:600">${c}</td>
+        <td style="text-align:center">${delivered.length?Math.round(c/delivered.length*100)+'%':'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>`:''}
+    ${Object.keys(fpGrp).length?`
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Family Planning (Post-Delivery)</div>
+    <table>
+      <thead><tr><th>Method</th><th style="text-align:center">Count</th></tr></thead>
+      <tbody>${Object.entries(fpGrp).sort((a,b)=>b[1]-a[1]).map(([fp,c])=>`<tr>
+        <td>${fp}</td><td style="text-align:center;font-weight:600">${c}</td>
+      </tr>`).join('')}</tbody>
+    </table>`:''}
+  </div>`;
+
+  // ── Section 6: EDD Alert ───────────────────────────────────
+  const eddBlock = document.getElementById('rpt_block')?.value || '';
+  const pats15 = _eddAlertData(15, eddBlock);
+  const pats30 = _eddAlertData(30, eddBlock).filter(r=>daysUntil(r.e)>15);
+  const allEdd = [...pats15,...pats30];
+  const eddGrps = _groupByHospital(allEdd);
+  const eddPatRow = (r,i) => {
+    const d=daysUntil(r.e);const rc=rCat(calcScore(r.r));
+    return `<tr>
+      <td style="color:#9AA0A6">${i+1}</td>
+      <td><b>${r.n}</b></td>
+      <td style="color:#5F6368">${r.id||'—'}</td>
+      <td>${r.b}<br><span style="color:#5F6368;font-size:9px">${r.p}</span></td>
+      <td>${fmtD(r.e)}</td>
+      <td style="text-align:center"><span class="badge" style="background:${d<=7?'#FCE8E6':d<=15?'#FEF7E0':'#E8F0FE'};color:${d<=7?'#C5221F':d<=15?'#E37400':'#1557B0'}">${d}d</span></td>
+      <td><span class="badge" style="background:${rc.bg};color:${rc.c}">${calcScore(r.r)} ${rc.l}</span></td>
+      <td style="color:#5F6368">${r.ph||'—'}</td>
+    </tr>`;
+  };
+
+  const eddPage = `
+  <div class="page page-break">
+    <div class="cover-hdr"><h1 style="color:#C5221F">Section 6 — EDD Alert</h1><div class="meta">${today}${eddBlock?' · Block: '+eddBlock:''}</div></div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" style="color:#C5221F">${pats15.filter(r=>daysUntil(r.e)<=7).length}</div><div class="stat-lbl">≤ 7 Days</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#E37400">${pats15.length}</div><div class="stat-lbl">≤ 15 Days</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#1A73E8">${allEdd.length}</div><div class="stat-lbl">≤ 30 Days</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#5F6368">${Object.keys(eddGrps).length}</div><div class="stat-lbl">Hospitals</div></div>
+    </div>
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Hospital-wise Summary</div>
+    <table style="margin-bottom:14px">
+      <thead><tr><th>Planned Place of Delivery</th><th style="text-align:center;color:#C5221F">≤ 7d</th><th style="text-align:center;color:#E37400">≤ 15d</th><th style="text-align:center">16–30d</th><th style="text-align:center">Total</th></tr></thead>
+      <tbody>${Object.entries(eddGrps).sort((a,b)=>b[1].length-a[1].length).map(([p,pts])=>`<tr>
+        <td><b>${p}</b></td>
+        <td style="text-align:center;color:#C5221F;font-weight:600">${pts.filter(r=>daysUntil(r.e)<=7).length||'—'}</td>
+        <td style="text-align:center;color:#E37400;font-weight:600">${pts.filter(r=>daysUntil(r.e)<=15).length||'—'}</td>
+        <td style="text-align:center">${pts.filter(r=>daysUntil(r.e)>15).length||'—'}</td>
+        <td style="text-align:center;font-weight:700">${pts.length}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+    ${pats15.length?`
+    <div style="font-weight:600;font-size:11px;color:#C5221F;text-transform:uppercase;margin-bottom:6px">🚨 Urgent — ≤ 15 Days (${pats15.length})</div>
+    <table><thead><tr><th>#</th><th>Mother Name</th><th>PICME</th><th>Block/PHC</th><th>EDD</th><th>Days</th><th>Risk</th><th>Mobile</th></tr></thead>
+    <tbody>${pats15.map((r,i)=>eddPatRow(r,i)).join('')}</tbody></table>`:''}
+    ${pats30.length?`
+    <div style="font-weight:600;font-size:11px;color:#E37400;text-transform:uppercase;margin:12px 0 6px">📅 Upcoming — 16–30 Days (${pats30.length})</div>
+    <table><thead><tr><th>#</th><th>Mother Name</th><th>PICME</th><th>Block/PHC</th><th>EDD</th><th>Days</th><th>Risk</th><th>Mobile</th></tr></thead>
+    <tbody>${pats30.map((r,i)=>eddPatRow(r,i)).join('')}</tbody></table>`:''}
+  </div>`;
+
+  // ── Section 7: Mentor OG ───────────────────────────────────
+  const mentorGrps = _groupByMentor(data);
+  const mentorPatRow = (r,i) => {
+    const sc=calcScore(r.r);const rc=rCat(sc);
+    const mopL=(r.mop||'').toLowerCase();
+    const mc=mopL.includes('refer')?'#C5221F':mopL==='normal'?'#188038':mopL.includes('review')?'#E37400':'#5F6368';
+    const d=r.e?daysUntil(r.e):null;
+    const eddB=d!==null&&d<=30?` <span class="badge" style="background:${d<=7?'#FCE8E6':d<=15?'#FEF7E0':'#E8F0FE'};color:${d<=7?'#C5221F':d<=15?'#E37400':'#1557B0'}">${d}d</span>`:'';
+    return `<tr>
+      <td style="color:#9AA0A6">${i+1}</td>
+      <td><b>${r.n}</b>${r.as==='Admitted'?' <span class="badge" style="background:#E8F0FE;color:#1557B0">Admitted</span>':''}</td>
+      <td style="color:#5F6368">${r.id||'—'}</td>
+      <td>${r.b}<br><span style="color:#5F6368;font-size:9px">${r.p}</span></td>
+      <td>${fmtD(r.e)}${eddB}</td>
+      <td><span class="badge" style="background:${rc.bg};color:${rc.c}">${sc} ${rc.l}</span></td>
+      <td style="color:${mc}">${r.mop||'—'}</td>
+      <td style="color:#5F6368;max-width:80px;word-wrap:break-word">${r.rm||'—'}</td>
+    </tr>`;
+  };
+
+  const mentorPage = `
+  <div class="page page-break">
+    <div class="cover-hdr"><h1 style="color:#E65100">Section 7 — Mentor OG Report</h1><div class="meta">${today}</div></div>
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Mentor-wise Summary</div>
+    <table style="margin-bottom:14px">
+      <thead><tr><th>Mentor OG</th><th style="text-align:center">Total</th><th style="text-align:center;color:#C5221F">Critical</th><th style="text-align:center;color:#E37400">High</th><th style="text-align:center;color:#C5221F">Referral</th><th style="text-align:center;color:#188038">Normal</th><th style="text-align:center">Admitted</th></tr></thead>
+      <tbody>${Object.entries(mentorGrps).sort((a,b)=>b[1].length-a[1].length).map(([mo,pts])=>`<tr>
+        <td><b>${mo}</b></td>
+        <td style="text-align:center;font-weight:700">${pts.length}</td>
+        <td style="text-align:center;color:#C5221F">${pts.filter(r=>calcScore(r.r)>=10).length||'—'}</td>
+        <td style="text-align:center;color:#E37400">${pts.filter(r=>{const s=calcScore(r.r);return s>=5&&s<10;}).length||'—'}</td>
+        <td style="text-align:center;color:#C5221F">${pts.filter(r=>(r.mop||'').toLowerCase().includes('refer')).length||'—'}</td>
+        <td style="text-align:center;color:#188038">${pts.filter(r=>(r.mop||'').toLowerCase()==='normal').length||'—'}</td>
+        <td style="text-align:center">${pts.filter(r=>r.as==='Admitted').length||'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+    ${Object.entries(mentorGrps).sort((a,b)=>a[0].localeCompare(b[0])).map(([mo,pts])=>`
+    <div class="no-break" style="margin-bottom:12px">
+      <div style="background:#FFF3E0;border-left:3px solid #E65100;padding:4px 10px;font-weight:600;font-size:11px;margin-bottom:4px;display:flex;justify-content:space-between">
+        <span>👨‍⚕️ ${mo}</span><span class="badge" style="background:#FFF3E0;color:#E65100">${pts.length} patients</span>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Mother Name</th><th>PICME</th><th>Block/PHC</th><th>EDD</th><th>Risk</th><th>Opinion</th><th>Remarks</th></tr></thead>
+        <tbody>${pts.map((r,i)=>mentorPatRow(r,i)).join('')}</tbody>
+      </table>
+    </div>`).join('')}
+  </div>`;
+
+  // ── Assemble & print ───────────────────────────────────────
+  const html = `<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Comprehensive HRP Report — Mayiladuthurai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>${CSS}</style>
+  </head><body>
+    <div class="footer">
+      <span>Comprehensive HRP Report — Mayiladuthurai District · DPH Tamil Nadu</span>
+      <span>Generated: ${today} by ${currentUser?.name||'Admin'}</span>
+    </div>
+    ${coverPage}${blockPage}${riskPage}${patientPage}${deliveryPage}${eddPage}${mentorPage}
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 900);
 }
 
 function exportReportCSV() {
