@@ -932,7 +932,8 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div class="report-tab" onclick="setReportTab(4,this)">Delivery Report</div>
     <div class="report-tab" onclick="setReportTab(5,this)" style="color:var(--c-crit)">🏥 EDD Alert</div>
     <div class="report-tab" onclick="setReportTab(6,this)" style="color:#7B3F00">👨‍⚕️ Mentor OG</div>
-    <div class="report-tab" onclick="setReportTab(7,this)" style="color:var(--pri);font-weight:600">📋 Comprehensive</div>
+    <div class="report-tab" onclick="setReportTab(7,this)" style="color:#1565C0">🏥 Hospital-wise</div>
+    <div class="report-tab" onclick="setReportTab(8,this)" style="color:var(--pri);font-weight:600">📋 Comprehensive</div>
   </div>
 
   <!-- Filter Bar -->
@@ -3735,6 +3736,7 @@ const REPORT_SECTIONS = [
   { label:'Delivery Report',  icon:'child_friendly',   color:'#188038', fn:(d,el)=>renderDeliveryReport(d,el)    },
   { label:'EDD Alert',        icon:'alarm',            color:'#C5221F', fn:(_,el)=>renderEddAlertReport(el)      },
   { label:'Mentor OG',        icon:'medical_services', color:'#E65100', fn:(d,el)=>renderMentorOGReport(d,el)    },
+  { label:'Hospital-wise',    icon:'local_hospital',   color:'#1565C0', fn:(d,el)=>renderHospitalWiseReport(d,el) },
 ];
 
 function renderReportTab() {
@@ -4601,6 +4603,319 @@ function printMentorOGPDF() {
 }
 
 // ============================================================
+// HOSPITAL-WISE REPORT
+// ============================================================
+function _groupByPlannedHospital(data) {
+  const g = {};
+  data.forEach(r => {
+    const k = (r.pp || 'Not Planned / Unknown').trim();
+    if (!g[k]) g[k] = [];
+    g[k].push(r);
+  });
+  return g;
+}
+
+function renderHospitalWiseReport(data, body) {
+  const groups = _groupByPlannedHospital(data);
+  const today  = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  const total  = data.length;
+
+  const summaryRows = Object.entries(groups)
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([hosp, pts]) => {
+      const crit    = pts.filter(r => calcScore(r.r) >= 10).length;
+      const high    = pts.filter(r => { const s=calcScore(r.r); return s>=5&&s<10; }).length;
+      const edd15   = pts.filter(r => { const d=daysUntil(r.e); return d!==null&&d>=0&&d<=15; }).length;
+      const edd30   = pts.filter(r => { const d=daysUntil(r.e); return d!==null&&d>=0&&d<=30; }).length;
+      const del     = pts.filter(r => r.ds === 'Delivered').length;
+      const admitted= pts.filter(r => r.as === 'Admitted').length;
+      return `<tr>
+        <td style="font-weight:500">${hosp}</td>
+        <td style="text-align:center;font-weight:600">${pts.length}</td>
+        <td style="text-align:center;color:var(--c-crit);font-weight:600">${crit||'—'}</td>
+        <td style="text-align:center;color:var(--c-high);font-weight:600">${high||'—'}</td>
+        <td style="text-align:center;color:var(--c-crit);font-weight:600">${edd15||'—'}</td>
+        <td style="text-align:center;color:var(--c-high)">${edd30||'—'}</td>
+        <td style="text-align:center;color:var(--c-mod)">${del||'—'}</td>
+        <td style="text-align:center;color:#1A73E8">${admitted||'—'}</td>
+      </tr>`;
+    }).join('');
+
+  const hospitalSections = Object.entries(groups)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([hosp, pts]) => {
+      const crit  = pts.filter(r => calcScore(r.r) >= 10).length;
+      const high  = pts.filter(r => { const s=calcScore(r.r); return s>=5&&s<10; }).length;
+      const edd15 = pts.filter(r => { const d=daysUntil(r.e); return d!==null&&d>=0&&d<=15; }).length;
+      return `
+      <div class="rpt-section">
+        <div class="rpt-section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <span style="display:flex;align-items:center;gap:8px">
+            <span class="material-icons-round" style="font-size:16px;color:#1565C0">local_hospital</span>
+            <b>${hosp}</b>
+          </span>
+          <span style="display:flex;gap:6px;flex-wrap:wrap">
+            <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#E3F2FD;color:#1565C0;font-weight:600">${pts.length} patients</span>
+            ${crit  ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--c-crit-bg);color:var(--c-crit);font-weight:600">${crit} critical</span>` : ''}
+            ${high  ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:var(--c-high-bg);color:var(--c-high);font-weight:600">${high} high</span>` : ''}
+            ${edd15 ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#FCE8E6;color:#C5221F;font-weight:600">${edd15} EDD ≤15d</span>` : ''}
+          </span>
+        </div>
+        <table class="rpt-table">
+          <thead><tr>
+            <th>#</th><th>Mother Name</th><th>PICME No.</th><th>Block / PHC</th>
+            <th>EDD</th><th>Days Left</th><th>Risk</th><th>Del. Status</th><th>Remarks</th><th>Mobile</th>
+          </tr></thead>
+          <tbody>${pts
+            .sort((a, b) => {
+              const da = daysUntil(a.e), db = daysUntil(b.e);
+              if (da === null && db === null) return 0;
+              if (da === null) return 1;
+              if (db === null) return -1;
+              return da - db;
+            })
+            .map((r, i) => {
+              const sc  = calcScore(r.r); const cat = riskCat(sc);
+              const d   = daysUntil(r.e);
+              const dBg = d===null?'var(--sur2)':d<=7?'var(--c-crit-bg)':d<=15?'var(--c-high-bg)':d<=30?'var(--c-low-bg)':'var(--sur2)';
+              const dCl = d===null?'var(--txt3)':d<=7?'var(--c-crit)':d<=15?'var(--c-high)':d<=30?'var(--c-low)':'var(--txt2)';
+              const dLabel = d !== null && d >= 0 ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:${dBg};color:${dCl}">${d}d</span>` : (d < 0 ? `<span style="color:var(--c-crit);font-size:11px;font-weight:600">EDD Passed</span>` : '—');
+              return `<tr>
+                <td style="color:var(--txt3);font-size:11px">${i+1}</td>
+                <td style="font-weight:500">${r.n}${r.as==='Admitted'?` <span style="font-size:9px;color:#1A73E8;font-weight:600">[Admitted]</span>`:''}</td>
+                <td style="font-size:11px;color:var(--txt2)">${r.id||'—'}</td>
+                <td style="font-size:11px">${r.b}<br><span style="color:var(--txt2)">${r.p}</span></td>
+                <td><b>${fmtDate(r.e)||'—'}</b></td>
+                <td style="text-align:center">${dLabel}</td>
+                <td><span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd};font-size:10px">${sc} ${cat.label}</span></td>
+                <td style="font-size:11px">${r.ds||'Undelivered'}</td>
+                <td style="font-size:11px;color:var(--txt2);max-width:120px;white-space:normal">${r.rm||'—'}</td>
+                <td style="font-size:11px;color:var(--txt3)">${r.ph||'—'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }).join('');
+
+  body.innerHTML = `
+    <div class="rpt-section" style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:var(--r-md);padding:12px 16px;margin-bottom:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="material-icons-round" style="color:#1565C0;font-size:22px">local_hospital</span>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#1565C0">Hospital-wise Report — ${total} patient${total!==1?'s':''} · ${Object.keys(groups).length} hospital${Object.keys(groups).length!==1?'s':''}</div>
+            <div style="font-size:11px;color:#1565C0;opacity:.8">As of ${today} · Grouped by Planned Place of Delivery</div>
+          </div>
+        </div>
+        <button class="btn-filled" onclick="printHospitalWisePDF()"
+          style="height:34px;padding:0 14px;font-size:12px;display:flex;align-items:center;gap:6px;background:#1565C0;border-color:#1565C0">
+          <span class="material-icons-round" style="font-size:15px">picture_as_pdf</span> Print / PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="rpt-section">
+      <div class="rpt-section-title">
+        <span class="material-icons-round" style="font-size:16px;color:#1565C0">local_hospital</span>Hospital Summary
+      </div>
+      <table class="rpt-table">
+        <thead><tr>
+          <th>Planned Hospital</th>
+          <th style="text-align:center">Total</th>
+          <th style="text-align:center;color:var(--c-crit)">Critical</th>
+          <th style="text-align:center;color:var(--c-high)">High</th>
+          <th style="text-align:center;color:var(--c-crit)">EDD ≤15d</th>
+          <th style="text-align:center;color:var(--c-high)">EDD ≤30d</th>
+          <th style="text-align:center;color:var(--c-mod)">Delivered</th>
+          <th style="text-align:center;color:#1A73E8">Admitted</th>
+        </tr></thead>
+        <tbody>${summaryRows}</tbody>
+      </table>
+    </div>
+    ${hospitalSections}`;
+}
+
+function printHospitalWisePDF() {
+  const data  = reportData;
+  const block = document.getElementById('rpt_block')?.value || '';
+  const today = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  const from  = document.getElementById('rpt_from')?.value || '';
+  const to    = document.getElementById('rpt_to')?.value   || '';
+  const groups = _groupByPlannedHospital(data);
+
+  const CSS = `
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Roboto',sans-serif;font-size:11px;color:#202124;background:#fff}
+    .page{padding:18mm 15mm 14mm;min-height:297mm;position:relative}
+    .cover-hdr{border-bottom:3px solid #1565C0;padding-bottom:10px;margin-bottom:14px}
+    .cover-hdr h1{font-size:18px;font-weight:700;color:#1565C0;font-family:'Google Sans',sans-serif}
+    .cover-hdr h2{font-size:13px;font-weight:500;color:#5F6368;margin-top:2px}
+    .meta{font-size:10px;color:#5F6368;margin-top:4px}
+    .summary-box{background:#E3F2FD;border:1px solid #90CAF9;border-radius:6px;padding:10px 14px;margin-bottom:14px}
+    .summary-box h3{font-size:12px;font-weight:600;color:#1565C0;margin-bottom:6px}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:10px}
+    th{background:#F8F9FA;padding:5px 7px;text-align:left;border:1px solid #DADCE0;font-weight:600;font-size:10px}
+    td{padding:4px 7px;border:1px solid #DADCE0;vertical-align:middle}
+    tr:nth-child(even) td{background:#FAFAFA}
+    .hosp-hdr{background:#E3F2FD;border-left:3px solid #1565C0;padding:5px 10px;font-weight:600;font-size:11px;margin:12px 0 4px;display:flex;justify-content:space-between;align-items:center}
+    .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:700}
+    .risk-crit{color:#C5221F;font-weight:600}
+    .risk-high{color:#E37400;font-weight:600}
+    .risk-mod{color:#188038}
+    .footer{position:fixed;bottom:8mm;left:15mm;right:15mm;font-size:9px;color:#9AA0A6;display:flex;justify-content:space-between;border-top:1px solid #DADCE0;padding-top:4px}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page-break{page-break-before:always}.no-break{page-break-inside:avoid}}`;
+
+  const rCat = sc => sc>=10?{l:'Critical',c:'#C5221F',bg:'#FCE8E6'}:sc>=5?{l:'High',c:'#E37400',bg:'#FEF7E0'}:sc>=3?{l:'Moderate',c:'#188038',bg:'#E6F4EA'}:sc>0?{l:'Low',c:'#1A73E8',bg:'#E8F0FE'}:{l:'No Flag',c:'#9AA0A6',bg:'#F1F3F4'};
+  const fmtD = v => { if(!v) return '—'; const d=new Date(v); return isNaN(d)?v:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); };
+
+  const patRow = (r, i) => {
+    const sc = calcScore(r.r); const rc = rCat(sc);
+    const riskCls = sc>=10?'risk-crit':sc>=5?'risk-high':sc>=3?'risk-mod':'';
+    const d = daysUntil(r.e);
+    const dLabel = d!==null&&d>=0
+      ? `<span class="badge" style="background:${d<=7?'#FCE8E6':d<=15?'#FEF7E0':d<=30?'#E8F0FE':'#F1F3F4'};color:${d<=7?'#C5221F':d<=15?'#E37400':d<=30?'#1557B0':'#9AA0A6'}">${d}d</span>`
+      : (d!==null&&d<0?'<span style="color:#C5221F;font-weight:600">Passed</span>':'—');
+    return `<tr>
+      <td style="color:#9AA0A6;text-align:center">${i+1}</td>
+      <td><b>${r.n}</b>${r.as==='Admitted'?' <span class="badge" style="background:#E8F0FE;color:#1557B0">Admitted</span>':''}</td>
+      <td style="color:#5F6368">${r.id||'—'}</td>
+      <td>${r.b}<br><span style="color:#5F6368;font-size:9px">${r.p}</span></td>
+      <td>${fmtD(r.e)}</td>
+      <td style="text-align:center">${dLabel}</td>
+      <td class="${riskCls}">${sc} ${rc.l}</td>
+      <td>${r.ds||'Undelivered'}</td>
+      <td style="color:#5F6368;max-width:80px;word-wrap:break-word">${r.rm||'—'}</td>
+      <td style="color:#5F6368">${r.ph||'—'}</td>
+    </tr>`;
+  };
+
+  // Summary table
+  const summaryTable = `
+    <table>
+      <thead><tr>
+        <th>Planned Hospital</th>
+        <th style="text-align:center">Total</th>
+        <th style="text-align:center;color:#C5221F">Critical</th>
+        <th style="text-align:center;color:#E37400">High</th>
+        <th style="text-align:center;color:#C5221F">EDD ≤15d</th>
+        <th style="text-align:center;color:#E37400">EDD ≤30d</th>
+        <th style="text-align:center;color:#188038">Delivered</th>
+        <th style="text-align:center;color:#1A73E8">Admitted</th>
+      </tr></thead>
+      <tbody>
+        ${Object.entries(groups).sort((a,b)=>b[1].length-a[1].length).map(([h,pts])=>{
+          const crit  = pts.filter(r=>calcScore(r.r)>=10).length;
+          const high  = pts.filter(r=>{const s=calcScore(r.r);return s>=5&&s<10;}).length;
+          const e15   = pts.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=15;}).length;
+          const e30   = pts.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=30;}).length;
+          const del   = pts.filter(r=>r.ds==='Delivered').length;
+          const adm   = pts.filter(r=>r.as==='Admitted').length;
+          return `<tr>
+            <td><b>${h}</b></td>
+            <td style="text-align:center;font-weight:700">${pts.length}</td>
+            <td style="text-align:center;color:#C5221F;font-weight:600">${crit||'—'}</td>
+            <td style="text-align:center;color:#E37400;font-weight:600">${high||'—'}</td>
+            <td style="text-align:center;color:#C5221F;font-weight:600">${e15||'—'}</td>
+            <td style="text-align:center;color:#E37400">${e30||'—'}</td>
+            <td style="text-align:center;color:#188038">${del||'—'}</td>
+            <td style="text-align:center;color:#1A73E8">${adm||'—'}</td>
+          </tr>`;
+        }).join('')}
+        <tr style="background:#F8F9FA;font-weight:700">
+          <td>TOTAL</td>
+          <td style="text-align:center">${data.length}</td>
+          <td style="text-align:center;color:#C5221F">${data.filter(r=>calcScore(r.r)>=10).length||'—'}</td>
+          <td style="text-align:center;color:#E37400">${data.filter(r=>{const s=calcScore(r.r);return s>=5&&s<10;}).length||'—'}</td>
+          <td style="text-align:center;color:#C5221F">${data.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=15;}).length||'—'}</td>
+          <td style="text-align:center;color:#E37400">${data.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=30;}).length||'—'}</td>
+          <td style="text-align:center;color:#188038">${data.filter(r=>r.ds==='Delivered').length||'—'}</td>
+          <td style="text-align:center;color:#1A73E8">${data.filter(r=>r.as==='Admitted').length||'—'}</td>
+        </tr>
+      </tbody>
+    </table>`;
+
+  const hospPages = Object.entries(groups)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([hosp, pts], idx) => {
+      const crit  = pts.filter(r=>calcScore(r.r)>=10).length;
+      const high  = pts.filter(r=>{const s=calcScore(r.r);return s>=5&&s<10;}).length;
+      const e15   = pts.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=15;}).length;
+      const del   = pts.filter(r=>r.ds==='Delivered').length;
+      return `
+    <div class="page page-break">
+      <div class="cover-hdr">
+        <h1>🏥 ${hosp}</h1>
+        <h2>Mayiladuthurai District — Hospital-wise Patient List</h2>
+        <div class="meta">Report Date: <b>${today}</b>${block?' &nbsp;·&nbsp; Block: <b>'+block+'</b>':''}${from||to?` &nbsp;·&nbsp; Period: <b>${from?fmtD(from):'Any'} → ${to?fmtD(to):'Any'}</b>`:''}</div>
+      </div>
+      <div class="summary-box">
+        <h3>📊 ${hosp} — At a Glance</h3>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:11px">
+          <div><span style="font-size:20px;font-weight:700;color:#1565C0">${pts.length}</span><br>Total Patients</div>
+          ${crit?`<div><span style="font-size:20px;font-weight:700;color:#C5221F">${crit}</span><br>Critical</div>`:''}
+          ${high?`<div><span style="font-size:20px;font-weight:700;color:#E37400">${high}</span><br>High Risk</div>`:''}
+          ${e15?`<div><span style="font-size:20px;font-weight:700;color:#C5221F">${e15}</span><br>EDD ≤15 Days</div>`:''}
+          <div><span style="font-size:20px;font-weight:700;color:#188038">${del}</span><br>Delivered</div>
+        </div>
+      </div>
+      <div class="no-break">
+        <div class="hosp-hdr">
+          <span>🏥 ${hosp} — Patient List (${pts.length})</span>
+          <span>${crit?`<span class="badge" style="background:#FCE8E6;color:#C5221F">${crit} Critical</span> `:''}${e15?`<span class="badge" style="background:#FCE8E6;color:#C5221F">${e15} EDD≤15d</span>`:''}</span>
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>Mother Name</th><th>PICME</th><th>Block/PHC</th><th>EDD</th><th>Days</th><th>Risk</th><th>Del. Status</th><th>Remarks</th><th>Mobile</th></tr></thead>
+          <tbody>${pts.sort((a,b)=>{const da=daysUntil(a.e),db=daysUntil(b.e);return da===null?1:db===null?-1:da-db;}).map((r,i)=>patRow(r,i)).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+    }).join('');
+
+  const html = `<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Hospital-wise Report — Mayiladuthurai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>${CSS}</style>
+  </head><body>
+    <div class="footer">
+      <span>HRP Tracker — Mayiladuthurai District · DPH Tamil Nadu</span>
+      <span>Generated: ${today} by ${currentUser?.name||'Admin'}</span>
+    </div>
+    <!-- Cover: summary -->
+    <div class="page">
+      <div class="cover-hdr">
+        <h1>Hospital-wise Report</h1>
+        <h2>Mayiladuthurai District — High-Risk Pregnancy Tracker</h2>
+        <div class="meta">
+          Report Date: <b>${today}</b>
+          ${block?' &nbsp;·&nbsp; Block: <b>'+block+'</b>':''}
+          ${from||to?` &nbsp;·&nbsp; Period: <b>${from?fmtD(from):'Any'} → ${to?fmtD(to):'Any'}</b>`:''}
+          &nbsp;·&nbsp; Generated by: <b>${currentUser?.name||'Admin'}</b> (${currentUser?.role||''})
+        </div>
+      </div>
+      <div class="summary-box">
+        <h3>📊 District Overview</h3>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:11px">
+          <div><span style="font-size:20px;font-weight:700;color:#1565C0">${data.length}</span><br>Total Patients</div>
+          <div><span style="font-size:20px;font-weight:700;color:#1A73E8">${Object.keys(groups).length}</span><br>Hospitals</div>
+          <div><span style="font-size:20px;font-weight:700;color:#C5221F">${data.filter(r=>calcScore(r.r)>=10).length}</span><br>Critical</div>
+          <div><span style="font-size:20px;font-weight:700;color:#C5221F">${data.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=15;}).length}</span><br>EDD ≤15 Days</div>
+        </div>
+      </div>
+      <div style="font-weight:600;font-size:12px;margin-bottom:8px;color:#5F6368">HOSPITAL-WISE SUMMARY</div>
+      ${summaryTable}
+    </div>
+    ${hospPages}
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 800);
+}
+
+// ============================================================
 // COMPREHENSIVE REPORT
 // ============================================================
 function renderComprehensiveReport(data, body) {
@@ -5028,6 +5343,75 @@ function printComprehensivePDF() {
     </div>`).join('')}
   </div>`;
 
+  // ── Section 8: Hospital-wise ──────────────────────────────
+  const hospGrpsComp = _groupByPlannedHospital(data);
+  const fmtDh = v => { if(!v) return '—'; const d=new Date(v); return isNaN(d)?v:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); };
+  const hospPatRowComp = (r, i) => {
+    const sc=calcScore(r.r); const rc=rCat(sc);
+    const riskCls=sc>=10?'risk-crit':sc>=5?'risk-high':sc>=3?'risk-mod':'';
+    const d=daysUntil(r.e);
+    const dLabel=d!==null&&d>=0?`<span class="badge" style="background:${d<=7?'#FCE8E6':d<=15?'#FEF7E0':d<=30?'#E8F0FE':'#F1F3F4'};color:${d<=7?'#C5221F':d<=15?'#E37400':d<=30?'#1557B0':'#9AA0A6'}">${d}d</span>`:(d!==null&&d<0?'<span style="color:#C5221F;font-weight:600">Passed</span>':'—');
+    return `<tr>
+      <td style="color:#9AA0A6">${i+1}</td>
+      <td><b>${r.n}</b>${r.as==='Admitted'?' <span class="badge" style="background:#E8F0FE;color:#1557B0">Adm</span>':''}</td>
+      <td style="color:#5F6368">${r.id||'—'}</td>
+      <td>${r.b}<br><span style="color:#5F6368;font-size:9px">${r.p}</span></td>
+      <td>${fmtDh(r.e)}</td>
+      <td style="text-align:center">${dLabel}</td>
+      <td class="${riskCls}">${sc} ${rc.l}</td>
+      <td>${r.ds||'Undelivered'}</td>
+      <td style="color:#5F6368;max-width:70px;word-wrap:break-word">${r.rm||'—'}</td>
+      <td style="color:#5F6368">${r.ph||'—'}</td>
+    </tr>`;
+  };
+
+  const hospitalPage = `
+  <div class="page page-break">
+    <div class="cover-hdr"><h1 style="color:#1565C0">Section 8 — Hospital-wise Report</h1><div class="meta">${today}</div></div>
+    <div style="font-weight:600;font-size:11px;color:#5F6368;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Hospital Summary</div>
+    <table style="margin-bottom:14px">
+      <thead><tr>
+        <th>Planned Hospital</th>
+        <th style="text-align:center">Total</th>
+        <th style="text-align:center;color:#C5221F">Critical</th>
+        <th style="text-align:center;color:#E37400">High</th>
+        <th style="text-align:center;color:#C5221F">EDD ≤15d</th>
+        <th style="text-align:center;color:#E37400">EDD ≤30d</th>
+        <th style="text-align:center;color:#188038">Delivered</th>
+        <th style="text-align:center;color:#1A73E8">Admitted</th>
+      </tr></thead>
+      <tbody>
+        ${Object.entries(hospGrpsComp).sort((a,b)=>b[1].length-a[1].length).map(([h,pts])=>{
+          const cr=pts.filter(r=>calcScore(r.r)>=10).length;
+          const hi=pts.filter(r=>{const s=calcScore(r.r);return s>=5&&s<10;}).length;
+          const e15=pts.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=15;}).length;
+          const e30=pts.filter(r=>{const d=daysUntil(r.e);return d!==null&&d>=0&&d<=30;}).length;
+          return `<tr>
+            <td><b>${h}</b></td>
+            <td style="text-align:center;font-weight:700">${pts.length}</td>
+            <td style="text-align:center;color:#C5221F;font-weight:600">${cr||'—'}</td>
+            <td style="text-align:center;color:#E37400;font-weight:600">${hi||'—'}</td>
+            <td style="text-align:center;color:#C5221F;font-weight:600">${e15||'—'}</td>
+            <td style="text-align:center;color:#E37400">${e30||'—'}</td>
+            <td style="text-align:center;color:#188038">${pts.filter(r=>r.ds==='Delivered').length||'—'}</td>
+            <td style="text-align:center;color:#1A73E8">${pts.filter(r=>r.as==='Admitted').length||'—'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    ${Object.entries(hospGrpsComp).sort((a,b)=>a[0].localeCompare(b[0])).map(([hosp,pts])=>`
+    <div class="no-break" style="margin-bottom:12px">
+      <div class="hosp-hdr" style="background:#E3F2FD;border-left:3px solid #1565C0;">
+        <span>🏥 ${hosp}</span>
+        <span class="badge" style="background:#E3F2FD;color:#1565C0">${pts.length} patients</span>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Mother Name</th><th>PICME</th><th>Block/PHC</th><th>EDD</th><th>Days</th><th>Risk</th><th>Del. Status</th><th>Remarks</th><th>Mobile</th></tr></thead>
+        <tbody>${pts.sort((a,b)=>{const da=daysUntil(a.e),db=daysUntil(b.e);return da===null?1:db===null?-1:da-db;}).map((r,i)=>hospPatRowComp(r,i)).join('')}</tbody>
+      </table>
+    </div>`).join('')}
+  </div>`;
+
   // ── Assemble & print ───────────────────────────────────────
   const html = `<!DOCTYPE html><html><head>
     <meta charset="UTF-8">
@@ -5039,7 +5423,7 @@ function printComprehensivePDF() {
       <span>Comprehensive HRP Report — Mayiladuthurai District · DPH Tamil Nadu</span>
       <span>Generated: ${today} by ${currentUser?.name||'Admin'}</span>
     </div>
-    ${coverPage}${blockPage}${riskPage}${patientPage}${deliveryPage}${eddPage}${mentorPage}
+    ${coverPage}${blockPage}${riskPage}${patientPage}${deliveryPage}${eddPage}${mentorPage}${hospitalPage}
   </body></html>`;
 
   const w = window.open('', '_blank');
