@@ -5021,7 +5021,7 @@ function printComprehensivePDF() {
     .page-break{page-break-before:always}
     .no-break{page-break-inside:avoid}
     .footer{position:fixed;bottom:8mm;left:14mm;right:14mm;font-size:9px;color:#9AA0A6;display:flex;justify-content:space-between;border-top:1px solid #DADCE0;padding-top:4px}
-    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}`;
 
   // ── Compute shared data ────────────────────────────────────
   const active   = data.filter(r=>r.ds!=='Delivered'&&r.ds!=='Abortion');
