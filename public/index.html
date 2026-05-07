@@ -577,6 +577,22 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
           <button class="act-btn" onclick="openImport()"><span class="material-icons-round">upload</span>Import</button>
         </div>
       </div>
+      <!-- Delivery status colour legend -->
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:6px 14px;background:var(--sur2);border-bottom:1px solid var(--bdr);font-size:11px;color:var(--txt2)">
+        <span style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-right:2px">Row colour:</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#C8E6C9;border:1px solid #A5D6A7"></span>Delivered</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#FFF9C4;border:1px solid #F9E89A"></span>Undelivered</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#FFE0B2;border:1px solid #FFCC80"></span>Scan EDD Differs</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#D7CCC8;border:1px solid #BCAAA4"></span>Abortion</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#fff;border:1px solid var(--bdr)"></span>Not yet set</span>
+        <span style="margin-left:10px;font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em">Status pill:</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;padding:1px 8px;border-radius:10px;background:#1B5E20;color:#fff;font-size:10px;font-weight:600">Delivered</span></span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;padding:1px 8px;border-radius:10px;background:#F57F17;color:#fff;font-size:10px;font-weight:600">Undelivered</span></span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;padding:1px 8px;border-radius:10px;background:#BF360C;color:#fff;font-size:10px;font-weight:600">Scan EDD Differs</span></span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;padding:1px 8px;border-radius:10px;background:#4E342E;color:#fff;font-size:10px;font-weight:600">Abortion</span></span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;padding:1px 8px;border-radius:10px;background:#E8F0FE;color:#1A73E8;font-size:10px;font-weight:600">Admitted</span></span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;padding:1px 8px;border-radius:10px;background:#E6F4EA;color:#188038;font-size:10px;font-weight:600">Undelivered</span></span>
+      </div>
       <div class="scroll-tbl">
         <table>
           <thead>
