@@ -29,6 +29,7 @@ async function init() {
   // Migrations: add columns if missing
   try { _db.run("ALTER TABLE users ADD COLUMN phc TEXT DEFAULT ''"); } catch {}
   try { _db.run("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''"); } catch {}
+  try { _db.run("ALTER TABLE patients ADD COLUMN pd TEXT DEFAULT ''"); } catch {}
   await _ensureAdmin();
   _flush();
 }
@@ -47,7 +48,7 @@ function _createSchema() {
     CREATE TABLE IF NOT EXISTS patients (
       id TEXT PRIMARY KEY, b TEXT, p TEXT, h TEXT, n TEXT, hu TEXT,
       e TEXT, a INTEGER, ph TEXT, g TEXT, pa TEXT, r TEXT DEFAULT '[]',
-      pp TEXT, pt TEXT, lv TEXT, nv TEXT, rm TEXT, as_status TEXT,
+      pp TEXT, pt TEXT, pd TEXT DEFAULT '', lv TEXT, nv TEXT, rm TEXT, as_status TEXT,
       ds TEXT, dd TEXT, fp TEXT, mo TEXT, mop TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -112,16 +113,17 @@ async function run(sql, params = []) {
 
 async function upsertPatient(row) {
   _db.run(`
-    INSERT INTO patients (id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,lv,nv,rm,as_status,ds,dd,fp,mo,mop)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    INSERT INTO patients (id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,pd,lv,nv,rm,as_status,ds,dd,fp,mo,mop)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(id) DO UPDATE SET
       b=excluded.b,p=excluded.p,h=excluded.h,n=excluded.n,hu=excluded.hu,
       e=excluded.e,a=excluded.a,ph=excluded.ph,g=excluded.g,pa=excluded.pa,
-      r=excluded.r,pp=excluded.pp,pt=excluded.pt,lv=excluded.lv,nv=excluded.nv,
+      r=excluded.r,pp=excluded.pp,pt=excluded.pt,pd=excluded.pd,
+      lv=excluded.lv,nv=excluded.nv,
       rm=excluded.rm,as_status=excluded.as_status,ds=excluded.ds,dd=excluded.dd,
       fp=excluded.fp,mo=excluded.mo,mop=excluded.mop,updated_at=datetime('now')
   `, [row.id,row.b,row.p,row.h,row.n,row.hu,row.e,row.a,row.ph,row.g,row.pa,row.r,
-      row.pp,row.pt,row.lv,row.nv,row.rm,row.as_status,row.ds,row.dd,row.fp,row.mo,row.mop]);
+      row.pp,row.pt,row.pd,row.lv,row.nv,row.rm,row.as_status,row.ds,row.dd,row.fp,row.mo,row.mop]);
   _scheduleFlush();
 }
 

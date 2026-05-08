@@ -191,19 +191,20 @@ async function run(sql, params = []) {
 
   // ── Patients ───────────────────────────────────────────────
   if (/INSERT INTO patients/.test(sql) && !/ON CONFLICT/.test(sql)) {
-    // params: [id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,lv,nv,rm,as_status,ds,dd,fp,mo,mop]
-    const [id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,lv,nv,rm,as_status,ds,dd,fp,mo,mop] = params;
+    // params: [id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,pd,lv,nv,rm,as_status,ds,dd,fp,mo,mop]
+    const [id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,pd,lv,nv,rm,as_status,ds,dd,fp,mo,mop] = params;
     await _db.collection('hrp_patients').doc(id).set({
-      b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,lv,nv,rm,as:as_status,ds,dd,fp,mo,mop,
+      b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,pd,lv,nv,rm,as:as_status,ds,dd,fp,mo,mop,
       created_at:now, updated_at:now,
     }, { merge: true });
     return;
   }
   if (/UPDATE patients SET/.test(sql)) {
+    // params: [b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,pd,lv,nv,rm,as_status,ds,dd,fp,mo,mop,id]
     const id = params[params.length - 1];
-    const [,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,lv,nv,rm,as_status,ds,dd,fp,mo,mop] = params;
+    const [b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,pd,lv,nv,rm,as_status,ds,dd,fp,mo,mop] = params;
     await _db.collection('hrp_patients').doc(id).update({
-      b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,lv,nv,rm,as:as_status,ds,dd,fp,mo,mop,
+      b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,pd,lv,nv,rm,as:as_status,ds,dd,fp,mo,mop,
       updated_at: now,
     });
     return;

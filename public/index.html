@@ -1112,19 +1112,41 @@ function calcScore(flags) {
 // ============================================================
 const TODAY = new Date(new Date().toISOString().split('T')[0]); // always today
 
+// Normalise any date string/serial to a JS Date (or null if unparseable)
+function _parseDate(d) {
+  if(!d) return null;
+  const s = String(d).trim();
+  if(!s) return null;
+  // Excel serial (e.g. 45678)
+  const n = parseFloat(s);
+  if(!isNaN(n) && n > 40000 && n < 60000) {
+    return new Date((n - 25569) * 86400000);
+  }
+  // DD/MM/YYYY or D/M/YYYY (with / or -)
+  const dmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(dmy) {
+    const yr = dmy[3].length === 2 ? '20' + dmy[3] : dmy[3];
+    const dt = new Date(`${yr}-${dmy[2].padStart(2,'0')}-${dmy[1].padStart(2,'0')}`);
+    if(!isNaN(dt.getTime())) return dt;
+  }
+  // ISO YYYY-MM-DD or full ISO string
+  const dt = new Date(s);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
 function daysUntil(dateStr) {
   if(!dateStr) return null;
-  return Math.floor((new Date(dateStr) - TODAY) / 86400000);
+  const dt = _parseDate(dateStr);
+  if(!dt) return null;
+  return Math.floor((dt - TODAY) / 86400000);
 }
 
 function nextVisitDate(rec) {
-  // Fixed: next visit = 15 days after last visit date
-  if(rec.lv) {
-    const last = new Date(rec.lv);
-    const next = new Date(last.getTime() + 15 * 86400000);
-    return next.toISOString().split('T')[0];
-  }
-  return null;
+  if(!rec.lv) return null;
+  const last = _parseDate(rec.lv);
+  if(!last) return null;
+  const next = new Date(last.getTime() + 15 * 86400000);
+  return next.toISOString().split('T')[0];
 }
 
 function visitStatus(rec) {
@@ -1132,6 +1154,7 @@ function visitStatus(rec) {
   const nv = nextVisitDate(rec);
   if(!nv) return {label:'Schedule', cls:'no-visit-tag'};
   const days = daysUntil(nv);
+  if(days === null) return {label:'Schedule', cls:'no-visit-tag'};
   if(days < 0) return {label:`Overdue ${Math.abs(days)}d`, cls:'overdue-tag'};
   if(days <= 7) return {label:`Due ${days}d`, cls:'due-soon-tag'};
   return {label:`${nv}`, cls:'on-track-tag'};
@@ -1144,7 +1167,8 @@ function isOverdue(rec) {
 
 function fmtDate(d) {
   if(!d) return '—';
-  const dt = new Date(d);
+  const dt = _parseDate(d);
+  if(!dt) return '—';
   return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'});
 }
 

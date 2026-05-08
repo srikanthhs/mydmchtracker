@@ -30,7 +30,7 @@ async function init() {
     CREATE TABLE IF NOT EXISTS patients (
       id TEXT PRIMARY KEY, b TEXT, p TEXT, h TEXT, n TEXT, hu TEXT,
       e TEXT, a INTEGER, ph TEXT, g TEXT, pa TEXT, r TEXT DEFAULT '[]',
-      pp TEXT, pt TEXT, lv TEXT, nv TEXT, rm TEXT, as_status TEXT,
+      pp TEXT, pt TEXT, pd TEXT DEFAULT '', lv TEXT, nv TEXT, rm TEXT, as_status TEXT,
       ds TEXT, dd TEXT, fp TEXT, mo TEXT, mop TEXT,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -92,15 +92,16 @@ async function run(queryStr, params = []) {
 async function upsertPatient(row) {
   const s = getSql();
   await s`
-    INSERT INTO patients (id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,lv,nv,rm,as_status,ds,dd,fp,mo,mop)
+    INSERT INTO patients (id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,pd,lv,nv,rm,as_status,ds,dd,fp,mo,mop)
     VALUES (${row.id},${row.b},${row.p},${row.h},${row.n},${row.hu},
             ${row.e},${row.a},${row.ph},${row.g},${row.pa},${row.r},
-            ${row.pp},${row.pt},${row.lv},${row.nv},${row.rm},
+            ${row.pp},${row.pt},${row.pd},${row.lv},${row.nv},${row.rm},
             ${row.as_status},${row.ds},${row.dd},${row.fp},${row.mo},${row.mop})
     ON CONFLICT (id) DO UPDATE SET
       b=EXCLUDED.b,p=EXCLUDED.p,h=EXCLUDED.h,n=EXCLUDED.n,hu=EXCLUDED.hu,
       e=EXCLUDED.e,a=EXCLUDED.a,ph=EXCLUDED.ph,g=EXCLUDED.g,pa=EXCLUDED.pa,
-      r=EXCLUDED.r,pp=EXCLUDED.pp,pt=EXCLUDED.pt,lv=EXCLUDED.lv,nv=EXCLUDED.nv,
+      r=EXCLUDED.r,pp=EXCLUDED.pp,pt=EXCLUDED.pt,pd=EXCLUDED.pd,
+      lv=EXCLUDED.lv,nv=EXCLUDED.nv,
       rm=EXCLUDED.rm,as_status=EXCLUDED.as_status,ds=EXCLUDED.ds,dd=EXCLUDED.dd,
       fp=EXCLUDED.fp,mo=EXCLUDED.mo,mop=EXCLUDED.mop,updated_at=NOW()
   `;

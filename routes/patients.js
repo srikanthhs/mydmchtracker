@@ -72,16 +72,16 @@ router.post('/', requireEditor, async (req, res) => {
     const existing = await db.queryOne('SELECT id FROM patients WHERE id = ?', [row.id]);
     if (existing) {
       await db.run(
-        `UPDATE patients SET b=?,p=?,h=?,n=?,hu=?,e=?,a=?,ph=?,g=?,pa=?,r=?,pp=?,pt=?,
+        `UPDATE patients SET b=?,p=?,h=?,n=?,hu=?,e=?,a=?,ph=?,g=?,pa=?,r=?,pp=?,pt=?,pd=?,
          lv=?,nv=?,rm=?,as_status=?,ds=?,dd=?,fp=?,mo=?,mop=?,updated_at=datetime('now') WHERE id=?`,
-        [row.b,row.p,row.h,row.n,row.hu,row.e,row.a,row.ph,row.g,row.pa,row.r,row.pp,row.pt,
+        [row.b,row.p,row.h,row.n,row.hu,row.e,row.a,row.ph,row.g,row.pa,row.r,row.pp,row.pt,row.pd,
          row.lv,row.nv,row.rm,row.as_status,row.ds,row.dd,row.fp,row.mo,row.mop,row.id]);
     } else {
       await db.run(
-        `INSERT INTO patients (id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,lv,nv,rm,as_status,ds,dd,fp,mo,mop)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        `INSERT INTO patients (id,b,p,h,n,hu,e,a,ph,g,pa,r,pp,pt,pd,lv,nv,rm,as_status,ds,dd,fp,mo,mop)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         [row.id,row.b,row.p,row.h,row.n,row.hu,row.e,row.a,row.ph,row.g,row.pa,row.r,
-         row.pp,row.pt,row.lv,row.nv,row.rm,row.as_status,row.ds,row.dd,row.fp,row.mo,row.mop]);
+         row.pp,row.pt,row.pd,row.lv,row.nv,row.rm,row.as_status,row.ds,row.dd,row.fp,row.mo,row.mop]);
     }
     await _audit(req.user.username, existing ? 'update' : 'create', 'patient', row.id);
     res.json({ ok: true, id: row.id });
@@ -95,9 +95,9 @@ router.put('/:id', requireEditor, async (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Patient not found' });
     const row = db.patientToRow({ ...req.body, id: req.params.id });
     await db.run(
-      `UPDATE patients SET b=?,p=?,h=?,n=?,hu=?,e=?,a=?,ph=?,g=?,pa=?,r=?,pp=?,pt=?,
+      `UPDATE patients SET b=?,p=?,h=?,n=?,hu=?,e=?,a=?,ph=?,g=?,pa=?,r=?,pp=?,pt=?,pd=?,
        lv=?,nv=?,rm=?,as_status=?,ds=?,dd=?,fp=?,mo=?,mop=?,updated_at=datetime('now') WHERE id=?`,
-      [row.b,row.p,row.h,row.n,row.hu,row.e,row.a,row.ph,row.g,row.pa,row.r,row.pp,row.pt,
+      [row.b,row.p,row.h,row.n,row.hu,row.e,row.a,row.ph,row.g,row.pa,row.r,row.pp,row.pt,row.pd,
        row.lv,row.nv,row.rm,row.as_status,row.ds,row.dd,row.fp,row.mo,row.mop,row.id]);
     await _audit(req.user.username, 'update', 'patient', req.params.id);
     res.json({ ok: true });

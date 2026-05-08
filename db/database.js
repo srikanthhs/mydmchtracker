@@ -27,7 +27,8 @@ function patientFromRow(row) {
     n:  row.n,  hu: row.hu, e: row.e,  a: row.a,  ph: row.ph,
     g:  row.g,  pa: row.pa,
     r: (() => { try { return JSON.parse(row.r || '[]'); } catch { return []; } })(),
-    pp: row.pp, pt: row.pt, lv: row.lv, nv: row.nv, rm: row.rm,
+    pp: row.pp, pt: row.pt, pd: row.pd,
+    lv: row.lv, nv: row.nv, rm: row.rm,
     as: row.as_status ?? row.as,
     ds: row.ds, dd: row.dd, fp: row.fp, mo: row.mo, mop: row.mop,
   };
@@ -44,7 +45,7 @@ function patientToRow(p) {
     e: p.e||'', a: p.a ?? null, ph: p.ph||'',
     g: p.g||'', pa: p.pa||'',
     r: JSON.stringify(Array.isArray(p.r) ? p.r : []),
-    pp: p.pp||'', pt: p.pt||'',
+    pp: p.pp||'', pt: p.pt||'', pd: p.pd||'',
     lv: p.lv||'', nv: p.nv||'', rm: p.rm||'',
     as_status: p.as||'',
     ds: p.ds||'', dd: p.dd||'', fp: p.fp||'',
