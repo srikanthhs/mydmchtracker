@@ -1312,30 +1312,34 @@ let currentPage = 1;
 const PAGE_SIZE = 50;
 
 const COLS = [
-  {key:'sno',  label:'S.No',           sortable:false, w:'44px'},
-  {key:'b',    label:'Block',           sortable:true},
-  {key:'p',    label:'PHC',             sortable:true},
-  {key:'h',    label:'HSC',             sortable:true},
-  {key:'n',    label:'Mother Name',     sortable:true},
-  {key:'hu',   label:'Husband Name',    sortable:true},
-  {key:'id',   label:'PICME No.',       sortable:true},
-  {key:'a',    label:'Age',             sortable:true,  w:'50px'},
-  {key:'g',    label:'G/P',             sortable:false, w:'55px'},
-  {key:'e',    label:'EDD',             sortable:true},
-  {key:'lv',   label:'Last Visit',      sortable:true},
-  {key:'nv',   label:'Next Visit Due',  sortable:true},
-  {key:'rm',   label:'Remarks',         sortable:false},
+  // ── Always-visible clinical columns (fit on most screens) ──
+  {key:'sno',  label:'S.No',           sortable:false, w:'40px'},
+  {key:'b',    label:'Block',           sortable:true,  w:'80px'},
+  {key:'p',    label:'PHC',             sortable:true,  w:'80px'},
+  {key:'h',    label:'HSC',             sortable:true,  w:'72px'},
+  {key:'n',    label:'Mother Name',     sortable:true,  w:'130px'},
+  {key:'a',    label:'Age',             sortable:true,  w:'44px'},
+  {key:'g',    label:'G/P',             sortable:false, w:'50px'},
+  {key:'e',    label:'EDD',             sortable:true,  w:'84px'},
+  // ── Three key date columns immediately after EDD ───────────
+  {key:'lv',   label:'Last Visit',      sortable:true,  w:'84px'},
+  {key:'nv',   label:'Next Visit',      sortable:true,  w:'92px'},
+  {key:'dd',   label:'Del. Date',       sortable:true,  w:'84px'},
+  // ── Risk & status ──────────────────────────────────────────
   {key:'r',    label:'Risk Flags',      sortable:false},
   {key:'score',label:'Risk Score',      sortable:true},
   {key:'as',   label:'Adm. Status',     sortable:true},
-  {key:'ds',   label:'Delivery Status', sortable:true},
-  {key:'dd',   label:'Delivery Date',   sortable:true},
+  {key:'ds',   label:'Del. Status',     sortable:true},
+  // ── Extended / reference columns (scroll right) ────────────
+  {key:'rm',   label:'Remarks',         sortable:false},
   {key:'pp',   label:'Planned Place',   sortable:true},
   {key:'pd',   label:'Place of Del.',   sortable:true},
   {key:'mo',   label:'Mentor OG',       sortable:true},
   {key:'mop',  label:'Mentor Opinion',  sortable:true},
   {key:'fp',   label:'Family Planning', sortable:true},
   {key:'ph',   label:'Mobile',          sortable:false},
+  {key:'hu',   label:'Husband Name',    sortable:true},
+  {key:'id',   label:'PICME No.',       sortable:true},
 ];
 
 function buildTableHeader() {
@@ -1495,25 +1499,25 @@ function renderTable() {
         <td style="font-weight:500;font-size:11px">${r.p||'—'}</td>
         <td style="font-size:11px">${r.h||'—'}</td>
         <td><div style="font-weight:500">${r.n}</div><div style="font-size:10px;color:var(--txt3)">${r.id||''}</div></td>
-        <td style="color:var(--txt2);font-size:11px">${r.hu||'—'}</td>
-        <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${r.id||'—'}</td>
         <td style="text-align:center">${r.a||'—'}</td>
         <td style="text-align:center">${r.g||'—'}/${r.pa||'—'}</td>
         <td><b>${fmtDate(r.e)}</b></td>
         <td style="color:var(--txt2);font-size:11px">${fmtDate(r.lv)||'—'}</td>
         <td>${nvStr}</td>
-        <td style="font-size:11px;color:var(--txt2);max-width:120px;white-space:normal">${r.rm||'—'}</td>
+        <td style="font-size:11px;color:var(--txt2)">${r.dd?fmtDate(r.dd):'—'}</td>
         <td>${flags}${more}</td>
         <td>${scoreHtml}</td>
         <td>${admPill}</td>
         <td>${delPill}</td>
-        <td style="font-size:11px;color:var(--txt2)">${r.dd?fmtDate(r.dd):'—'}</td>
+        <td style="font-size:11px;color:var(--txt2);max-width:120px;white-space:normal">${r.rm||'—'}</td>
         <td style="font-size:11px">${r.pp||'—'}${r.pt?` <span style="font-size:10px;color:var(--txt3)">(${r.pt})</span>`:''}</td>
         <td style="font-size:11px">${r.pd||'—'}</td>
         <td>${moCell}</td>
         <td>${mopCell}</td>
         <td style="font-size:11px;color:var(--txt2)">${r.fp||'—'}</td>
         <td style="font-size:11px;color:var(--txt3)">${r.ph||'—'}</td>
+        <td style="color:var(--txt2);font-size:11px">${r.hu||'—'}</td>
+        <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${r.id||'—'}</td>
       </tr>`;
     }).join('');
   }
