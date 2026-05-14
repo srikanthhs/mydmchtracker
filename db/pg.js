@@ -57,6 +57,13 @@ async function init() {
       action TEXT, entity TEXT, entity_id TEXT, detail TEXT,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )`;
+  await s`
+    CREATE TABLE IF NOT EXISTS access_requests (
+      id TEXT PRIMARY KEY, name TEXT, email TEXT,
+      role TEXT DEFAULT 'viewer', block TEXT DEFAULT '',
+      phc TEXT DEFAULT '', message TEXT DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )`;
   await s`CREATE INDEX IF NOT EXISTS idx_p_block ON patients(b)`;
   await s`CREATE INDEX IF NOT EXISTS idx_p_ds    ON patients(ds)`;
   await s`CREATE INDEX IF NOT EXISTS idx_p_edd   ON patients(e)`;

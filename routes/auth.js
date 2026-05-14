@@ -75,6 +75,63 @@ router.post('/google', async (req, res) => {
   }
 });
 
+// POST /api/auth/request-access  (public — no auth needed)
+router.post('/request-access', async (req, res) => {
+  const { name, email, role, block, phc, message } = req.body || {};
+  if (!name || !email) return res.status(400).json({ error: 'Name and email are required' });
+  if (!email.includes('@')) return res.status(400).json({ error: 'Invalid email address' });
+  try {
+    await db.storeAccessRequest({
+      id: Date.now().toString(),
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      role: role || 'viewer',
+      block: block || '',
+      phc: phc || '',
+      message: message || '',
+    });
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/auth/access-requests  (admin only)
+router.get('/access-requests', requireAuth, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  try { res.json(await db.getAccessRequests()); }
+  catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/auth/access-requests/:id/approve  (admin only)
+router.post('/access-requests/:id/approve', requireAuth, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  try {
+    const requests = await db.getAccessRequests();
+    const ar = requests.find(r => r.id === req.params.id);
+    if (!ar) return res.status(404).json({ error: 'Request not found' });
+    const password = (req.body && req.body.tempPassword) ? req.body.tempPassword : 'Welcome@2026';
+    const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    // Derive username from email prefix, sanitised
+    const base = ar.email.split('@')[0].replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 20);
+    const username = base || 'user' + req.params.id.slice(-4);
+    // Check for duplicate username
+    const existing = await db.queryOne('SELECT username FROM users WHERE username = ?', [username]);
+    const finalUsername = existing ? username + '_' + req.params.id.slice(-4) : username;
+    await db.run(
+      'INSERT INTO users (username,name,email,role,block,phc,password_hash,active) VALUES (?,?,?,?,?,?,?,1)',
+      [finalUsername, ar.name, ar.email, ar.role, ar.block||'', ar.phc||'', hash]
+    );
+    await db.deleteAccessRequest(req.params.id);
+    res.json({ ok: true, username: finalUsername, tempPassword: password });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// DELETE /api/auth/access-requests/:id  (admin only)
+router.delete('/access-requests/:id', requireAuth, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  try { await db.deleteAccessRequest(req.params.id); res.json({ ok: true }); }
+  catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // POST /api/auth/logout
 router.post('/logout', requireAuth, (_req, res) => res.json({ ok: true }));
 

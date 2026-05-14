@@ -53,4 +53,20 @@ function patientToRow(p) {
   };
 }
 
-module.exports = { ...backend, patientFromRow, patientToRow };
+// ── Access request helpers ────────────────────────────────────
+async function storeAccessRequest(req) {
+  await backend.run(
+    `INSERT INTO access_requests (id,name,email,role,block,phc,message) VALUES (?,?,?,?,?,?,?)`,
+    [req.id, req.name, req.email, req.role||'viewer', req.block||'', req.phc||'', req.message||'']
+  );
+}
+
+async function getAccessRequests() {
+  return backend.query('SELECT * FROM access_requests ORDER BY created_at DESC');
+}
+
+async function deleteAccessRequest(id) {
+  await backend.run('DELETE FROM access_requests WHERE id = ?', [id]);
+}
+
+module.exports = { ...backend, patientFromRow, patientToRow, storeAccessRequest, getAccessRequests, deleteAccessRequest };

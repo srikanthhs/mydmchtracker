@@ -163,6 +163,12 @@ async function query(sql, params = []) {
     const doc = await _db.collection('hrp_alert_schedules').doc(params[0]).get();
     return doc.exists ? [{ id: doc.id }] : [];
   }
+  // SELECT * FROM access_requests
+  if (/SELECT \* FROM access_requests ORDER BY created_at/.test(sql)) {
+    const snap = await _db.collection('hrp_access_requests').orderBy('created_at','desc').get();
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+
   // SELECT * FROM audit_log
   if (/SELECT \* FROM audit_log ORDER BY created_at DESC/.test(sql)) {
     const snap = await _db.collection('hrp_audit').orderBy('created_at','desc').limit(200).get();
@@ -264,6 +270,17 @@ async function run(sql, params = []) {
   }
   if (/DELETE FROM schedules WHERE id/.test(sql)) {
     await _db.collection('hrp_alert_schedules').doc(params[0]).delete(); return;
+  }
+
+  // ── Access requests ───────────────────────────────────────
+  if (/INSERT INTO access_requests/.test(sql)) {
+    const [id,name,email,role,block,phc,message] = params;
+    await _db.collection('hrp_access_requests').doc(id).set({
+      name,email,role,block,phc,message, created_at: now,
+    }); return;
+  }
+  if (/DELETE FROM access_requests WHERE id/.test(sql)) {
+    await _db.collection('hrp_access_requests').doc(params[0]).delete(); return;
   }
 
   // ── Audit ─────────────────────────────────────────────────

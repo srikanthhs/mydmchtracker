@@ -405,6 +405,22 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   .rpt-stat-grid{grid-template-columns:repeat(2,1fr)}
 }
 
+/* ── SCHEDULE MODAL ──────────────────────────────────────── */
+.sched-visit-row{display:grid;grid-template-columns:60px 1fr 130px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--bdr);gap:8px}
+.sched-visit-row:last-child{border-bottom:none}
+.sched-visit-num{font-weight:600;color:var(--pri);font-size:13px}
+.sched-date{font-weight:600;color:#C5221F;font-size:14px}
+.sched-day-label{font-size:11px;color:var(--txt2)}
+.sched-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.sched-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:'Roboto',sans-serif;transition:opacity .15s}
+.sched-btn:hover{opacity:.88}
+/* ── ACCESS REQUEST MODAL ────────────────────────────────── */
+.ar-field{margin-bottom:12px}
+.ar-field label{font-size:11px;font-weight:500;color:var(--txt2);display:block;margin-bottom:4px}
+.ar-field input,.ar-field select,.ar-field textarea{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--bdr);border-radius:var(--r-sm);font-size:13px;font-family:'Roboto',sans-serif;outline:none;background:#fff}
+.ar-field input:focus,.ar-field select:focus,.ar-field textarea:focus{border-color:var(--pri)}
+.req-card{border:1px solid var(--bdr);border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px;background:var(--sur)}
+
 </style>
 </head>
 <body>
@@ -448,8 +464,13 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
       <span class="material-icons-round" style="font-size:18px">login</span>&nbsp;Sign In
     </button>
     <div class="access-err" id="accessErr"></div>
-    <div style="margin-top:18px;font-size:11px;color:var(--txt3)">Access restricted to authorised DPH / District personnel.<br>Contact the system admin to create your account.</div>
-    <div style="margin-top:8px;font-size:10px;color:var(--txt3);opacity:.7">Bootstrap admin: username <b>admin</b> · password <b>Admin@2026</b><br>(change after first login)</div>
+    <div style="margin-top:18px;font-size:11px;color:var(--txt3)">Access restricted to authorised DPH / District personnel.</div>
+    <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,.15);padding-top:12px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap">
+      <button onclick="openAccessReqModal()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:7px 18px;font-size:12px;color:#fff;cursor:pointer;font-family:'Roboto',sans-serif;display:flex;align-items:center;gap:5px">
+        <span class="material-icons-round" style="font-size:15px">person_add</span>Request Access
+      </button>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:rgba(255,255,255,.45)">Bootstrap admin: <b>admin</b> / <b>Admin@2026</b> (change after first login)</div>
   </div>
 </div>
 
@@ -1025,8 +1046,80 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div class="um-tab active" id="umTab0" onclick="switchUmTab(0)">👥 Users</div>
     <div class="um-tab" id="umTab1" onclick="switchUmTab(1)">➕ Add User</div>
     <div class="um-tab" id="umTab2" onclick="switchUmTab(2)">🔑 Change Password</div>
+    <div class="um-tab" id="umTab3" onclick="switchUmTab(3)">🔔 Requests<span id="arBadge" style="display:none;background:#C5221F;color:#fff;border-radius:10px;font-size:10px;padding:1px 7px;margin-left:5px;vertical-align:middle">0</span></div>
   </div>
   <div class="um-body" id="umBody"></div>
+</div>
+</div>
+
+<!-- VISIT SCHEDULE MODAL -->
+<div class="modal-ov" id="scheduleModal" onclick="closeModalOv(event,'scheduleModal')">
+<div class="modal" style="max-width:580px;max-height:90vh;overflow-y:auto">
+  <div class="modal-hdr">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="material-icons-round" style="color:var(--pri);font-size:20px">event_note</span>
+      <div>
+        <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500">Visit Schedule Generator</div>
+        <div id="schedPatName" style="font-size:11px;color:var(--txt2)"></div>
+      </div>
+    </div>
+    <button onclick="closeModal('scheduleModal')" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+  </div>
+  <div id="schedBody" style="padding:0 16px 16px"></div>
+</div>
+</div>
+
+<!-- ACCESS REQUEST MODAL -->
+<div class="modal-ov" id="accessReqModal" onclick="closeModalOv(event,'accessReqModal')">
+<div class="modal" style="max-width:440px">
+  <div class="modal-hdr">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="material-icons-round" style="color:var(--pri)">person_add</span>
+      <div>
+        <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500">Request Access</div>
+        <div style="font-size:11px;color:var(--txt2)">Admin will review and create your account</div>
+      </div>
+    </div>
+    <button onclick="closeModal('accessReqModal')" style="background:none;border:none;cursor:pointer"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+  </div>
+  <div style="padding:16px">
+    <div class="ar-field">
+      <label>Full Name *</label>
+      <input id="ar_name" type="text" placeholder="Your full name">
+    </div>
+    <div class="ar-field">
+      <label>Gmail / Email *</label>
+      <input id="ar_email" type="email" placeholder="yourname@gmail.com">
+    </div>
+    <div class="ar-field">
+      <label>Role Requested</label>
+      <select id="ar_role">
+        <option value="viewer">Viewer (Read-only)</option>
+        <option value="phc_officer">PHC Officer</option>
+        <option value="bdo">BDO / Block Officer</option>
+        <option value="dph_officer">DPH Officer</option>
+      </select>
+    </div>
+    <div class="ar-field">
+      <label>Block / Area (if applicable)</label>
+      <input id="ar_block" type="text" placeholder="Your block name">
+    </div>
+    <div class="ar-field">
+      <label>PHC (if applicable)</label>
+      <input id="ar_phc" type="text" placeholder="Your PHC name">
+    </div>
+    <div class="ar-field">
+      <label>Reason / Message</label>
+      <textarea id="ar_msg" rows="3" placeholder="Brief reason for needing access…"></textarea>
+    </div>
+    <div id="ar_err" style="color:var(--c-crit);font-size:12px;margin-bottom:8px;display:none"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeModal('accessReqModal')" style="padding:8px 16px;border:1px solid var(--bdr);border-radius:var(--r-sm);background:none;font-size:13px;cursor:pointer;font-family:inherit">Cancel</button>
+      <button id="arSubmitBtn" onclick="submitAccessRequest()" style="padding:8px 20px;background:var(--pri);color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+        <span class="material-icons-round" style="font-size:16px">send</span>Submit Request
+      </button>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -1788,6 +1881,7 @@ function openDrawer(key, idx) {
       <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
         ${canEdit() ? `<button class="act-btn" onclick="editRecord(${idx})"><span class="material-icons-round">edit</span> Edit</button>` : '<span style="font-size:12px;color:var(--txt3);padding:4px 8px;background:var(--sur2);border-radius:20px">View only</span>'}
         ${r.ph ? `<a href="tel:${r.ph}" class="act-btn" style="text-decoration:none"><span class="material-icons-round">call</span> Call</a>` : ''}
+        <button class="act-btn" style="background:var(--c-mod-bg);color:var(--c-mod);border-color:var(--c-mod-bd)" onclick="openScheduleModal(filteredCache[${idx}])"><span class="material-icons-round">event_note</span> Schedule</button>
         <button class="act-btn" onclick="navigator.clipboard.writeText('${r.n}, PICME: ${r.id||'-'}, EDD: ${r.e||'-'}, PHC: ${r.p}');showSnack('Copied to clipboard')"><span class="material-icons-round">content_copy</span> Copy</button>
       </div>
     </div>`;
@@ -5675,6 +5769,8 @@ function grantAccess(u) {
   }
 
   applyFilters();
+  // Load access request badge for admin
+  if (u.role === 'admin') loadAccessRequestBadge();
 }
 
 // ── Sign out ─────────────────────────────────────────────────
@@ -5755,13 +5851,14 @@ function openUserMgmt() {
 
 function switchUmTab(n) {
   umActiveTab = n;
-  [0,1,2].forEach(i => {
+  [0,1,2,3].forEach(i => {
     const t = document.getElementById('umTab'+i);
     if(t) t.classList.toggle('active', i===n);
   });
   if(n===0) renderUserList();
   else if(n===1) renderAddUser();
   else if(n===2) renderChangePassword();
+  else if(n===3) renderAccessRequests();
 }
 
 async function renderUserList() {
@@ -6038,6 +6135,395 @@ function resetLoginBtn(btn) {
 }
 
 
+
+// ============================================================
+// ACCESS REQUEST SYSTEM
+// ============================================================
+
+function openAccessReqModal() {
+  ['ar_name','ar_email','ar_block','ar_phc','ar_msg'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('ar_role').value = 'viewer';
+  const err = document.getElementById('ar_err'); if(err) err.style.display='none';
+  document.getElementById('accessReqModal').classList.add('open');
+  setTimeout(()=>{ const el=document.getElementById('ar_name'); if(el) el.focus(); },200);
+}
+
+async function submitAccessRequest() {
+  const name    = (document.getElementById('ar_name').value||'').trim();
+  const email   = (document.getElementById('ar_email').value||'').trim();
+  const role    = document.getElementById('ar_role').value;
+  const block   = (document.getElementById('ar_block').value||'').trim();
+  const phc     = (document.getElementById('ar_phc').value||'').trim();
+  const message = (document.getElementById('ar_msg').value||'').trim();
+  const errEl   = document.getElementById('ar_err');
+  const btn     = document.getElementById('arSubmitBtn');
+
+  errEl.style.display = 'none';
+  if(!name)  { errEl.textContent='Full name is required'; errEl.style.display=''; return; }
+  if(!email||!email.includes('@')) { errEl.textContent='Valid email required'; errEl.style.display=''; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-icons-round sync-spinning" style="font-size:16px">refresh</span>&nbsp;Submitting…';
+  try {
+    await _api('POST', '/auth/request-access', { name, email, role, block, phc, message });
+    closeModal('accessReqModal');
+    showSnack('✓ Request submitted. Admin will review and contact you.');
+  } catch(err) {
+    errEl.textContent = err.message || 'Submission failed. Try again.';
+    errEl.style.display = '';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-icons-round" style="font-size:16px">send</span>Submit Request';
+  }
+}
+
+async function loadAccessRequestBadge() {
+  if(!currentUser || currentUser.role !== 'admin') return;
+  try {
+    const reqs = await _api('GET', '/auth/access-requests');
+    const badge = document.getElementById('arBadge');
+    if(!badge) return;
+    if(reqs && reqs.length) {
+      badge.textContent = reqs.length;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch(e) {}
+}
+
+async function renderAccessRequests() {
+  const body = document.getElementById('umBody');
+  body.innerHTML = '<div style="text-align:center;padding:32px;color:var(--txt3)"><span class="material-icons-round sync-spinning" style="font-size:32px;display:block;margin-bottom:8px">refresh</span>Loading…</div>';
+  let reqs = [];
+  try { reqs = await _api('GET', '/auth/access-requests'); } catch(e) {
+    body.innerHTML = `<div style="padding:16px;color:var(--c-crit)">Error: ${e.message}</div>`; return;
+  }
+  if(!reqs.length) {
+    body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--txt3)"><span class="material-icons-round" style="font-size:36px;display:block;margin-bottom:8px">check_circle</span>No pending access requests</div>';
+    return;
+  }
+  const ROLE_LABELS = { admin:'Admin', dph_officer:'DPH Officer', bdo:'Block Officer', phc_officer:'PHC Officer', viewer:'Viewer' };
+  body.innerHTML = `
+    <div style="padding:12px 16px 4px;font-size:12px;color:var(--txt2)">${reqs.length} pending request(s)</div>
+    ${reqs.map(ar=>`
+      <div class="req-card" style="margin:6px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div style="min-width:0">
+            <div style="font-weight:500;font-size:13px">${ar.name}</div>
+            <div style="font-size:11px;color:var(--pri);margin-top:2px">${ar.email}</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:3px">
+              Role: <b>${ROLE_LABELS[ar.role]||ar.role}</b>
+              ${ar.block?` · Block: ${ar.block}`:''}${ar.phc?` · PHC: ${ar.phc}`:''}
+            </div>
+            ${ar.message?`<div style="font-size:11px;color:var(--txt2);margin-top:4px;font-style:italic">"${ar.message.replace(/"/g,'&quot;')}"</div>`:''}
+            <div style="font-size:10px;color:var(--txt3);margin-top:4px">${ar.created_at||''}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+            <button onclick="approveAccessRequest('${ar.id}','${ar.name.replace(/'/g,'&#39;')}','${ar.email}')"
+              style="padding:5px 12px;border:none;border-radius:var(--r-sm);background:var(--c-mod);color:#fff;font-size:12px;cursor:pointer">✓ Approve</button>
+            <button onclick="denyAccessRequest('${ar.id}')"
+              style="padding:5px 12px;border:1px solid var(--c-crit);border-radius:var(--r-sm);background:none;color:var(--c-crit);font-size:12px;cursor:pointer">✗ Deny</button>
+          </div>
+        </div>
+      </div>
+    `).join('')}`;
+}
+
+async function approveAccessRequest(id, name, email) {
+  const pw = prompt(`Creating account for ${name} (${email}).\n\nTemporary password (min 6 chars):\nLeave blank to use: Welcome@2026`) ?? '';
+  const tempPw = pw.trim() || 'Welcome@2026';
+  if(tempPw.length < 6) { showSnack('Password must be at least 6 characters'); return; }
+  try {
+    const res = await _api('POST', `/auth/access-requests/${id}/approve`, { tempPassword: tempPw });
+    showSnack(`✓ Account created — Username: ${res.username} · Password: ${res.tempPassword}`);
+    loadAccessRequestBadge();
+    renderAccessRequests();
+  } catch(e) { showSnack('✗ ' + e.message); }
+}
+
+async function denyAccessRequest(id) {
+  if(!confirm('Deny and delete this access request?')) return;
+  try {
+    await _api('DELETE', `/auth/access-requests/${id}`);
+    showSnack('Request denied and removed');
+    loadAccessRequestBadge();
+    renderAccessRequests();
+  } catch(e) { showSnack('✗ ' + e.message); }
+}
+
+// ============================================================
+// VISIT SCHEDULE GENERATOR
+// ============================================================
+
+let _schedRec = null;
+
+function genVisitDates(edd) {
+  if(!edd) return null;
+  const base = _parseDate(edd);
+  if(!base) return null;
+  return [
+    { visit:1, days:60, date: new Date(base.getTime() - 60*86400000) },
+    { visit:2, days:45, date: new Date(base.getTime() - 45*86400000) },
+    { visit:3, days:30, date: new Date(base.getTime() - 30*86400000) },
+    { visit:4, days:15, date: new Date(base.getTime() - 15*86400000) },
+    { visit:5, days:7,  date: new Date(base.getTime() -  7*86400000) },
+  ];
+}
+
+function fmtDateLong(d) {
+  const dt = (d instanceof Date) ? d : _parseDate(d);
+  if(!dt || isNaN(dt.getTime())) return '—';
+  return dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
+
+function openScheduleModal(r) {
+  if(!r) return;
+  _schedRec = r;
+  const dates = genVisitDates(r.e);
+  document.getElementById('schedPatName').textContent =
+    `${r.n} · PHC: ${r.p||'—'} · EDD: ${fmtDateLong(r.e)}`;
+
+  const body = document.getElementById('schedBody');
+  if(!dates) {
+    body.innerHTML='<div style="padding:16px;color:var(--c-crit)">No valid EDD found for this patient.</div>';
+    document.getElementById('scheduleModal').classList.add('open');
+    return;
+  }
+
+  body.innerHTML = `
+    <div style="background:var(--c-mod-bg);border-left:3px solid var(--c-mod);border-radius:var(--r-sm);padding:9px 14px;margin:12px 0;font-size:12px;color:var(--c-mod)">
+      <span class="material-icons-round" style="font-size:14px;vertical-align:middle;margin-right:4px">info</span>
+      Visit dates are calculated counting back from the Expected Date of Delivery (EDD: <b>${fmtDateLong(r.e)}</b>).
+    </div>
+
+    <div style="border:1px solid var(--bdr);border-radius:var(--r-md);overflow:hidden;margin-bottom:16px">
+      <div style="background:var(--sur2);display:grid;grid-template-columns:60px 1fr 1fr;padding:8px 14px;font-size:11px;font-weight:500;color:var(--txt2)">
+        <div>Visit</div><div>Schedule</div><div style="color:#C5221F">Date</div>
+      </div>
+      ${dates.map(v=>`
+        <div style="display:grid;grid-template-columns:60px 1fr 1fr;padding:10px 14px;border-top:1px solid var(--bdr);align-items:center">
+          <div style="font-weight:600;color:var(--pri)">Visit ${v.visit}</div>
+          <div style="font-size:12px;color:var(--txt2)">${v.days} days before EDD</div>
+          <div style="font-weight:600;color:#C5221F">${fmtDateLong(v.date)}</div>
+        </div>`).join('')}
+    </div>
+
+    <div style="font-size:12px;color:var(--txt2);margin-bottom:14px">
+      <span class="material-icons-round" style="font-size:14px;vertical-align:middle">schedule</span> Time: 09:00 AM &nbsp;·&nbsp;
+      <span class="material-icons-round" style="font-size:14px;vertical-align:middle">location_on</span> Venue: <b>${r.p||'Nearest PHC'}</b> / Nearest Govt PHC/GH
+    </div>
+
+    <div class="sched-actions">
+      <button class="sched-btn" onclick="sendSchedWhatsApp(_schedRec)"
+        style="background:#25D366;color:#fff">
+        <span class="material-icons-round" style="font-size:16px">chat</span> WhatsApp
+      </button>
+      <button class="sched-btn" onclick="sendSchedEmail(_schedRec,'en')"
+        style="background:#1A73E8;color:#fff">
+        <span class="material-icons-round" style="font-size:16px">email</span> Email (English)
+      </button>
+      <button class="sched-btn" onclick="sendSchedEmail(_schedRec,'ta')"
+        style="background:#E65100;color:#fff">
+        <span class="material-icons-round" style="font-size:16px">email</span> Email (தமிழ்)
+      </button>
+      <button class="sched-btn" onclick="downloadSchedICS(_schedRec)"
+        style="background:var(--sur2);color:var(--txt);border:1px solid var(--bdr)">
+        <span class="material-icons-round" style="font-size:16px">event</span> Download .ics
+      </button>
+    </div>
+    <div style="font-size:10px;color:var(--txt3);margin-top:10px;line-height:1.5">
+      💡 <b>Calendar sync:</b> Download the .ics file and attach it to the email — when opened on Android/iOS it auto-adds all 5 visits to the Calendar app with reminders.
+    </div>
+  `;
+  document.getElementById('scheduleModal').classList.add('open');
+}
+
+// ── WhatsApp ──────────────────────────────────────────────────
+function sendSchedWhatsApp(r) {
+  const dates = genVisitDates(r.e);
+  if(!dates) { showSnack('No valid EDD for schedule'); return; }
+  const lines = [
+    '*DPHPM – Mayiladuthurai*',
+    '*Maternal & Child Health — Visit Schedule*','',
+    `*Dear ${r.n},*`,
+    'Your antenatal hospital visits have been scheduled below. Please plan accordingly.','',
+    `Name : ${r.n}`,
+    `Age  : ${r.a||'—'} yrs`,
+    `Block: ${r.b||'—'}`,
+    `PHC  : ${r.p||'—'}`,
+    `EDD  : ${fmtDateLong(r.e)}`,
+    `Phone: ${r.ph||'—'}`,
+    '','*Visit Schedule:*',
+    ...dates.map(v=>`📅 *Visit ${v.visit}* (${v.days} days before EDD): *${fmtDateLong(v.date)}*`),
+    '','⏰ Time: 09:00 AM',
+    `📍 Venue: ${r.p||'Nearest Govt PHC'} / Govt PHC/GH`,
+    '','*Please bring:*',
+    '1. Antenatal card/booklet',
+    '2. Recent test results / scans',
+    '3. List of current medications',
+    '','⚠️ *Emergency:* If unwell, bleeding, reduced fetal movements, or severe headache/swelling — call *108* immediately.',
+    '',
+    '— DPHPM, Mayiladuthurai',
+  ];
+  const phone = (r.ph||'').replace(/\D/g,'');
+  const intlPhone = phone.length===10 ? '91'+phone : phone;
+  window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
+}
+
+// ── Email body builders ───────────────────────────────────────
+function _emailBodyEn(r, dates) {
+  const sep = '-------';
+  const bring = [
+    '*Please bring:*',
+    '1. Your antenatal card/booklet',
+    '2. Any recent test results or scans',
+    '3. List of current medications',
+    '4. Questions you\'d like to discuss',
+  ].join('\n');
+  const note = '*Important Note:* If you\'re feeling unwell, have bleeding, reduced fetal movements, or severe headache/swelling, call ambulance (108) or your Doctor/ Village Health Nurse (VHN) right away instead of waiting for your appointment.';
+  const visitBlocks = dates.map(v=>[
+    `*Visit ${v.visit}:*`,
+    `Date: ${fmtDateLong(v.date)}`,
+    'Time: 09:00 AM',
+    `Venue: ${r.p||'Nearest Govt PHC'} / Nearest Government PHC/GH`,
+    sep,
+  ].join('\n')).join('\n\n');
+
+  return [
+    `Dear ${r.n},`,
+    '',
+    'Your visits to nearby Hospital towards a safe delivery, have been planned and scheduled below.',
+    '',
+    'Please remember the dates and plan your next visit to the nearest Primary Health Centre (PHC)/ Government Hospital (GH) accordingly and get evaluated by Doctor.',
+    '',
+    `Name    : ${r.n}`,
+    `Age     : ${r.a||'—'}`,
+    `Phone   : ${r.ph||'—'}`,
+    `Block   : ${r.b||'—'}`,
+    `PHC     : ${r.p||'—'}`,
+    `Expected Date of Delivery (EDD) : ${fmtDateLong(r.e)}`,
+    sep,
+    'Visit schedule:', '',
+    visitBlocks,
+    '',
+    bring,
+    '',
+    note,
+    '',
+    'Looking forward to seeing you and your baby.',
+    '----------------------------------------------',
+    'Thanks,',
+    'Directorate of Public Health and Preventive Medicine, Mayiladuthurai.',
+  ].join('\n');
+}
+
+function _emailBodyTa(r, dates) {
+  const sep = '-------';
+  const visitBlocks = dates.map(v=>[
+    `*வருகை ${v.visit}:*`,
+    `தேதி: ${fmtDateLong(v.date)}`,
+    'நேரம்: 09:00 AM',
+    `இடம்: ${r.p||'அரசு PHC'} / அரசு PHC/GH`,
+    sep,
+  ].join('\n')).join('\n\n');
+
+  return [
+    `அன்பார்ந்த ${r.n},`,
+    '',
+    'நலமான பிரசவத்திற்காக, உங்கள் மருத்துவமனை வருகைகள் திட்டமிடப்பட்டுள்ளன.',
+    '',
+    'கீழே உள்ள தேதிகளை நினைவில் வைத்து, அருகில் உள்ள அரசு PHC / மருத்துவமனைக்குச் சென்று மருத்துவரால் பரிசோதிக்கப்படவும்.',
+    '',
+    `பெயர்        : ${r.n}`,
+    `வயது         : ${r.a||'—'}`,
+    `தொலைபேசி    : ${r.ph||'—'}`,
+    `வட்டம்       : ${r.b||'—'}`,
+    `PHC          : ${r.p||'—'}`,
+    `பிரசவ எதிர்பார்க்கப்படும் தேதி (EDD) : ${fmtDateLong(r.e)}`,
+    sep,
+    'வருகை அட்டவணை:', '',
+    visitBlocks,
+    '',
+    '*கொண்டு வர வேண்டியவை:*',
+    '1. கர்ப்ப கால அட்டை / பதிவேடு',
+    '2. சமீபத்திய சோதனை முடிவுகள் / ஸ்கேன்',
+    '3. தற்போது உட்கொள்ளும் மருந்துகளின் பட்டியல்',
+    '4. மருத்துவரிடம் கேட்க விரும்பும் கேள்விகள்',
+    '',
+    '*முக்கிய குறிப்பு:* உடல்நலம் சரியில்லாமல் இருந்தால், ரத்தப்போக்கு, குழந்தையின் அசைவு குறைந்தால் அல்லது கடுமையான தலைவலி / வீக்கம் இருந்தால், உடனடியாக 108 ஆம்புலன்ஸ் அல்லது மருத்துவர் / கிராம சுகாதார செவிலியர் (VHN) ஐ தொடர்பு கொள்ளவும்.',
+    '',
+    'உங்களையும் குழந்தையையும் சந்திப்பதற்கு ஆவலாக உள்ளோம்.',
+    '----------------------------------------------',
+    'நன்றி,',
+    'பொது சுகாதாரம் மற்றும் தடுப்பு மருத்துவ இயக்குநரகம், மயிலாடுதுறை.',
+  ].join('\n');
+}
+
+function sendSchedEmail(r, lang) {
+  const dates = genVisitDates(r.e);
+  if(!dates) { showSnack('No valid EDD for schedule'); return; }
+  const subject = 'Health - Maternal and Child Health - Visit to Hospital - Scheduled Dates – DPHPM – Mayiladuthurai';
+  const body = lang==='ta' ? _emailBodyTa(r, dates) : _emailBodyEn(r, dates);
+  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+  showSnack('📧 Email draft opened — add recipient email, then attach the .ics calendar file');
+}
+
+// ── ICS Calendar File ─────────────────────────────────────────
+function _icsDate(dt) {
+  return `${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}`;
+}
+
+function downloadSchedICS(r) {
+  const dates = genVisitDates(r.e);
+  if(!dates) { showSnack('No valid EDD for schedule'); return; }
+  const uid = (r.id||r.n||'pat').replace(/[^a-zA-Z0-9]/g,'').substring(0,20);
+  const now  = new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+
+  let ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//DPHPM HRP Tracker//Mayiladuthurai TN//EN',
+    'METHOD:PUBLISH',
+    'CALSCALE:GREGORIAN',
+    `X-WR-CALNAME:Antenatal Visits – ${r.n}`,
+    'X-WR-TIMEZONE:Asia/Kolkata',
+  ];
+
+  dates.forEach(v => {
+    const ds = _icsDate(v.date);
+    ics = ics.concat([
+      'BEGIN:VEVENT',
+      `UID:hrp-v${v.visit}-${uid}-${ds}@dphpm.tn`,
+      `DTSTAMP:${now}`,
+      `DTSTART;TZID=Asia/Kolkata:${ds}T090000`,
+      `DTEND;TZID=Asia/Kolkata:${ds}T100000`,
+      `SUMMARY:Hospital Visit ${v.visit} of 5 – ${r.n}`,
+      `DESCRIPTION:Visit ${v.visit} (${v.days} days before EDD)\\nPatient: ${r.n}\\nPHC: ${r.p||'—'}\\nEDD: ${fmtDateLong(r.e)}\\nTime: 09:00 AM`,
+      `LOCATION:${r.p||'Nearest Govt PHC'} / Nearest Government PHC/GH`,
+      'BEGIN:VALARM',
+      'TRIGGER:-P1D',
+      'ACTION:DISPLAY',
+      `DESCRIPTION:Reminder: Hospital Visit Tomorrow – ${r.n}`,
+      'END:VALARM',
+      'END:VEVENT',
+    ]);
+  });
+  ics.push('END:VCALENDAR');
+
+  const blob = new Blob([ics.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `antenatal-visits-${(r.n||'patient').replace(/\s+/g,'-')}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showSnack('📅 Calendar file downloaded — open it on your phone to add all visits to Calendar app');
+}
 
 buildTableHeader();
 buildRiskChips();
