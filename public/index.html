@@ -1458,6 +1458,7 @@ const COLS = [
   {key:'score',label:'Risk Score',                              sortable:true,  w:'80px'},
   {key:'pp',   label:'Planned Place of Delivery',               sortable:true,  w:'130px'},
   {key:'pt',   label:'Planned Place Type',                      sortable:true,  w:'110px'},
+  {key:'lv',   label:'Last Follow Up/ Visit Date',              sortable:true,  w:'110px'},
   {key:'nv',   label:'Next Visit Due',                          sortable:true,  w:'100px'},
   {key:'rm',   label:'Remarks',                                 sortable:false, w:'120px'},
   {key:'as',   label:'Admission Status',                        sortable:true,  w:'110px'},
@@ -1636,6 +1637,7 @@ function renderTable() {
         <td>${scoreHtml}</td>
         <td style="font-size:11px">${r.pp||'—'}</td>
         <td style="font-size:11px;color:var(--txt2)">${r.pt||'—'}</td>
+        <td style="color:var(--txt2);font-size:11px">${fmtDate(r.lv)||'—'}</td>
         <td>${nvStr}</td>
         <td style="font-size:11px;color:var(--txt2);max-width:120px;white-space:normal">${r.rm||'—'}</td>
         <td>${admPill}</td>
