@@ -45,7 +45,7 @@ app.use('/api/sheet',     require('./routes/sheet'));
 app.get('/api/health',    (_req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
 
 // ── Frontend (Tier 1 — Presentation Layer) ────────────────────
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { etag: false, maxAge: 0 }));
 app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 // ── Global error handler ──────────────────────────────────────

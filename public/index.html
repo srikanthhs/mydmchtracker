@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HRP Tracker — Mayiladuthurai District</title>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -659,7 +662,6 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
       </div>
     </div>
     <div class="form-row">
-      <div class="fg"><label>Last Follow-Up / Visit Date</label><input type="date" id="f_lv"></div>
       <div class="fg"><label>Date of Delivery</label><input type="date" id="f_dd"></div>
     </div>
     <div class="form-row">
@@ -1222,6 +1224,16 @@ function _parseDate(d) {
     const dt = new Date(`${yr}-${dmy[2].padStart(2,'0')}-${dmy[1].padStart(2,'0')}`);
     if(!isNaN(dt.getTime())) return dt;
   }
+  // D-Mon-YY or D-Mon-YYYY (e.g. "8-May-26", "23-Apr-2026")
+  const MONTHS = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const dmyText = s.match(/^(\d{1,2})[\/\-]([A-Za-z]{3})[\/\-](\d{2,4})$/);
+  if(dmyText) {
+    const mon = MONTHS[dmyText[2].toLowerCase()];
+    if(mon !== undefined) {
+      const yr = dmyText[3].length === 2 ? 2000 + parseInt(dmyText[3]) : parseInt(dmyText[3]);
+      return new Date(yr, mon, parseInt(dmyText[1]));
+    }
+  }
   // ISO YYYY-MM-DD or full ISO string
   const dt = new Date(s);
   return isNaN(dt.getTime()) ? null : dt;
@@ -1428,35 +1440,32 @@ let sortCol = 'e', sortDir = 1;
 let currentPage = 1;
 const PAGE_SIZE = 50;
 
+// Column order matches Google Sheet exactly
 const COLS = [
-  // ── Always-visible clinical columns (fit on most screens) ──
-  {key:'sno',  label:'S.No',           sortable:false, w:'40px'},
-  {key:'b',    label:'Block',           sortable:true,  w:'80px'},
-  {key:'p',    label:'PHC',             sortable:true,  w:'80px'},
-  {key:'h',    label:'HSC',             sortable:true,  w:'72px'},
-  {key:'n',    label:'Mother Name',     sortable:true,  w:'130px'},
-  {key:'a',    label:'Age',             sortable:true,  w:'44px'},
-  {key:'g',    label:'G/P',             sortable:false, w:'50px'},
-  {key:'e',    label:'EDD',             sortable:true,  w:'84px'},
-  // ── Three key date columns immediately after EDD ───────────
-  {key:'lv',   label:'Last Visit',      sortable:true,  w:'84px'},
-  {key:'nv',   label:'Next Visit',      sortable:true,  w:'92px'},
-  {key:'dd',   label:'Del. Date',       sortable:true,  w:'84px'},
-  // ── Risk & status ──────────────────────────────────────────
-  {key:'r',    label:'Risk Flags',      sortable:false},
-  {key:'score',label:'Risk Score',      sortable:true},
-  {key:'as',   label:'Adm. Status',     sortable:true},
-  {key:'ds',   label:'Del. Status',     sortable:true},
-  // ── Extended / reference columns (scroll right) ────────────
-  {key:'rm',   label:'Remarks',         sortable:false},
-  {key:'pp',   label:'Planned Place',   sortable:true},
-  {key:'pd',   label:'Place of Del.',   sortable:true},
-  {key:'mo',   label:'Mentor OG',       sortable:true},
-  {key:'mop',  label:'Mentor Opinion',  sortable:true},
-  {key:'fp',   label:'Family Planning', sortable:true},
-  {key:'ph',   label:'Mobile',          sortable:false},
-  {key:'hu',   label:'Husband Name',    sortable:true},
-  {key:'id',   label:'PICME No.',       sortable:true},
+  {key:'sno',  label:'S.No',                                    sortable:false, w:'44px'},
+  {key:'b',    label:'Block',                                    sortable:true,  w:'80px'},
+  {key:'p',    label:'Name of PHC',                             sortable:true,  w:'110px'},
+  {key:'h',    label:'Name of HSC',                             sortable:true,  w:'100px'},
+  {key:'id',   label:'PICME No.',                               sortable:true,  w:'90px'},
+  {key:'n',    label:'Name of the Mother',                      sortable:true,  w:'140px'},
+  {key:'hu',   label:'Husband Name',                            sortable:true,  w:'120px'},
+  {key:'e',    label:'EDD',                                     sortable:true,  w:'84px'},
+  {key:'a',    label:'Age',                                     sortable:true,  w:'44px'},
+  {key:'ph',   label:'Mother Contact Number',                   sortable:false, w:'110px'},
+  {key:'g',    label:'Gravida / Para',                          sortable:false, w:'70px'},
+  {key:'r',    label:'Type of High Risk',                       sortable:false},
+  {key:'score',label:'Risk Score',                              sortable:true,  w:'80px'},
+  {key:'pp',   label:'Planned Place of Delivery',               sortable:true,  w:'130px'},
+  {key:'pt',   label:'Planned Place Type',                      sortable:true,  w:'110px'},
+  {key:'nv',   label:'Next Visit Due',                          sortable:true,  w:'100px'},
+  {key:'rm',   label:'Remarks',                                 sortable:false, w:'120px'},
+  {key:'as',   label:'Admission Status',                        sortable:true,  w:'110px'},
+  {key:'ds',   label:'Delivery Status',                         sortable:true,  w:'110px'},
+  {key:'dd',   label:'Date of Delivery (dd/mm/yyyy)',           sortable:true,  w:'130px'},
+  {key:'pd',   label:'Place of Delivery',                       sortable:true,  w:'110px'},
+  {key:'fp',   label:'Family Planning',                         sortable:true,  w:'110px'},
+  {key:'mo',   label:'Mentor OG Allotted',                      sortable:true,  w:'120px'},
+  {key:'mop',  label:'Mentor OG Opinion',                       sortable:true,  w:'120px'},
 ];
 
 function buildTableHeader() {
@@ -1613,28 +1622,28 @@ function renderTable() {
       return `<tr class="data-row ${cat.cls}" style="${rowBg}" onclick="openDrawer('${(r.id||r.n).replace(/'/g,'\'')}',${start+i})">
         <td style="color:var(--txt3)">${start+i+1}</td>
         <td style="font-size:11px">${r.b||'—'}</td>
-        <td style="font-weight:500;font-size:11px">${r.p||'—'}</td>
+        <td style="font-size:11px">${r.p||'—'}</td>
         <td style="font-size:11px">${r.h||'—'}</td>
-        <td><div style="font-weight:500">${r.n}</div><div style="font-size:10px;color:var(--txt3)">${r.id||''}</div></td>
-        <td style="text-align:center">${r.a||'—'}</td>
-        <td style="text-align:center">${r.g||'—'}/${r.pa||'—'}</td>
+        <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${r.id||'—'}</td>
+        <td style="font-weight:500;font-size:12px">${r.n||'—'}</td>
+        <td style="font-size:11px;color:var(--txt2)">${r.hu||'—'}</td>
         <td><b>${fmtDate(r.e)}</b></td>
-        <td style="color:var(--txt2);font-size:11px">${fmtDate(r.lv)||'—'}</td>
-        <td>${nvStr}</td>
-        <td style="font-size:11px;color:var(--txt2)">${r.dd?fmtDate(r.dd):'—'}</td>
+        <td style="text-align:center">${r.a||'—'}</td>
+        <td style="font-size:11px;color:var(--txt3)">${r.ph||'—'}</td>
+        <td style="text-align:center;font-size:11px">${r.g||'—'}/${r.pa||'—'}</td>
         <td>${flags}${more}</td>
         <td>${scoreHtml}</td>
+        <td style="font-size:11px">${r.pp||'—'}</td>
+        <td style="font-size:11px;color:var(--txt2)">${r.pt||'—'}</td>
+        <td>${nvStr}</td>
+        <td style="font-size:11px;color:var(--txt2);max-width:120px;white-space:normal">${r.rm||'—'}</td>
         <td>${admPill}</td>
         <td>${delPill}</td>
-        <td style="font-size:11px;color:var(--txt2);max-width:120px;white-space:normal">${r.rm||'—'}</td>
-        <td style="font-size:11px">${r.pp||'—'}${r.pt?` <span style="font-size:10px;color:var(--txt3)">(${r.pt})</span>`:''}</td>
+        <td style="font-size:11px;color:var(--txt2)">${r.dd?fmtDate(r.dd):'—'}</td>
         <td style="font-size:11px">${r.pd||'—'}</td>
+        <td style="font-size:11px;color:var(--txt2)">${r.fp||'—'}</td>
         <td>${moCell}</td>
         <td>${mopCell}</td>
-        <td style="font-size:11px;color:var(--txt2)">${r.fp||'—'}</td>
-        <td style="font-size:11px;color:var(--txt3)">${r.ph||'—'}</td>
-        <td style="color:var(--txt2);font-size:11px">${r.hu||'—'}</td>
-        <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${r.id||'—'}</td>
       </tr>`;
     }).join('');
   }
@@ -1858,10 +1867,15 @@ function openDrawer(key, idx) {
         <div class="dg"><label>PHC</label><div class="v">${r.p}</div></div>
         <div class="dg"><label>HSC / Sub-centre</label><div class="v">${r.h||'—'}</div></div>
         <div class="dg"><label>Husband</label><div class="v" style="font-size:13px">${r.hu||'—'}</div></div>
-        <div class="dg"><label>Last visit</label><div class="v">${fmtDate(r.lv)}</div></div>
         <div class="dg"><label>Next visit due</label><div class="v" style="color:${vs?('var(--c-'+(vs.cls==='overdue-tag'?'crit':vs.cls==='due-soon-tag'?'high':'mod')+')'):''}">${vs?vs.label:'—'}</div></div>
         <div class="dg"><label>Visit interval</label><div class="v">Every ${score_interval} days</div></div>
-        <div class="dg"><label>Status</label><div class="v">${r.ds||r.as||'Undelivered'}</div></div>
+        <div class="dg"><label>Adm. Status</label><div class="v">${r.as||'—'}</div></div>
+        <div class="dg"><label>Delivery Status</label><div class="v">${r.ds||'Undelivered'}</div></div>
+        <div class="dg"><label>Delivery Date</label><div class="v">${fmtDate(r.dd)}</div></div>
+        <div class="dg"><label>Place of Delivery</label><div class="v">${r.pd||'—'}</div></div>
+        <div class="dg"><label>Family Planning</label><div class="v">${r.fp||'—'}</div></div>
+        <div class="dg"><label>Mentor OG</label><div class="v">${r.mo||'—'}</div></div>
+        <div class="dg"><label>Mentor Opinion</label><div class="v">${r.mop||'—'}</div></div>
       </div>
       <div class="sec-title">Risk score breakdown</div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
@@ -2380,11 +2394,8 @@ async function syncFromSheet(silent=false) {
       throw new Error(json.message || 'Unexpected response: ' + JSON.stringify(json).substring(0,200));
 
     const mapped = json.data.map(mapSheetRow).filter(Boolean);
-    if(mapped.length === 0) {
-      // Show first row keys to help diagnose column name mismatch
-      const sample = json.data[0] ? Object.keys(json.data[0]).join(', ') : 'no rows';
-      throw new Error('0 records mapped. Sheet columns found: [' + sample + ']');
-    }
+    if(mapped.length === 0)
+      throw new Error('0 records mapped from ' + json.data.length + ' rows');
 
     const filtered = filterByRole(mapped);
     ALL.length = 0;
@@ -2397,10 +2408,10 @@ async function syncFromSheet(silent=false) {
     if(dot) dot.className = 'sync-dot';
     if(ts)  ts.textContent = filtered.length + ' rec · ' + time;
     localStorage.setItem('hrp_last_sync', json.ts);
-    // Only cache unfiltered data for admin/dph; restricted roles skip cache
-    if (!currentUser || ['admin','dph_officer'].includes(currentUser.role)) {
-      localStorage.setItem('hrp_cache', JSON.stringify(mapped));
-    }
+    // Save for all roles so data persists across page reloads
+    try { localStorage.setItem('hrp_cache', JSON.stringify(filtered)); } catch(e) {}
+    // Persist to DB if user has editor role
+    _api('POST', '/patients/bulk', mapped).catch(() => {});
     if(!silent) showSnack('✓ Synced ' + filtered.length + ' records from Google Sheet');
     return { ok: true, count: filtered.length };
   } catch(err) {
@@ -2468,86 +2479,64 @@ function showSyncDiag(err, rawText) {
 }
 
 // ── Map Google Sheet row → app record ────────────────────
+// Exact column names confirmed from live sheet fetch
 function mapSheetRow(row) {
-  const name = row["NAME OF THE MOTHER"] || row["Mother Name"] || row["name"] || "";
-  if(!name.trim()) return null;
+  // Direct lookup by exact column name (case-insensitive, whitespace-normalised)
+  const nk = s => String(s).toLowerCase().replace(/[\s\n\r\t]+/g,' ').trim();
+  const idx = {};
+  Object.keys(row).forEach(k => { idx[nk(k)] = String(row[k]||'').trim(); });
+  const g = k => idx[nk(k)] || '';
 
-  // Risk flags: pipe / semicolon / comma separated
-  const riskRaw = row["TYPE OF HIGH RISK"] || row["Risk Flags"] || row["risk_flags"] || "";
-  const riskFlags = riskRaw
-    ? String(riskRaw).split(/[;,|\n]/).map(s=>s.trim()).filter(Boolean)
-    : [];
-
-  function d(v){ // date normaliser — handles DD/MM/YYYY, YYYY-MM-DD, Excel serial
+  // Date normaliser — sheet sends ISO timestamps like "2026-05-07T18:30:00.000Z"
+  function d(v) {
     if(!v) return '';
     const s = String(v).trim();
     if(!s) return '';
-    // Excel serial date (e.g. 45678)
-    const n = parseFloat(s);
-    if(!isNaN(n) && n > 40000 && n < 60000) {
-      const dt = new Date((n - 25569) * 86400000);
-      return dt.toISOString().split('T')[0];
-    }
-    // DD/MM/YYYY or D/M/YYYY
-    const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-    if(dmyMatch) {
-      const [,day,mon,yr] = dmyMatch;
-      return `${yr}-${mon.padStart(2,'0')}-${day.padStart(2,'0')}`;
-    }
-    // YYYY-MM-DD already
     if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
-    // MM/DD/YYYY
-    const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if(mdyMatch) {
-      const [,mon,day,yr] = mdyMatch;
-      // Heuristic: if first number >12 it's day-first
-      if(parseInt(mdyMatch[1]) > 12) return `${yr}-${mdyMatch[2].padStart(2,'0')}-${mdyMatch[1].padStart(2,'0')}`;
-      return `${yr}-${mon.padStart(2,'0')}-${day.padStart(2,'0')}`;
-    }
-    return s;
-  }
-
-  // Helper: get first non-empty value from multiple possible column names
-  function col(...keys) {
-    for(const k of keys) {
-      const v = row[k];
-      if(v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
-    }
+    const n = parseFloat(s);
+    if(!isNaN(n) && n > 40000 && n < 60000)
+      return new Date((n-25569)*86400000).toISOString().split('T')[0];
+    const MON = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+    const t = s.match(/^(\d{1,2})[\-\/\s]([A-Za-z]{3})[\-\/\s](\d{2,4})$/);
+    if(t){ const m=MON[t[2].toLowerCase()]; if(m){ const y=t[3].length<=2?'20'+t[3]:t[3]; return `${y}-${m}-${t[1].padStart(2,'0')}`; } }
+    const t2 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if(t2){ const y=t2[3].length<=2?'20'+t2[3]:t2[3]; return `${y}-${t2[2].padStart(2,'0')}-${t2[1].padStart(2,'0')}`; }
     return '';
   }
 
-  // Delivery status: handle "YES"/"NO" in "Delivered" column
-  let dsVal = col("DELIVERY STATUS","Delivery Status","delivery status");
-  if(!dsVal) {
-    const delRaw = col("Delivered","DELIVERED","delivered");
-    if(delRaw.toUpperCase()==='YES' || delRaw.toUpperCase()==='Y') dsVal = 'Delivered';
-    else if(delRaw && delRaw.toUpperCase()!=='NO' && delRaw.toUpperCase()!=='N' && delRaw.toUpperCase()!=='') dsVal = delRaw;
-  }
+  const name = g('NAME OF THE MOTHER');
+  if(!name) return null;
+
+  const riskRaw = g('TYPE OF HIGH RISK');
+  const riskFlags = riskRaw ? riskRaw.split(/[;,|\n]/).map(s=>s.trim()).filter(Boolean) : [];
+
+  let dsVal = g('DELIVERY STATUS');
+  if(!dsVal){ const raw=g('Delivered'); if(/^(yes|y)$/i.test(raw)) dsVal='Delivered'; else if(raw&&!/^(no|n)$/i.test(raw)) dsVal=raw; }
 
   return {
-    b:   col("BLOCK","Block","block"),
-    p:   col("NAME OF PHC","PHC","phc"),
-    h:   col("NAME OF HSC","HSC","hsc"),
-    id:  col("PICME_NO","PICME No.","picme_no","PICME NO","picme no"),
+    b:   g('BLOCK'),
+    p:   g('NAME OF PHC'),
+    h:   g('NAME OF HSC'),
+    id:  g('PICME_NO'),
     n:   name.trim(),
-    hu:  col("HUSBAND NAME","Husband Name","husband name"),
-    e:   d(col("EDD","edd")),
-    a:   col("AGE","Age","age"),
-    ph:  col("MOTHER CONTACT NUMBER","Mobile","mobile","phone","PHONE"),
-    g:   col("GRAVIDA","Gravida","gravida"),
-    pa:  col("PARA","Para","para"),
+    hu:  g('HUSBAND NAME'),
+    e:   d(g('EDD')),
+    a:   g('AGE'),
+    ph:  g('MOTHER CONTACT NUMBER'),
+    g:   g('GRAVIDA'),
+    pa:  g('PARA'),
     r:   riskFlags,
-    pp:  col("PLANNED PLACE OF DELIVERY","Planned Place","planned place of delivery"),
-    pt:  col("PLANNED PLACE TYPE","Delivery Type","planned place type"),
-    pd:  col("PLACE OF DELIVERY","Place of Delivery","place of delivery"),
-    lv:  d(col("LAST FOLLOW UP/ VISIT DATE","LAST FOLLOW UP/VISIT DATE","LAST FOLLOW UP / VISIT DATE","LAST VISIT DATE","Last Follow Up/ Visit Date","Last Follow Up/Visit Date","Last Visit Date","last follow up/ visit date","last follow up/visit date","last follow up/ visit date (dd/mm/yyyy)","last visit","LAST FOLLOW UP")),
-    rm:  col("REMARKS","Remarks","remarks"),
-    as:  col("ADMISSION STATUS","Admission Status","admission status"),
+    pp:  g('PLANNED PLACE OF DELIVERY'),
+    pt:  g('PLANNED PLACE TYPE'),
+    pd:  g('PLACE OF DELIVERY'),
+    lv:  d(g('LAST FOLLOW UP/ VISIT DATE (dd/mm/yyyy)')),
+    rm:  g('REMARKS'),
+    as:  g('ADMISSION STATUS'),
     ds:  dsVal,
-    dd:  d(col("DATE OF DELIVERY","Delivery Date","date of delivery")),
-    fp:  col("FAMILY PLANNING","Family Planning","family planning"),
-    mo:  col("MENTOR OG ALLOTTED","Mentor OG Allotted","mentor og allotted","MENTOR OG","mentor og"),
-    mop: col("MENTOR OG OPINION","Mentor OG Opinion","mentor og opinion","MENTOR OPINION","mentor opinion"),
+    dd:  d(g('DATE OF DELIVERY (dd/mm/yyyy)')),
+    fp:  g('FAMILY PLANNING'),
+    mo:  g('MENTOR OG ALLOTTED'),
+    mop: g('MENTOR OG OPINION'),
   };
 }
 
@@ -6531,7 +6520,7 @@ loadSchedulesLocal();
 updateSchedBadge();
 // Start access control — show login overlay until authenticated
 initAccessControl();
-// Load patients from the REST API, then start Google Sheet sync timer
+// Load patients from the REST API, then sync from Google Sheet
 (async () => {
   try {
     const data = await _api('GET', '/patients');
@@ -6542,7 +6531,6 @@ initAccessControl();
   } catch(e) {
     console.warn('[API] Could not load patients:', e.message);
   }
-  // Also sync from Google Sheet (pushes fresh data into our API)
   syncFromSheet(false).then(() => { startSyncTimer(); });
   setTimeout(() => { if (ALL.length === 0) { buildSidebar(); buildDropdowns(); applyFilters(); } }, 4000);
 })();
