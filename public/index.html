@@ -222,39 +222,49 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
 /* ══════════════════════════════════════════════════════
-   MOBILE-FIRST UI  (≤ 768 px)
-   Inspired by Google Health / Material Design 3
+   MOBILE UI  ≤ 768px
    ══════════════════════════════════════════════════════ */
 .mob-nav{display:none}
+/* Force sidebarToggle always visible — explicit rule */
+#sidebarToggle{display:flex!important}
 
 @media(max-width:768px){
 
   /* ── 1. BASE ──────────────────────────────────────── */
-  html{overflow-x:hidden}
+  html,body{
+    width:100%;max-width:100%;
+    overflow-x:hidden;
+  }
   body{
-    overflow-y:auto;overflow-x:hidden;
-    height:auto;min-height:100svh;
+    display:block!important;  /* override desktop flex */
+    height:auto!important;
+    min-height:100dvh;
+    overflow-y:auto;
     background:#F0F4F9;
   }
 
   /* ── 2. APP BAR ───────────────────────────────────── */
   .app-bar{
-    position:fixed;top:0;left:0;right:0;z-index:200;
-    height:56px;padding:0 12px;gap:8px;
+    position:fixed;top:0;left:0;right:0;z-index:500;
+    height:56px;padding:0 8px;gap:6px;
     background:var(--pri);
+    display:flex!important;
+    align-items:center;
   }
-  /* App bar: keep ☰ menu + ⟳ sync only */
-  .app-bar .icon-btn:not(#syncBtn):not(#sidebarToggle){display:none!important}
-  /* Hide subtitle on mobile */
-  .app-bar > div > div:last-child{display:none}
-  #syncStatus{display:flex;gap:4px}
+  /* Explicitly show menu + sync; hide everything else */
+  .app-bar > *{display:none!important}
+  #sidebarToggle{display:flex!important}
+  .app-bar > div{display:flex!important;flex:1;flex-direction:column}
+  .app-bar > div > div:last-child{display:none!important}
+  #syncBtn{display:flex!important}
+  #syncStatus{display:flex!important;gap:3px;flex-shrink:0}
 
   /* ── 3. BODY WRAP ─────────────────────────────────── */
   .body-wrap{
     display:block!important;
     overflow:visible!important;
     padding-top:56px;
-    min-height:100svh;
+    min-height:100dvh;
   }
   /* Sidebar: slide-in from left over content */
   .sidebar{
