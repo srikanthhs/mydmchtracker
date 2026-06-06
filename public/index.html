@@ -191,7 +191,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 .fab .material-icons-round{font-size:18px}
 
 /* SNACKBAR */
-.snack{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(16px);background:#323232;color:#fff;padding:10px 20px;border-radius:var(--r-md);font-size:13px;opacity:0;transition:all .25s;pointer-events:none;z-index:600;white-space:nowrap}
+.snack{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(16px);background:#323232;color:#fff;padding:10px 20px;border-radius:var(--r-md);font-size:13px;opacity:0;transition:all .25s;pointer-events:none;z-index:600;white-space:nowrap;max-width:90vw}
 .snack.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* PAGINATION */
@@ -266,7 +266,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 
   /* ── 1. BASE — lock width to screen, kill overflow ─── */
   html{
-    overflow-x:hidden!important;
+    overflow-x:clip!important;
     width:100%!important;
     height:auto;
   }
@@ -274,12 +274,14 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     display:block!important;
     height:auto!important;
     min-height:100dvh;
-    overflow-x:hidden!important;
+    overflow-x:clip!important;
     overflow-y:auto!important;
     width:100%!important;
-    /* Do NOT use 100vw — it includes scrollbar and causes right gap */
     background:#F0F4F9;
-    position:relative;
+  }
+  /* Clip overflow on all main containers */
+  .body-wrap, .main{
+    overflow-x:clip!important;
   }
 
   /* ── 2. APP BAR: hide desktop bar, show mobile header ── */
@@ -6923,23 +6925,6 @@ initAccessControl();
 setTimeout(() => { if (schedules.length) checkDueAlerts(); }, 5500);
 setTimeout(initFirebase, 500);
 
-// Find and log the element causing horizontal overflow on mobile
-if(window.innerWidth <= 768) {
-  setTimeout(() => {
-    const w = document.body.scrollWidth;
-    if(w <= window.innerWidth) return;
-    let worst = document.body, worstW = 0;
-    document.querySelectorAll('*').forEach(el => {
-      const r = el.getBoundingClientRect();
-      if(r.right > window.innerWidth && r.width > worstW) {
-        worstW = r.width; worst = el;
-      }
-    });
-    const tag = worst.tagName + (worst.id?'#'+worst.id:'') + (worst.className&&typeof worst.className==='string'?'.'+worst.className.trim().split(' ')[0]:'');
-    showSnack('Overflow: ' + tag + ' w=' + Math.round(worstW) + ' screen=' + window.innerWidth);
-    console.warn('[Overflow]', worst, worstW);
-  }, 3000);
-}
 
 </script>
 </body>
