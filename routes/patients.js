@@ -104,6 +104,16 @@ router.put('/:id', requireEditor, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// DELETE /api/patients — wipe ALL patients (admin only)
+router.delete('/', async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+    await db.run('DELETE FROM patients');
+    await _audit(req.user.username, 'wipe_all', 'patient', null, 'All patient records deleted');
+    res.json({ ok: true, message: 'All patient records deleted' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // DELETE /api/patients/:id
 router.delete('/:id', async (req, res) => {
   try {

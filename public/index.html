@@ -493,6 +493,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <button class="icon-btn" title="Print" onclick="window.print()"><span class="material-icons-round">print</span></button>
   <button class="icon-btn" title="Messaging Centre" onclick="openMessaging()" style="background:rgba(255,255,255,.2)"><span class="material-icons-round">send</span></button>
   <button class="icon-btn" id="syncBtn" title="Sync from Google Sheet" onclick="syncFromSheet()"><span class="material-icons-round" id="syncIcon">sync</span></button>
+  <button class="icon-btn" id="clearDataBtn" title="Clear All Data &amp; Re-sync" onclick="clearAllData()" style="background:rgba(220,53,69,.35);display:none"><span class="material-icons-round">delete_sweep</span></button>
   <button class="icon-btn" title="Sync ALL records to Firebase" onclick="syncAllToFirestore()" style="background:rgba(255,165,0,.25)" id="fbSyncBtn"><span class="material-icons-round">cloud_upload</span></button>
   <div id="userBarSlot"></div>
   <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.75)" id="syncStatus"><span class="sync-dot loading" id="syncDot"></span><span id="syncTs">Syncing…</span></div>
@@ -3489,6 +3490,22 @@ async function saveToFirestore(rec) {
   }
 }
 
+// Clear all patient data from DB and re-sync from sheet (admin only)
+async function clearAllData() {
+  if(!confirm('This will DELETE all patient records from the database and re-sync fresh from Google Sheet.\n\nAre you sure?')) return;
+  try {
+    showSnack('Clearing all data…');
+    await _api('DELETE', '/patients');
+    ALL.length = 0;
+    localStorage.removeItem('hrp_cache');
+    buildSidebar(); buildDropdowns(); applyFilters();
+    showSnack('✓ All data cleared — syncing fresh from Google Sheet…');
+    await syncFromSheet(false);
+  } catch(e) {
+    showSnack('⚠ Clear failed: ' + e.message.slice(0, 60));
+  }
+}
+
 // Push entire ALL array to the API (replaces syncAllToFirestore)
 async function syncAllToFirestore() {
   const total = ALL.length;
@@ -5714,9 +5731,11 @@ function grantAccess(u) {
   currentUser = u;
   document.getElementById('accessOverlay').classList.add('hidden');
 
-  // Show admin button only for admin role
+  // Show admin-only buttons
   const umBtn = document.getElementById('userMgmtBtn');
   if(umBtn) umBtn.style.display = u.role === 'admin' ? '' : 'none';
+  const clearBtn = document.getElementById('clearDataBtn');
+  if(clearBtn) clearBtn.style.display = u.role === 'admin' ? '' : 'none';
 
   // Update app bar user chip
   const slot = document.getElementById('userBarSlot');
