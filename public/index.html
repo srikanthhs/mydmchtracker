@@ -223,103 +223,147 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
 /* ── BOTTOM NAV (mobile only) ─────────────────────────── */
 .mob-nav{display:none}
+
 @media(max-width:768px){
-  /* Base layout */
-  body{height:100svh;overflow:hidden}
+  /* ── CORE LAYOUT ──────────────────────────────── */
+  /* App bar becomes fixed top bar */
+  .app-bar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    padding:0 10px;gap:4px;height:56px;
+  }
+  /* Only show menu toggle + title + sync on mobile */
+  .app-bar > *:not(#sidebarToggle):not(#syncBtn):not(#syncStatus):not(style):not(div):first-of-type{display:none}
+  .app-bar .icon-btn:not(#syncBtn):not(#sidebarToggle){display:none!important}
+  #syncStatus{display:flex}
+
+  /* Body fills screen, scrolls naturally */
+  body{overflow-y:auto;overflow-x:hidden;height:auto;min-height:100svh}
+  html{overflow-x:hidden}
+
+  /* body-wrap: block instead of flex row, padded for fixed header+footer */
   .body-wrap{
-    height:calc(100svh - 56px - 58px); /* header + bottom nav */
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior:contain;
+    display:block !important;
+    overflow:visible !important;
+    padding-top:56px;
+    padding-bottom:64px;
+    min-height:100svh;
   }
 
-  /* App bar — slim, just title + sync */
-  .app-bar{padding:0 12px;gap:6px}
-  .app-bar .icon-btn:not(#syncBtn):not(#sidebarToggle){display:none!important}
-  #syncStatus{display:none}
+  /* Sidebar slides from left over content */
+  .sidebar{
+    position:fixed;top:56px;bottom:64px;left:0;
+    z-index:400;background:var(--sur);
+    width:0;overflow:hidden;
+    transition:width .25s;
+    box-shadow:var(--sh2);
+  }
+  .sidebar:not(.collapsed){width:82vw;max-width:300px;overflow-y:auto}
+  .sb-overlay{
+    display:none;position:fixed;
+    inset:0;top:56px;bottom:64px;
+    background:rgba(0,0,0,.4);z-index:399
+  }
+  .sb-overlay.open{display:block}
 
-  /* Bottom navigation bar */
+  /* Bottom navigation */
   .mob-nav{
     display:flex;
-    position:fixed;
-    bottom:0;left:0;right:0;
-    height:58px;
+    position:fixed;bottom:0;left:0;right:0;
+    height:64px;
     background:var(--sur);
     border-top:1px solid var(--bdr);
-    z-index:200;
-    box-shadow:0 -2px 12px rgba(0,0,0,.08);
+    z-index:300;
+    box-shadow:0 -1px 8px rgba(0,0,0,.10);
+    padding-bottom:env(safe-area-inset-bottom,0px);
   }
   .mob-nav-btn{
     flex:1;display:flex;flex-direction:column;align-items:center;
     justify-content:center;gap:2px;border:none;background:none;
-    cursor:pointer;padding:6px 4px;color:var(--txt3);font-size:9px;
-    font-family:'Roboto',sans-serif;letter-spacing:.02em;
-    -webkit-tap-highlight-color:transparent;transition:color .15s;
+    cursor:pointer;padding:4px 2px;
+    color:var(--txt3);font-size:10px;
+    font-family:'Roboto',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    transition:color .15s;
   }
-  .mob-nav-btn .material-icons-round{font-size:22px}
+  .mob-nav-btn .material-icons-round{font-size:24px;line-height:1}
   .mob-nav-btn.active{color:var(--pri)}
-  .mob-nav-btn.active .material-icons-round{font-weight:700}
+  .mob-nav-btn.active .material-icons-round{
+    background:var(--pri-lt);border-radius:12px;padding:2px 16px;
+  }
 
-  /* Sidebar — slide over from left */
-  .sidebar{position:fixed;top:0;bottom:58px;left:0;z-index:300;
-    box-shadow:var(--sh2);width:0;transition:width .25s;overflow:hidden}
-  .sidebar:not(.collapsed){width:82vw;max-width:300px;overflow-y:auto}
-  .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299}
-  .sb-overlay.open{display:block}
-
-  /* Summary cards */
-  .cards-bar{flex-wrap:nowrap;overflow-x:auto;padding:10px 12px;gap:10px;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  /* ── CONTENT SECTIONS ─────────────────────────── */
+  .cards-bar{
+    flex-wrap:nowrap;overflow-x:auto;
+    padding:12px;gap:10px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none
+  }
   .cards-bar::-webkit-scrollbar{display:none}
   .sum-card{flex-shrink:0;min-width:100px;padding:10px 12px}
-  .sum-val{font-size:18px}
+  .sum-val{font-size:20px}
   .sum-lbl{font-size:10px}
-  .sum-icon{width:30px;height:30px}
-  .sum-icon .material-icons-round{font-size:16px}
+  .sum-icon{width:32px;height:32px}
+  .sum-icon .material-icons-round{font-size:17px}
 
-  /* Toolbar */
-  .toolbar{padding:8px 12px;gap:6px;flex-wrap:wrap}
+  .toolbar{padding:10px 12px;gap:8px;flex-wrap:wrap}
   .search-wrap{min-width:100%;order:-1}
-  .md-sel{font-size:13px;padding:8px 10px;flex:1;min-width:calc(50% - 3px)}
+  .md-sel{font-size:13px;padding:8px 10px;flex:1;min-width:calc(50% - 4px)}
 
-  /* Risk chip bar */
-  .chip-bar{flex-wrap:nowrap;overflow-x:auto;padding:6px 12px;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .chip-bar{
+    flex-wrap:nowrap;overflow-x:auto;
+    padding:8px 12px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none
+  }
   .chip-bar::-webkit-scrollbar{display:none}
-  .chip{flex-shrink:0;font-size:12px;padding:5px 12px}
+  .chip{flex-shrink:0;font-size:12px;padding:6px 14px}
 
-  /* Patient list */
-  .table-wrap{display:none}
-  .mob-list{display:flex;padding-bottom:16px}
+  .tbl-header{padding:10px 12px;gap:6px;flex-wrap:wrap}
 
-  /* Patient detail drawer */
-  .drawer{width:100%;top:0;bottom:58px}
+  /* Table hidden; cards shown */
+  .table-wrap{display:none!important}
+  .mob-list{display:flex;flex-direction:column;padding:8px 12px 16px}
 
-  /* Modals — bottom sheet style */
-  .modal-ov{align-items:flex-end}
-  .modal{width:100%;max-width:100%;border-radius:16px 16px 0 0;
-    max-height:90svh;margin:0;overflow-y:auto}
-  .modal-hdr{padding:16px}
+  /* ── DRAWER: full-screen overlay ─────────────── */
+  .drawer{
+    position:fixed;inset:0;width:100%!important;
+    top:0!important;z-index:500;
+    overflow-y:auto;
+  }
+
+  /* ── MODALS: slide up from bottom ────────────── */
+  .modal-ov{align-items:flex-end;padding:0}
+  .modal{
+    width:100%;max-width:100%;
+    border-radius:16px 16px 0 0;
+    max-height:92svh;margin:0;
+    overflow-y:auto;
+  }
+  .modal-hdr{padding:16px 16px 12px;position:sticky;top:0;background:var(--sur);z-index:1}
   .modal-body{padding:14px 16px}
-  .modal-ftr{padding:12px 16px;flex-wrap:wrap;gap:8px}
+  .modal-ftr{padding:12px 16px;flex-wrap:wrap;gap:8px;position:sticky;bottom:0;background:var(--sur)}
   .modal-ftr button{flex:1;min-width:120px}
 
-  /* Forms */
+  /* ── FORMS ───────────────────────────────────── */
   .form-row{grid-template-columns:1fr}
   .chk-grid{grid-template-columns:1fr 1fr}
-
-  /* Misc */
-  .fab{right:16px;bottom:74px;padding:12px 18px;font-size:13px}
-  .pagination{flex-wrap:wrap;gap:6px;padding:8px 12px}
-  .pagination>span{width:100%;text-align:center;font-size:11px}
-  .tbl-header{padding:10px 12px;gap:6px}
-  .snack{white-space:normal;text-align:center;width:92%;max-width:340px;bottom:72px}
   .detail-grid{grid-template-columns:1fr 1fr}
+
+  /* ── MISC ────────────────────────────────────── */
+  .fab{right:16px;bottom:80px;padding:12px 18px;font-size:13px}
+  .pagination{flex-wrap:wrap;gap:6px;padding:8px 12px;justify-content:center}
+  .pagination>span{width:100%;text-align:center;font-size:11px}
+  .snack{
+    white-space:normal;text-align:center;
+    width:92%;max-width:360px;
+    bottom:74px;left:50%;transform:translateX(-50%);
+  }
 }
+
 @media(max-width:400px){
-  .sum-card{min-width:88px}
+  .sum-card{min-width:86px}
   .icon-btn{width:34px;height:34px}
   .chk-grid{grid-template-columns:1fr}
+  .mob-nav-btn{font-size:9px}
+  .mob-nav-btn .material-icons-round{font-size:22px}
 }
 
 /* ── MESSAGING CENTER ────────────────────────────────────── */
