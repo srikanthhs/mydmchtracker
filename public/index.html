@@ -225,8 +225,6 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
    MOBILE UI  ≤ 768px
    ══════════════════════════════════════════════════════ */
 .mob-nav{display:none}
-/* Force sidebarToggle always visible — explicit rule */
-#sidebarToggle{display:flex!important}
 
 @media(max-width:768px){
 
@@ -248,16 +246,18 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     position:fixed;top:0;left:0;right:0;z-index:500;
     height:56px;padding:0 8px;gap:6px;
     background:var(--pri);
-    display:flex!important;
+    display:flex;
     align-items:center;
   }
-  /* Explicitly show menu + sync; hide everything else */
-  .app-bar > *{display:none!important}
-  #sidebarToggle{display:flex!important}
-  .app-bar > div{display:flex!important;flex:1;flex-direction:column}
-  .app-bar > div > div:last-child{display:none!important}
-  #syncBtn{display:flex!important}
-  #syncStatus{display:flex!important;gap:3px;flex-shrink:0}
+  /* Hide all icon buttons EXCEPT menu and sync */
+  .app-bar .icon-btn:not(#sidebarToggle):not(#syncBtn) { display:none!important }
+  /* Hide user chip and subtitle to save space */
+  #userBarSlot { display:none!important }
+  .app-bar > div > div:last-child { display:none!important }
+  /* Ensure menu and sync are always visible */
+  #sidebarToggle { display:flex!important }
+  #syncBtn       { display:flex!important }
+  #syncStatus    { display:flex!important }
 
   /* ── 3. BODY WRAP ─────────────────────────────────── */
   .body-wrap{
