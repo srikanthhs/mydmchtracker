@@ -257,16 +257,19 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 
 @media(max-width:768px){
 
-  /* ── 1. BASE ──────────────────────────────────────── */
-  html,body{
-    width:100%;max-width:100%;
-    overflow-x:hidden;
+  /* ── 1. BASE — lock width to screen, kill overflow ─── */
+  html{
+    overflow-x:hidden!important;
+    width:100%!important;
   }
   body{
-    display:block!important;  /* override desktop flex */
+    display:block!important;
     height:auto!important;
     min-height:100dvh;
-    overflow-y:auto;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    width:100%!important;
+    max-width:100vw!important;
     background:#F0F4F9;
   }
 
@@ -284,12 +287,17 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   }
   .main{
     display:block!important;
-    overflow:visible!important;
-    width:100%;
-    max-width:100%;
+    overflow:hidden!important;
+    width:100%!important;
+    max-width:100vw!important;
   }
-  /* Prevent anything from overflowing horizontally */
-  .body-wrap *{ max-width:100%; box-sizing:border-box; }
+  /* Kill the 1100px table width */
+  table{ min-width:0!important; }
+  .table-wrap,.scroll-tbl{ display:none!important; }
+  /* Toolbar wraps properly */
+  .toolbar{ flex-wrap:wrap!important; width:100%!important; }
+  .search-wrap{ min-width:0!important; width:100%!important; }
+  .md-sel{ min-width:0!important; width:calc(50% - 4px)!important; flex:none!important; }
   /* Sidebar: slide-in from left over content */
   .sidebar{
     display:block!important;
