@@ -226,6 +226,35 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
    ══════════════════════════════════════════════════════ */
 .mob-nav{display:none}
 
+/* Standalone mobile header — hidden on desktop */
+#mob-header{display:none}
+#mob-header{
+  position:fixed;top:0;left:0;right:0;
+  height:56px;z-index:9000;
+  background:#1A73E8;
+  align-items:center;
+  padding:0 8px;gap:8px;
+  box-shadow:0 2px 4px rgba(0,0,0,.3);
+}
+#mob-menu-btn,#mob-sync-btn{
+  width:40px;height:40px;
+  border-radius:50%;border:none;
+  background:rgba(255,255,255,.15);
+  color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+#mob-menu-btn:active,#mob-sync-btn:active{background:rgba(255,255,255,.3)}
+#mob-menu-btn .material-icons-round,
+#mob-sync-btn .material-icons-round{font-size:22px;color:#fff}
+#mob-title{
+  flex:1;
+  font-family:'Google Sans',sans-serif;
+  font-size:18px;font-weight:500;
+  color:#fff;
+}
+
 @media(max-width:768px){
 
   /* ── 1. BASE ──────────────────────────────────────── */
@@ -241,23 +270,9 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     background:#F0F4F9;
   }
 
-  /* ── 2. APP BAR ───────────────────────────────────── */
-  .app-bar{
-    position:fixed;top:0;left:0;right:0;z-index:500;
-    height:56px;padding:0 8px;gap:6px;
-    background:var(--pri);
-    display:flex;
-    align-items:center;
-  }
-  /* Hide all icon buttons EXCEPT menu and sync */
-  .app-bar .icon-btn:not(#sidebarToggle):not(#syncBtn) { display:none!important }
-  /* Hide user chip and subtitle to save space */
-  #userBarSlot { display:none!important }
-  .app-bar > div > div:last-child { display:none!important }
-  /* Ensure menu and sync are always visible */
-  #sidebarToggle { display:flex!important }
-  #syncBtn       { display:flex!important }
-  #syncStatus    { display:flex!important }
+  /* ── 2. APP BAR: hide desktop bar, show mobile header ── */
+  .app-bar{ display:none!important }
+  #mob-header{ display:flex!important }
 
   /* ── 3. BODY WRAP ─────────────────────────────────── */
   .body-wrap{
@@ -721,7 +736,18 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   </div>
 </div>
 
-<!-- APP BAR -->
+<!-- MOBILE HEADER (separate from desktop app bar, no CSS conflicts) -->
+<div id="mob-header">
+  <button id="mob-menu-btn" onclick="toggleSidebar()">
+    <span class="material-icons-round">menu</span>
+  </button>
+  <div id="mob-title">HRP Tracker</div>
+  <button id="mob-sync-btn" onclick="syncFromSheet()">
+    <span class="material-icons-round" id="mob-sync-icon">sync</span>
+  </button>
+</div>
+
+<!-- APP BAR (desktop only) -->
 <div class="app-bar">
   <button class="icon-btn" id="sidebarToggle" onclick="toggleSidebar()"><span class="material-icons-round">menu</span></button>
   <div style="flex:1">
@@ -2659,7 +2685,7 @@ const SYNC_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 let syncTimer = null;
 
 async function syncFromSheet(silent=false) {
-  const icon = document.getElementById('syncIcon');
+  const icon = document.getElementById('syncIcon') || document.getElementById('mob-sync-icon');
   const dot  = document.getElementById('syncDot');
   const ts   = document.getElementById('syncTs');
   if(icon) icon.classList.add('sync-spinning');
