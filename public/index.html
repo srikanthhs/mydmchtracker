@@ -221,49 +221,105 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 .sync-dot.err{background:#f87171}.sync-dot.loading{background:#FBBC04}
 
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
+/* ── BOTTOM NAV (mobile only) ─────────────────────────── */
+.mob-nav{display:none}
 @media(max-width:768px){
-  body{height:100svh}
-  .body-wrap{height:calc(100svh - 56px)}
-  .app-bar{padding:0 8px;gap:2px}
+  /* Base layout */
+  body{height:100svh;overflow:hidden}
+  .body-wrap{
+    height:calc(100svh - 56px - 58px); /* header + bottom nav */
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+
+  /* App bar — slim, just title + sync */
+  .app-bar{padding:0 12px;gap:6px}
+  .app-bar .icon-btn:not(#syncBtn):not(#sidebarToggle){display:none!important}
   #syncStatus{display:none}
-  /* Hide non-essential toolbar buttons on mobile — keep sync + user chip */
-  .app-bar .icon-btn:not(#syncBtn):not(#clearDataBtn):not(#aiBtn){display:none!important}
-  .sidebar{position:fixed;top:56px;bottom:0;left:0;z-index:150;box-shadow:var(--sh2);width:0;transition:width .25s}
-  .sidebar:not(.collapsed){width:82vw;max-width:300px}
-  .sb-overlay{display:none;position:fixed;inset:0;top:56px;background:rgba(0,0,0,.4);z-index:149}
+
+  /* Bottom navigation bar */
+  .mob-nav{
+    display:flex;
+    position:fixed;
+    bottom:0;left:0;right:0;
+    height:58px;
+    background:var(--sur);
+    border-top:1px solid var(--bdr);
+    z-index:200;
+    box-shadow:0 -2px 12px rgba(0,0,0,.08);
+  }
+  .mob-nav-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:2px;border:none;background:none;
+    cursor:pointer;padding:6px 4px;color:var(--txt3);font-size:9px;
+    font-family:'Roboto',sans-serif;letter-spacing:.02em;
+    -webkit-tap-highlight-color:transparent;transition:color .15s;
+  }
+  .mob-nav-btn .material-icons-round{font-size:22px}
+  .mob-nav-btn.active{color:var(--pri)}
+  .mob-nav-btn.active .material-icons-round{font-weight:700}
+
+  /* Sidebar — slide over from left */
+  .sidebar{position:fixed;top:0;bottom:58px;left:0;z-index:300;
+    box-shadow:var(--sh2);width:0;transition:width .25s;overflow:hidden}
+  .sidebar:not(.collapsed){width:82vw;max-width:300px;overflow-y:auto}
+  .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299}
   .sb-overlay.open{display:block}
-  .cards-bar{flex-wrap:nowrap;overflow-x:auto;padding:8px 10px;gap:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+
+  /* Summary cards */
+  .cards-bar{flex-wrap:nowrap;overflow-x:auto;padding:10px 12px;gap:10px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none}
   .cards-bar::-webkit-scrollbar{display:none}
-  .sum-card{flex-shrink:0;min-width:95px;padding:8px 10px}
-  .sum-val{font-size:17px}
+  .sum-card{flex-shrink:0;min-width:100px;padding:10px 12px}
+  .sum-val{font-size:18px}
   .sum-lbl{font-size:10px}
-  .sum-icon{width:28px;height:28px}
-  .sum-icon .material-icons-round{font-size:15px}
-  .toolbar{padding:8px 10px;gap:6px}
+  .sum-icon{width:30px;height:30px}
+  .sum-icon .material-icons-round{font-size:16px}
+
+  /* Toolbar */
+  .toolbar{padding:8px 12px;gap:6px;flex-wrap:wrap}
   .search-wrap{min-width:100%;order:-1}
-  .md-sel{font-size:12px;padding:6px 8px;flex:1;min-width:calc(50% - 3px)}
-  .chip-bar{flex-wrap:nowrap;overflow-x:auto;padding:6px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .md-sel{font-size:13px;padding:8px 10px;flex:1;min-width:calc(50% - 3px)}
+
+  /* Risk chip bar */
+  .chip-bar{flex-wrap:nowrap;overflow-x:auto;padding:6px 12px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none}
   .chip-bar::-webkit-scrollbar{display:none}
-  .chip{flex-shrink:0}
+  .chip{flex-shrink:0;font-size:12px;padding:5px 12px}
+
+  /* Patient list */
   .table-wrap{display:none}
-  .mob-list{display:flex}
-  .drawer{width:100%;top:0}
+  .mob-list{display:flex;padding-bottom:16px}
+
+  /* Patient detail drawer */
+  .drawer{width:100%;top:0;bottom:58px}
+
+  /* Modals — bottom sheet style */
   .modal-ov{align-items:flex-end}
-  .modal{width:100%;max-width:100%;border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:92svh;margin:0}
-  .modal-hdr{padding:14px 16px}
+  .modal{width:100%;max-width:100%;border-radius:16px 16px 0 0;
+    max-height:90svh;margin:0;overflow-y:auto}
+  .modal-hdr{padding:16px}
   .modal-body{padding:14px 16px}
-  .modal-ftr{padding:12px 16px}
+  .modal-ftr{padding:12px 16px;flex-wrap:wrap;gap:8px}
+  .modal-ftr button{flex:1;min-width:120px}
+
+  /* Forms */
   .form-row{grid-template-columns:1fr}
-  .chk-grid{grid-template-columns:1fr}
-  .fab{right:16px;bottom:16px;padding:12px 16px;font-size:12px}
+  .chk-grid{grid-template-columns:1fr 1fr}
+
+  /* Misc */
+  .fab{right:16px;bottom:74px;padding:12px 18px;font-size:13px}
   .pagination{flex-wrap:wrap;gap:6px;padding:8px 12px}
   .pagination>span{width:100%;text-align:center;font-size:11px}
-  .tbl-header{flex-wrap:wrap;gap:6px;padding:10px 12px}
-  .snack{white-space:normal;text-align:center;width:90%;max-width:340px}
+  .tbl-header{padding:10px 12px;gap:6px}
+  .snack{white-space:normal;text-align:center;width:92%;max-width:340px;bottom:72px}
+  .detail-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:400px){
-  .sum-card{min-width:82px}
-  .icon-btn{width:32px;height:32px}
+  .sum-card{min-width:88px}
+  .icon-btn{width:34px;height:34px}
+  .chk-grid{grid-template-columns:1fr}
 }
 
 /* ── MESSAGING CENTER ────────────────────────────────────── */
@@ -500,6 +556,25 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <div id="userBarSlot"></div>
   <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.75)" id="syncStatus"><span class="sync-dot loading" id="syncDot"></span><span id="syncTs">Syncing…</span></div>
 </div>
+
+<!-- MOBILE BOTTOM NAVIGATION -->
+<nav class="mob-nav" id="mobNav">
+  <button class="mob-nav-btn active" id="mbn-all" onclick="mobNav('all')">
+    <span class="material-icons-round">dashboard</span>All
+  </button>
+  <button class="mob-nav-btn" id="mbn-active" onclick="mobNav('active')">
+    <span class="material-icons-round">pregnant_woman</span>Undelivered
+  </button>
+  <button class="mob-nav-btn" id="mbn-del" onclick="mobNav('delivered')">
+    <span class="material-icons-round">child_friendly</span>Delivered
+  </button>
+  <button class="mob-nav-btn" id="mbn-risk" onclick="mobNav('highrisk')">
+    <span class="material-icons-round">warning</span>High Risk
+  </button>
+  <button class="mob-nav-btn" id="mbn-menu" onclick="toggleSidebar()">
+    <span class="material-icons-round">menu</span>Menu
+  </button>
+</nav>
 
 <div class="body-wrap">
 
@@ -1374,6 +1449,19 @@ function sbFilter(type) {
   const idMap = {active:'sb-active',delivered:'sb-del',overdue:'sb-overdue',edd15:'sb-edd15',highrisk:'sb-hr',post42:'sb-post42',eddOverdue:'sb-edd-overdue'};
   setSbActive(idMap[type]||'sb-all');
   applyFilters();
+}
+
+// Mobile bottom nav handler
+function mobNav(type) {
+  document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
+  const btnMap = {all:'mbn-all', active:'mbn-active', delivered:'mbn-del', highrisk:'mbn-risk'};
+  const btn = document.getElementById(btnMap[type]);
+  if(btn) btn.classList.add('active');
+  if(type === 'all') sbSelect('all');
+  else sbFilter(type);
+  // Close sidebar if open
+  const sb = document.getElementById('sidebar');
+  if(sb && !sb.classList.contains('collapsed')) sb.classList.add('collapsed');
 }
 
 function toggleSidebar() {
