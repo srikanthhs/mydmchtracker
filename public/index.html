@@ -221,150 +221,252 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 .sync-dot.err{background:#f87171}.sync-dot.loading{background:#FBBC04}
 
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
-/* ── TOP NAV TABS (mobile only) ──────────────────────── */
+/* ══════════════════════════════════════════════════════
+   MOBILE-FIRST UI  (≤ 768 px)
+   Inspired by Google Health / Material Design 3
+   ══════════════════════════════════════════════════════ */
 .mob-nav{display:none}
 
 @media(max-width:768px){
-  /* ── CORE LAYOUT ──────────────────────────────── */
-  .app-bar{
-    position:fixed;top:0;left:0;right:0;z-index:100;
-    padding:0 10px;gap:4px;height:56px;
-  }
-  .app-bar .icon-btn:not(#syncBtn):not(#sidebarToggle){display:none!important}
-  #syncStatus{display:flex}
 
-  /* Top nav tabs fixed just below app bar */
+  /* ── 1. BASE ──────────────────────────────────────── */
+  html{overflow-x:hidden}
+  body{
+    overflow-y:auto;overflow-x:hidden;
+    height:auto;min-height:100svh;
+    background:#F0F4F9;
+  }
+
+  /* ── 2. APP BAR ───────────────────────────────────── */
+  .app-bar{
+    position:fixed;top:0;left:0;right:0;z-index:200;
+    height:56px;padding:0 12px;gap:8px;
+    background:var(--pri);
+  }
+  /* Hide all toolbar buttons except sync */
+  .app-bar .icon-btn:not(#syncBtn){display:none!important}
+  /* Hide subtitle on mobile */
+  .app-bar > div > div:last-child{display:none}
+  #syncStatus{display:flex;gap:4px}
+
+  /* ── 3. BODY WRAP ─────────────────────────────────── */
+  .body-wrap{
+    display:block!important;
+    overflow:visible!important;
+    padding-top:56px;
+    min-height:100svh;
+  }
+  /* Hide the desktop sidebar completely */
+  .sidebar{display:none!important}
+  .sb-overlay{display:none!important}
+
+  /* ── 4. MOBILE NAV TABS (below app bar, horizontal scroll) */
   .mob-nav{
     display:flex;
-    position:fixed;top:56px;left:0;right:0;
-    height:46px;
+    position:sticky;top:56px;
+    z-index:190;
     background:var(--pri);
-    z-index:99;
     overflow-x:auto;
     scrollbar-width:none;
     -webkit-overflow-scrolling:touch;
+    box-shadow:0 2px 4px rgba(0,0,0,.18);
   }
   .mob-nav::-webkit-scrollbar{display:none}
   .mob-nav-btn{
     flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;gap:5px;
-    border:none;background:none;
-    cursor:pointer;padding:0 14px;
-    color:rgba(255,255,255,.7);
-    font-size:12px;font-weight:500;
+    display:flex;flex-direction:row;
+    align-items:center;gap:6px;
+    border:none;background:transparent;
+    cursor:pointer;
+    padding:0 16px;height:44px;
+    color:rgba(255,255,255,.65);
+    font-size:13px;font-weight:500;
     font-family:'Google Sans',sans-serif;
     white-space:nowrap;
     -webkit-tap-highlight-color:transparent;
-    transition:color .15s, border-bottom .15s;
     border-bottom:3px solid transparent;
+    transition:all .15s;
   }
-  .mob-nav-btn .material-icons-round{font-size:16px}
+  .mob-nav-btn .material-icons-round{font-size:17px}
   .mob-nav-btn.active{
     color:#fff;
-    border-bottom:3px solid #fff;
+    border-bottom:3px solid rgba(255,255,255,.9);
   }
 
-  /* Body fills screen, scrolls naturally */
-  body{overflow-y:auto;overflow-x:hidden;height:auto;min-height:100svh}
-  html{overflow-x:hidden}
-
-  /* body-wrap padded for fixed header (56px app bar + 46px tabs) */
-  .body-wrap{
-    display:block !important;
-    overflow:visible !important;
-    padding-top:102px;
-    min-height:100svh;
-  }
-
-  /* Sidebar slides from left over content */
-  .sidebar{
-    position:fixed;top:102px;bottom:0;left:0;
-    z-index:400;background:var(--sur);
-    width:0;overflow:hidden;
-    transition:width .25s;
-    box-shadow:var(--sh2);
-  }
-  .sidebar:not(.collapsed){width:82vw;max-width:300px;overflow-y:auto}
-  .sb-overlay{
-    display:none;position:fixed;
-    inset:0;top:102px;
-    background:rgba(0,0,0,.4);z-index:399
-  }
-  .sb-overlay.open{display:block}
-
-  /* ── CONTENT SECTIONS ─────────────────────────── */
+  /* ── 5. SUMMARY STAT CARDS ────────────────────────── */
   .cards-bar{
-    flex-wrap:nowrap;overflow-x:auto;
-    padding:12px;gap:10px;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none
+    display:flex;
+    overflow-x:auto;
+    gap:10px;
+    padding:14px 12px 10px;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    background:transparent;
   }
   .cards-bar::-webkit-scrollbar{display:none}
-  .sum-card{flex-shrink:0;min-width:100px;padding:10px 12px}
-  .sum-val{font-size:20px}
-  .sum-lbl{font-size:10px}
-  .sum-icon{width:32px;height:32px}
-  .sum-icon .material-icons-round{font-size:17px}
+  .sum-card{
+    flex-shrink:0;min-width:110px;
+    background:#fff;
+    border-radius:14px;
+    padding:12px 14px;
+    box-shadow:0 1px 3px rgba(0,0,0,.10);
+  }
+  .sum-val{font-size:22px;font-weight:600}
+  .sum-lbl{font-size:11px;margin-top:2px}
+  .sum-icon{width:34px;height:34px;border-radius:10px}
+  .sum-icon .material-icons-round{font-size:18px}
 
-  .toolbar{padding:10px 12px;gap:8px;flex-wrap:wrap}
-  .search-wrap{min-width:100%;order:-1}
-  .md-sel{font-size:13px;padding:8px 10px;flex:1;min-width:calc(50% - 4px)}
+  /* ── 6. SEARCH + FILTERS ──────────────────────────── */
+  .toolbar{
+    padding:4px 12px 8px;
+    gap:8px;flex-wrap:wrap;
+    background:transparent;
+  }
+  .search-wrap{
+    width:100%;order:-1;
+    background:#fff;
+    border-radius:26px;
+    box-shadow:0 1px 3px rgba(0,0,0,.10);
+    border:none;
+  }
+  .search-wrap input{
+    background:transparent;
+    border-radius:26px;
+    padding:10px 16px;
+    font-size:14px;
+  }
+  .search-wrap .material-icons-round{padding-left:14px}
+  .md-sel{
+    font-size:13px;padding:9px 12px;
+    flex:1;min-width:calc(50% - 4px);
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+    border:1px solid var(--bdr);
+  }
 
+  /* ── 7. RISK CHIPS ────────────────────────────────── */
   .chip-bar{
-    flex-wrap:nowrap;overflow-x:auto;
-    padding:8px 12px;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none
+    overflow-x:auto;
+    padding:4px 12px 10px;
+    gap:6px;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
   }
   .chip-bar::-webkit-scrollbar{display:none}
-  .chip{flex-shrink:0;font-size:12px;padding:6px 14px}
-
-  .tbl-header{padding:10px 12px;gap:6px;flex-wrap:wrap}
-
-  /* Table hidden; cards shown */
-  .table-wrap{display:none!important}
-  .mob-list{display:flex;flex-direction:column;padding:8px 12px 16px}
-
-  /* ── DRAWER: full-screen overlay ─────────────── */
-  .drawer{
-    position:fixed;top:0;left:0;right:0;bottom:0;
-    width:100%!important;z-index:500;
-    overflow-y:auto;
+  .chip{
+    flex-shrink:0;
+    font-size:12px;padding:6px 14px;
+    border-radius:20px;
   }
 
-  /* ── MODALS: slide up from bottom ────────────── */
+  /* ── 8. TABLE HEADER ROW (record count + csv) ─────── */
+  .tbl-header{
+    padding:6px 12px 4px;
+    gap:6px;flex-wrap:wrap;
+    font-size:12px;
+  }
+
+  /* ── 9. PATIENT CARDS ─────────────────────────────── */
+  .table-wrap{display:none!important}
+  .mob-list{
+    display:flex;flex-direction:column;
+    gap:10px;
+    padding:6px 12px 24px;
+  }
+  .mob-card{
+    background:#fff;
+    border-radius:16px;
+    padding:0;
+    box-shadow:0 1px 4px rgba(0,0,0,.10);
+    border:none;
+    overflow:hidden;
+  }
+  .mob-card-top{
+    padding:14px 14px 10px;
+    border-left:4px solid transparent;
+  }
+  .mob-card.risk-crit .mob-card-top{border-left-color:var(--c-crit)}
+  .mob-card.risk-high .mob-card-top{border-left-color:var(--c-high)}
+  .mob-card.risk-mod  .mob-card-top{border-left-color:var(--c-mod)}
+  .mob-card.risk-low  .mob-card-top{border-left-color:var(--c-low)}
+  .mob-card-bot{
+    background:#F8F9FA;
+    border-top:1px solid #EFEFEF;
+    padding:8px 14px;
+    display:flex;gap:12px;flex-wrap:wrap;
+    font-size:11px;color:var(--txt2);
+  }
+  .mob-card-bot span{display:flex;align-items:center;gap:3px}
+  .mob-card-bot .material-icons-round{font-size:13px;color:var(--txt3)}
+
+  /* ── 10. FULL-SCREEN DRAWER ───────────────────────── */
+  .drawer{
+    position:fixed;inset:0;
+    width:100%!important;z-index:500;
+    overflow-y:auto;
+    background:var(--sur2);
+  }
+
+  /* ── 11. BOTTOM-SHEET MODALS ──────────────────────── */
   .modal-ov{align-items:flex-end;padding:0}
   .modal{
     width:100%;max-width:100%;
-    border-radius:16px 16px 0 0;
-    max-height:92svh;margin:0;
+    border-radius:20px 20px 0 0;
+    max-height:93svh;margin:0;
     overflow-y:auto;
   }
-  .modal-hdr{padding:16px 16px 12px;position:sticky;top:0;background:var(--sur);z-index:1}
+  .modal-hdr{
+    padding:12px 16px;
+    position:sticky;top:0;z-index:1;
+    background:var(--sur);
+    border-bottom:1px solid var(--bdr);
+  }
+  /* drag handle on modal */
+  .modal-hdr::before{
+    content:'';display:block;
+    width:36px;height:4px;
+    background:var(--bdr2);
+    border-radius:2px;
+    margin:0 auto 10px;
+  }
   .modal-body{padding:14px 16px}
-  .modal-ftr{padding:12px 16px;flex-wrap:wrap;gap:8px;position:sticky;bottom:0;background:var(--sur)}
-  .modal-ftr button{flex:1;min-width:120px}
+  .modal-ftr{
+    padding:12px 16px;
+    position:sticky;bottom:0;background:var(--sur);
+    border-top:1px solid var(--bdr);
+    display:flex;gap:8px;flex-wrap:wrap;
+  }
+  .modal-ftr button{flex:1;min-width:120px;padding:12px}
 
-  /* ── FORMS ───────────────────────────────────── */
+  /* ── 12. FORMS ────────────────────────────────────── */
   .form-row{grid-template-columns:1fr}
   .chk-grid{grid-template-columns:1fr 1fr}
   .detail-grid{grid-template-columns:1fr 1fr}
+  .fg label{font-size:12px}
+  .fg input,.fg select,.fg textarea{font-size:14px;padding:10px 12px;border-radius:10px}
 
-  /* ── MISC ────────────────────────────────────── */
-  .fab{right:16px;bottom:20px;padding:12px 18px;font-size:13px}
+  /* ── 13. PAGINATION ───────────────────────────────── */
   .pagination{flex-wrap:wrap;gap:6px;padding:8px 12px;justify-content:center}
   .pagination>span{width:100%;text-align:center;font-size:11px}
+
+  /* ── 14. SNACKBAR ─────────────────────────────────── */
   .snack{
     white-space:normal;text-align:center;
     width:92%;max-width:360px;
     bottom:20px;left:50%;transform:translateX(-50%);
+    border-radius:12px;
+    font-size:13px;
   }
+
+  /* ── 15. FAB ──────────────────────────────────────── */
+  .fab{right:16px;bottom:20px;border-radius:16px;padding:14px 20px;font-size:13px}
 }
 
 @media(max-width:400px){
-  .sum-card{min-width:86px}
-  .icon-btn{width:34px;height:34px}
+  .sum-card{min-width:96px}
+  .mob-nav-btn{padding:0 12px;font-size:12px}
   .chk-grid{grid-template-columns:1fr}
-  .mob-nav-btn{font-size:9px}
-  .mob-nav-btn .material-icons-round{font-size:22px}
 }
 
 /* ── MESSAGING CENTER ────────────────────────────────────── */
@@ -1817,31 +1919,34 @@ function renderMobileList(pageData, start) {
     const scoreHtml = score > 0
       ? `<span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd}"><b>${score}</b> ${cat.label}</span>`
       : '<span class="rbadge" style="background:var(--c-none-bg);color:var(--c-none)">No flag</span>';
-    const vsHtml = vs ? `<span class="status-pill ${vs.cls}">${vs.label}</span>` : '';
     const statusPill = statusCell(r);
-    const eddStr = r.e ? `EDD: <b>${fmtDate(r.e)}</b>` : '';
-    const ddStr  = r.dd ? `Del: <b>${fmtDate(r.dd)}</b>` : '';
-    const lvStr  = r.lv ? `Last Visit: <b>${fmtDate(r.lv)}</b>` : '';
+    const eddStr  = r.e  ? fmtDate(r.e)  : '—';
+    const ddStr   = r.dd ? fmtDate(r.dd) : '—';
+    const lvStr   = r.lv ? fmtDate(r.lv) : '—';
+    const initial = (r.n||'?')[0].toUpperCase();
+    const avatarBg = cat.color || 'var(--pri)';
     return `<div class="mob-card ${cat.cls}" onclick="openDrawer('${(r.id||r.n).replace(/'/g,"\\'")}',${start+i})">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-        <div style="flex:1;min-width:0">
-          <div class="mob-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.n}</div>
-          <div class="mob-sub">${r.p}${r.h?' · '+r.h:''}${r.id?' · <span style="font-family:monospace">'+r.id+'</span>':''}</div>
+      <div class="mob-card-top">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="width:40px;height:40px;border-radius:50%;background:${avatarBg};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Google Sans',sans-serif;font-size:16px;font-weight:600;flex-shrink:0">${initial}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.n}</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:2px">${r.p||''}${r.h?' · '+r.h:''}${r.id?' · <span style="font-family:monospace;font-size:10px">'+r.id+'</span>':''}</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:1px">${r.b||''} · Age ${r.a||'—'} · G${r.g||'?'}/P${r.pa||'?'}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+            ${scoreHtml}
+            ${statusPill}
+          </div>
         </div>
-        ${scoreHtml}
+        ${(r.r||[]).length ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">${flags}${more}</div>` : ''}
       </div>
-      <div class="mob-row" style="margin-top:6px">
-        <span class="mob-meta">Age ${r.a||'—'} · G${r.g||'?'}/P${r.pa||'?'} · ${r.b}</span>
-        ${statusPill}
+      <div class="mob-card-bot">
+        <span><span class="material-icons-round">event</span>EDD: ${eddStr}</span>
+        ${r.dd ? `<span><span class="material-icons-round">child_friendly</span>Delivered: ${ddStr}</span>` : ''}
+        ${r.lv ? `<span><span class="material-icons-round">schedule</span>Last Visit: ${lvStr}</span>` : ''}
+        ${r.ph ? `<span><span class="material-icons-round">call</span>${r.ph}</span>` : ''}
       </div>
-      <div style="font-size:11px;color:var(--txt2);margin-top:5px;display:flex;flex-wrap:wrap;gap:8px">
-        ${eddStr ? `<span>${eddStr}</span>` : ''}
-        ${ddStr  ? `<span>${ddStr}</span>`  : ''}
-        ${lvStr  ? `<span>${lvStr}</span>`  : ''}
-        ${vsHtml}
-      </div>
-      ${r.ph ? `<div style="font-size:11px;color:var(--txt3);margin-top:3px">📞 ${r.ph}</div>` : ''}
-      ${(r.r||[]).length ? `<div class="mob-flags" style="margin-top:6px">${flags}${more}</div>` : ''}
     </div>`;
   }).join('');
 }
