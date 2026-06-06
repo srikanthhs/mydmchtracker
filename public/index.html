@@ -2178,8 +2178,19 @@ function openDrawer(key, idx) {
   const nv = nextVisitDate(r);
   const score_interval = 15; // Fixed: 15 days after last visit
 
+  const isMob = window.innerWidth <= 768;
   document.getElementById('drawerContent').innerHTML = `
-    <div class="dwr-header">
+    <div class="dwr-header" style="${isMob?'background:var(--pri);color:#fff;padding:0 8px 0 0;':''}">
+      ${isMob ? `
+      <button onclick="closeDrawer()" style="background:none;border:none;cursor:pointer;padding:14px 12px;display:flex;align-items:center;gap:6px;color:#fff;font-size:15px;font-family:'Google Sans',sans-serif;font-weight:500;-webkit-tap-highlight-color:transparent">
+        <span class="material-icons-round" style="font-size:24px">arrow_back</span>
+      </button>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Google Sans',sans-serif;font-size:16px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.n}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:1px">${r.p} · ${r.h||'—'}</div>
+      </div>
+      <span class="rbadge" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);font-size:11px;flex-shrink:0;margin-right:8px">${score} ${cat.label}</span>
+      ` : `
       <div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <span class="dwr-name">${r.n}</span>
@@ -2188,6 +2199,7 @@ function openDrawer(key, idx) {
         <div class="dwr-sub">${r.id||'No PICME'} &nbsp;·&nbsp; ${r.p} &nbsp;·&nbsp; ${r.h||'—'} HSC</div>
       </div>
       <button onclick="closeDrawer()" style="background:none;border:none;cursor:pointer;padding:4px"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
+      `}
     </div>
     <div class="dwr-body">
       <div class="detail-grid">
@@ -2234,12 +2246,20 @@ function openDrawer(key, idx) {
 
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerOv').classList.add('open');
+  // Push state so Android back button closes drawer
+  if(window.innerWidth <= 768) history.pushState({drawer:true}, '');
 }
 
 function closeDrawer() {
   document.getElementById('drawer').classList.remove('open');
   document.getElementById('drawerOv').classList.remove('open');
 }
+
+// Handle Android hardware back button closing the drawer
+window.addEventListener('popstate', e => {
+  const drawer = document.getElementById('drawer');
+  if(drawer && drawer.classList.contains('open')) closeDrawer();
+});
 
 // ============================================================
 // ADD / EDIT
