@@ -6921,8 +6921,25 @@ initAccessControl();
   setTimeout(() => { if (ALL.length === 0) { buildSidebar(); buildDropdowns(); applyFilters(); } }, 4000);
 })();
 setTimeout(() => { if (schedules.length) checkDueAlerts(); }, 5500);
-// Connect to API (loads schedules, shows badge)
 setTimeout(initFirebase, 500);
+
+// Find and log the element causing horizontal overflow on mobile
+if(window.innerWidth <= 768) {
+  setTimeout(() => {
+    const w = document.body.scrollWidth;
+    if(w <= window.innerWidth) return;
+    let worst = document.body, worstW = 0;
+    document.querySelectorAll('*').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if(r.right > window.innerWidth && r.width > worstW) {
+        worstW = r.width; worst = el;
+      }
+    });
+    const tag = worst.tagName + (worst.id?'#'+worst.id:'') + (worst.className&&typeof worst.className==='string'?'.'+worst.className.trim().split(' ')[0]:'');
+    showSnack('Overflow: ' + tag + ' w=' + Math.round(worstW) + ' screen=' + window.innerWidth);
+    console.warn('[Overflow]', worst, worstW);
+  }, 3000);
+}
 
 </script>
 </body>
