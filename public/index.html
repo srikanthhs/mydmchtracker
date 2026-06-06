@@ -5,7 +5,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HRP Tracker — Mayiladuthurai District</title>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -274,13 +274,22 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   .app-bar{ display:none!important }
   #mob-header{ display:flex!important }
 
-  /* ── 3. BODY WRAP ─────────────────────────────────── */
+  /* ── 3. BODY WRAP + MAIN ─────────────────────────── */
   .body-wrap{
     display:block!important;
     overflow:visible!important;
     padding-top:56px;
     min-height:100dvh;
+    width:100%;
   }
+  .main{
+    display:block!important;
+    overflow:visible!important;
+    width:100%;
+    max-width:100%;
+  }
+  /* Prevent anything from overflowing horizontally */
+  .body-wrap *{ max-width:100%; box-sizing:border-box; }
   /* Sidebar: slide-in from left over content */
   .sidebar{
     display:block!important;
@@ -741,7 +750,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <button id="mob-menu-btn" onclick="toggleSidebar()">
     <span class="material-icons-round">menu</span>
   </button>
-  <div id="mob-title">HRP Tracker</div>
+  <div id="mob-title">High-Risk Pregnancy Tracker</div>
   <button id="mob-sync-btn" onclick="syncFromSheet()">
     <span class="material-icons-round" id="mob-sync-icon">sync</span>
   </button>
