@@ -256,9 +256,27 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     padding-top:56px;
     min-height:100svh;
   }
-  /* Hide the desktop sidebar completely */
-  .sidebar{display:none!important}
-  .sb-overlay{display:none!important}
+  /* Sidebar: slide-in from left over content */
+  .sidebar{
+    display:block!important;
+    position:fixed;top:56px;bottom:0;left:0;
+    z-index:400;background:var(--sur);
+    width:0;overflow:hidden;
+    transition:width .25s cubic-bezier(.4,0,.2,1);
+    box-shadow:none;
+  }
+  .sidebar:not(.collapsed){
+    width:82vw;max-width:300px;
+    overflow-y:auto;
+    box-shadow:4px 0 16px rgba(0,0,0,.15);
+  }
+  .sb-overlay{
+    display:none;
+    position:fixed;inset:0;top:56px;
+    background:rgba(0,0,0,.4);
+    z-index:399;
+  }
+  .sb-overlay.open{display:block}
 
   /* ── 4. MOBILE NAV TABS (below app bar, horizontal scroll) */
   .mob-nav{
