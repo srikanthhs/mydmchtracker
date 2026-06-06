@@ -224,8 +224,10 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 @media(max-width:768px){
   body{height:100svh}
   .body-wrap{height:calc(100svh - 56px)}
-  .app-bar{padding:0 6px;gap:3px}
+  .app-bar{padding:0 8px;gap:2px}
   #syncStatus{display:none}
+  /* Hide non-essential toolbar buttons on mobile — keep sync + user chip */
+  .app-bar .icon-btn:not(#syncBtn):not(#clearDataBtn):not(#aiBtn){display:none!important}
   .sidebar{position:fixed;top:56px;bottom:0;left:0;z-index:150;box-shadow:var(--sh2);width:0;transition:width .25s}
   .sidebar:not(.collapsed){width:82vw;max-width:300px}
   .sb-overlay{display:none;position:fixed;inset:0;top:56px;background:rgba(0,0,0,.4);z-index:149}
@@ -663,6 +665,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
       </div>
     </div>
     <div class="form-row">
+      <div class="fg"><label>Last Follow-Up / Visit Date</label><input type="date" id="f_lv"></div>
       <div class="fg"><label>Date of Delivery</label><input type="date" id="f_dd"></div>
     </div>
     <div class="form-row">
@@ -1682,21 +1685,30 @@ function renderMobileList(pageData, start) {
       ? `<span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd}"><b>${score}</b> ${cat.label}</span>`
       : '<span class="rbadge" style="background:var(--c-none-bg);color:var(--c-none)">No flag</span>';
     const vsHtml = vs ? `<span class="status-pill ${vs.cls}">${vs.label}</span>` : '';
+    const statusPill = statusCell(r);
     const eddStr = r.e ? `EDD: <b>${fmtDate(r.e)}</b>` : '';
-    return `<div class="mob-card ${cat.cls}" onclick="openDrawer('${r.id||r.n}',${start+i})">
+    const ddStr  = r.dd ? `Del: <b>${fmtDate(r.dd)}</b>` : '';
+    const lvStr  = r.lv ? `Last Visit: <b>${fmtDate(r.lv)}</b>` : '';
+    return `<div class="mob-card ${cat.cls}" onclick="openDrawer('${(r.id||r.n).replace(/'/g,"\\'")}',${start+i})">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-        <div>
-          <div class="mob-name">${r.n}</div>
-          <div class="mob-sub">${r.p}${r.h?' · '+r.h:''}${r.id?' · '+r.id:''}</div>
+        <div style="flex:1;min-width:0">
+          <div class="mob-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.n}</div>
+          <div class="mob-sub">${r.p}${r.h?' · '+r.h:''}${r.id?' · <span style="font-family:monospace">'+r.id+'</span>':''}</div>
         </div>
         ${scoreHtml}
       </div>
-      <div class="mob-row">
+      <div class="mob-row" style="margin-top:6px">
         <span class="mob-meta">Age ${r.a||'—'} · G${r.g||'?'}/P${r.pa||'?'} · ${r.b}</span>
+        ${statusPill}
+      </div>
+      <div style="font-size:11px;color:var(--txt2);margin-top:5px;display:flex;flex-wrap:wrap;gap:8px">
+        ${eddStr ? `<span>${eddStr}</span>` : ''}
+        ${ddStr  ? `<span>${ddStr}</span>`  : ''}
+        ${lvStr  ? `<span>${lvStr}</span>`  : ''}
         ${vsHtml}
       </div>
-      ${eddStr ? `<div style="font-size:11px;color:var(--txt2);margin-top:4px">${eddStr}</div>` : ''}
-      ${(r.r||[]).length ? `<div class="mob-flags">${flags}${more}</div>` : ''}
+      ${r.ph ? `<div style="font-size:11px;color:var(--txt3);margin-top:3px">📞 ${r.ph}</div>` : ''}
+      ${(r.r||[]).length ? `<div class="mob-flags" style="margin-top:6px">${flags}${more}</div>` : ''}
     </div>`;
   }).join('');
 }
