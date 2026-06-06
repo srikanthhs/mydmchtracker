@@ -129,10 +129,17 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 .drawer-overlay.open{display:block}
 .drawer{position:fixed;right:0;top:0;bottom:0;width:520px;max-width:96vw;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.2);z-index:301;overflow-y:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
 .drawer.open{transform:translateX(0)}
-.dwr-header{padding:16px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:2}
+.dwr-header{padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:#fff;z-index:2}
+.dwr-title-block{flex:1;min-width:0}
 .dwr-body{padding:16px 20px 24px}
-.dwr-name{font-family:'Google Sans',sans-serif;font-size:18px;font-weight:500}
-.dwr-sub{font-size:12px;color:var(--txt2);margin-top:3px}
+.dwr-name{font-family:'Google Sans',sans-serif;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dwr-sub{font-size:12px;color:var(--txt2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Back button — hidden on desktop */
+.dwr-back-btn{display:none;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;padding:6px;border-radius:50%;-webkit-tap-highlight-color:transparent}
+.dwr-back-btn .material-icons-round{font-size:24px;color:var(--txt)}
+/* Close button — shown on desktop */
+.dwr-close-btn{display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;padding:6px;border-radius:50%;flex-shrink:0}
+.dwr-close-btn .material-icons-round{font-size:22px;color:var(--txt2)}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .dg{background:var(--sur2);border-radius:var(--r-sm);padding:10px 12px}
 .dg label{font-size:11px;color:var(--txt2);display:block;margin-bottom:2px}
@@ -477,6 +484,23 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     width:100%!important;z-index:500;
     overflow-y:auto;
     background:var(--sur2);
+  }
+  /* Mobile drawer header: blue app-bar style */
+  .dwr-header{
+    background:var(--pri)!important;
+    border-bottom:none!important;
+    padding:0 12px 0 4px!important;
+    min-height:56px;
+  }
+  .dwr-back-btn{display:flex!important;}
+  .dwr-back-btn .material-icons-round{color:#fff!important;font-size:26px!important}
+  .dwr-close-btn{display:none!important}
+  .dwr-name{color:#fff!important;font-size:16px!important}
+  .dwr-sub{color:rgba(255,255,255,.8)!important;font-size:11px!important}
+  .dwr-header .rbadge{
+    background:rgba(255,255,255,.2)!important;
+    color:#fff!important;
+    border-color:rgba(255,255,255,.3)!important;
   }
 
   /* ── 11. BOTTOM-SHEET MODALS ──────────────────────── */
@@ -2178,28 +2202,17 @@ function openDrawer(key, idx) {
   const nv = nextVisitDate(r);
   const score_interval = 15; // Fixed: 15 days after last visit
 
-  const isMob = window.innerWidth <= 768;
   document.getElementById('drawerContent').innerHTML = `
-    <div class="dwr-header" style="${isMob?'background:var(--pri);color:#fff;padding:0 8px 0 0;':''}">
-      ${isMob ? `
-      <button onclick="closeDrawer()" style="background:none;border:none;cursor:pointer;padding:14px 12px;display:flex;align-items:center;gap:6px;color:#fff;font-size:15px;font-family:'Google Sans',sans-serif;font-weight:500;-webkit-tap-highlight-color:transparent">
-        <span class="material-icons-round" style="font-size:24px">arrow_back</span>
+    <div class="dwr-header">
+      <button class="dwr-back-btn" onclick="closeDrawer()">
+        <span class="material-icons-round">arrow_back</span>
       </button>
-      <div style="flex:1;min-width:0">
-        <div style="font-family:'Google Sans',sans-serif;font-size:16px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.n}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:1px">${r.p} · ${r.h||'—'}</div>
+      <div class="dwr-title-block">
+        <div class="dwr-name">${r.n}</div>
+        <div class="dwr-sub">${r.id||'No PICME'} &nbsp;·&nbsp; ${r.p} &nbsp;·&nbsp; ${r.h||'—'}</div>
       </div>
-      <span class="rbadge" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);font-size:11px;flex-shrink:0;margin-right:8px">${score} ${cat.label}</span>
-      ` : `
-      <div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span class="dwr-name">${r.n}</span>
-          <span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd};font-size:12px">Score: ${score} — ${cat.label}</span>
-        </div>
-        <div class="dwr-sub">${r.id||'No PICME'} &nbsp;·&nbsp; ${r.p} &nbsp;·&nbsp; ${r.h||'—'} HSC</div>
-      </div>
-      <button onclick="closeDrawer()" style="background:none;border:none;cursor:pointer;padding:4px"><span class="material-icons-round" style="color:var(--txt2)">close</span></button>
-      `}
+      <span class="rbadge" style="background:${cat.bg};color:${cat.color};border:1px solid ${cat.bd};font-size:12px;flex-shrink:0">Score: ${score}</span>
+      <button class="dwr-close-btn" onclick="closeDrawer()"><span class="material-icons-round">close</span></button>
     </div>
     <div class="dwr-body">
       <div class="detail-grid">
