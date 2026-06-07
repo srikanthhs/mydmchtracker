@@ -537,7 +537,7 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     display:none;
     position:fixed;inset:0;
     width:100%!important;max-width:100%!important;
-    z-index:500;
+    z-index:9999;  /* above app header (9000) & bottom nav (8000) so back button shows */
     overflow-y:auto;
     transform:none!important;
     transition:none!important;
@@ -549,12 +549,14 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     animation:drawerFadeIn .2s ease;
   }
   @keyframes drawerFadeIn{from{opacity:.4}to{opacity:1}}
-  /* Mobile drawer header: blue app-bar style */
+  /* Mobile drawer header: blue app-bar style, sticky so back button always visible */
   .dwr-header{
     background:var(--pri)!important;
     border-bottom:none!important;
     padding:0 12px 0 4px!important;
     min-height:56px;
+    position:sticky!important;top:0;z-index:5;
+    box-shadow:0 2px 4px rgba(0,0,0,.2);
   }
   .dwr-back-btn{display:flex!important;}
   .dwr-back-btn .material-icons-round{color:#fff!important;font-size:26px!important}
