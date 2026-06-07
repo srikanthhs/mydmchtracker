@@ -740,12 +740,13 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     <div class="access-title">HRP Tracker</div>
     <div class="access-sub">Mayiladuthurai District · DPH Tamil Nadu</div>
 
-    <!-- Google Sign-In button (shown when client ID is configured) -->
-    <div id="googleSignInWrap" style="display:none;margin-bottom:16px">
+    <!-- Google Sign-In button (shown when GOOGLE_CLIENT_ID is configured) -->
+    <div id="googleSignInWrap" style="display:none;margin-bottom:20px">
+      <p style="font-size:12px;color:var(--txt2);margin-bottom:10px;text-align:center">Sign in with your authorised Gmail account</p>
       <div id="googleSignInBtn" style="display:flex;justify-content:center"></div>
-      <div style="display:flex;align-items:center;gap:8px;margin:14px 0 2px">
+      <div style="display:flex;align-items:center;gap:8px;margin:16px 0 4px">
         <div style="flex:1;height:1px;background:var(--bdr)"></div>
-        <span style="font-size:11px;color:var(--txt3)">or sign in with username</span>
+        <span style="font-size:11px;color:var(--txt3)">or use username &amp; password</span>
         <div style="flex:1;height:1px;background:var(--bdr)"></div>
       </div>
     </div>
@@ -1381,8 +1382,9 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   <div class="um-tabs">
     <div class="um-tab active" id="umTab0" onclick="switchUmTab(0)">👥 Users</div>
     <div class="um-tab" id="umTab1" onclick="switchUmTab(1)">➕ Add User</div>
-    <div class="um-tab" id="umTab2" onclick="switchUmTab(2)">🔑 Change Password</div>
+    <div class="um-tab" id="umTab2" onclick="switchUmTab(2)">🔑 Password</div>
     <div class="um-tab" id="umTab3" onclick="switchUmTab(3)">🔔 Requests<span id="arBadge" style="display:none;background:#C5221F;color:#fff;border-radius:10px;font-size:10px;padding:1px 7px;margin-left:5px;vertical-align:middle">0</span></div>
+    <div class="um-tab" id="umTab4" onclick="switchUmTab(4)">📊 Stats</div>
   </div>
   <div class="um-body" id="umBody"></div>
 </div>
@@ -6013,6 +6015,7 @@ async function hashPwd(pwd) { return sha256(pwd + ':' + PWD_SALT); }
 async function initGoogleSignIn() {
   try {
     const cfg = await _api('GET', '/auth/config');
+    window._googleClientId = cfg && cfg.googleClientId ? cfg.googleClientId : '';
     if (!cfg || !cfg.googleClientId) return;
     // Load Google Identity Services script dynamically
     await new Promise((res, rej) => {
@@ -6228,7 +6231,7 @@ function openUserMgmt() {
 
 function switchUmTab(n) {
   umActiveTab = n;
-  [0,1,2,3].forEach(i => {
+  [0,1,2,3,4].forEach(i => {
     const t = document.getElementById('umTab'+i);
     if(t) t.classList.toggle('active', i===n);
   });
@@ -6236,6 +6239,63 @@ function switchUmTab(n) {
   else if(n===1) renderAddUser();
   else if(n===2) renderChangePassword();
   else if(n===3) renderAccessRequests();
+  else if(n===4) renderAdminStats();
+}
+
+async function renderAdminStats() {
+  const body = document.getElementById('umBody');
+  body.innerHTML = '<div style="text-align:center;padding:32px;color:var(--txt3)"><span class="material-icons-round sync-spinning" style="font-size:32px;display:block;margin-bottom:8px">refresh</span>Loading…</div>';
+  try {
+    const [stats, users] = await Promise.all([
+      _api('GET', '/patients/stats/summary'),
+      _api('GET', '/users')
+    ]);
+    const roleCount = {};
+    (users||[]).forEach(u => { roleCount[u.role] = (roleCount[u.role]||0)+1; });
+    const roleLabels = {admin:'Admin',dph_officer:'DPH Officer',bdo:'Block Officer',phc_officer:'PHC Officer',viewer:'Viewer'};
+    body.innerHTML = `
+      <div style="padding:16px">
+        <div style="font-family:'Google Sans',sans-serif;font-size:15px;font-weight:500;margin-bottom:14px;color:var(--txt)">📊 System Overview</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+          <div style="background:var(--pri-lt);border-radius:12px;padding:14px;text-align:center">
+            <div style="font-size:28px;font-weight:700;color:var(--pri)">${stats?.total||0}</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:2px">Total Patients</div>
+          </div>
+          <div style="background:#E6F4EA;border-radius:12px;padding:14px;text-align:center">
+            <div style="font-size:28px;font-weight:700;color:#188038">${stats?.delivered||0}</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:2px">Delivered</div>
+          </div>
+          <div style="background:#FEF7E0;border-radius:12px;padding:14px;text-align:center">
+            <div style="font-size:28px;font-weight:700;color:#E37400">${stats?.active||0}</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:2px">Active / Undelivered</div>
+          </div>
+          <div style="background:#FCE8E6;border-radius:12px;padding:14px;text-align:center">
+            <div style="font-size:28px;font-weight:700;color:#C5221F">${stats?.highRisk||0}</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:2px">High Risk</div>
+          </div>
+        </div>
+        <div style="font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;margin-bottom:10px;color:var(--txt)">👥 Users by Role</div>
+        <div style="background:var(--sur2);border-radius:10px;overflow:hidden">
+          ${Object.entries(roleCount).map(([role,count])=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--bdr)">
+              <span style="font-size:13px;color:var(--txt)">${roleLabels[role]||role}</span>
+              <span style="background:var(--pri-lt);color:var(--pri);border-radius:12px;padding:2px 10px;font-size:12px;font-weight:500">${count}</span>
+            </div>`).join('')}
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px">
+            <span style="font-size:13px;font-weight:500;color:var(--txt)">Total Users</span>
+            <span style="background:var(--sur3);color:var(--txt);border-radius:12px;padding:2px 10px;font-size:12px;font-weight:600">${(users||[]).length}</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding:12px 14px;background:#E8F0FE;border-radius:10px;font-size:12px;color:var(--pri)">
+          <b>Google Sign-In status:</b> ${window._googleClientId ? '✅ Configured — users can sign in with Gmail' : '⚠️ Not configured — add GOOGLE_CLIENT_ID in Vercel environment variables'}
+        </div>
+        <div style="margin-top:10px;padding:12px 14px;background:var(--sur2);border-radius:10px;font-size:12px;color:var(--txt2)">
+          <b>Last sync:</b> ${localStorage.getItem('hrp_last_sync') ? new Date(localStorage.getItem('hrp_last_sync')).toLocaleString('en-IN') : 'Not synced yet'}
+        </div>
+      </div>`;
+  } catch(e) {
+    body.innerHTML = `<div style="padding:20px;color:var(--c-crit)">Error: ${e.message}</div>`;
+  }
 }
 
 async function renderUserList() {
