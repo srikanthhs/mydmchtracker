@@ -275,18 +275,19 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 }
 .mbn-item{
   flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:3px;
+  align-items:center;justify-content:center;gap:2px;
   border:none;background:none;cursor:pointer;
-  color:var(--txt3);font-size:10px;
+  color:var(--txt3);font-size:9.5px;
   font-family:'Roboto',sans-serif;
-  padding:6px 2px;
+  padding:6px 1px;min-width:0;
+  white-space:nowrap;
   -webkit-tap-highlight-color:transparent;
   transition:color .15s;
 }
-.mbn-item .material-icons-round{font-size:24px;line-height:1}
+.mbn-item .material-icons-round{font-size:23px;line-height:1}
 .mbn-item.active{color:var(--pri)}
 .mbn-item.active .material-icons-round{
-  background:var(--pri-lt);border-radius:14px;padding:2px 14px;
+  background:var(--pri-lt);border-radius:14px;padding:2px 12px;
 }
 /* "More" bottom sheet */
 #mob-more-ov{
@@ -387,18 +388,8 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   .sb-overlay.open{display:block}
 
   /* ── 4. MOBILE NAV TABS (below app bar, horizontal scroll) */
-  .mob-nav{
-    display:flex;
-    position:sticky;top:56px;
-    left:0;right:0;
-    width:100%;
-    z-index:190;
-    background:var(--pri);
-    overflow-x:auto;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-    box-shadow:0 2px 4px rgba(0,0,0,.18);
-  }
+  /* Top filter tabs removed — moved to bottom navigation */
+  .mob-nav{ display:none!important }
   .mob-nav::-webkit-scrollbar{display:none}
   .mob-nav-btn{
     flex-shrink:0;
@@ -863,21 +854,21 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   </button>
 </div>
 
-<!-- MOBILE BOTTOM NAVIGATION (WhatsApp-style) -->
+<!-- MOBILE BOTTOM NAVIGATION (filter tabs) -->
 <nav id="mob-bottomnav">
-  <button class="mbn-item active" id="mbn-home" onclick="mobBottomNav('home')">
-    <span class="material-icons-round">groups</span><span>Patients</span>
+  <button class="mbn-item active" id="bn-all" onclick="mobFilterNav('all')">
+    <span class="material-icons-round">dashboard</span><span>All</span>
   </button>
-  <button class="mbn-item" id="mbn-reports" onclick="mobBottomNav('reports')">
-    <span class="material-icons-round">bar_chart</span><span>Reports</span>
+  <button class="mbn-item" id="bn-undel" onclick="mobFilterNav('active')">
+    <span class="material-icons-round">pregnant_woman</span><span>Undelivered</span>
   </button>
-  <button class="mbn-item" id="mbn-msg" onclick="mobBottomNav('messages')">
-    <span class="material-icons-round">forum</span><span>Messages</span>
+  <button class="mbn-item" id="bn-del" onclick="mobFilterNav('delivered')">
+    <span class="material-icons-round">child_friendly</span><span>Delivered</span>
   </button>
-  <button class="mbn-item" id="mbn-alerts" onclick="mobBottomNav('alerts')">
-    <span class="material-icons-round">notifications</span><span>Alerts</span>
+  <button class="mbn-item" id="bn-risk" onclick="mobFilterNav('highrisk')">
+    <span class="material-icons-round">warning</span><span>High Risk</span>
   </button>
-  <button class="mbn-item" id="mbn-more" onclick="mobBottomNav('more')">
+  <button class="mbn-item" id="bn-more" onclick="openMobMore()">
     <span class="material-icons-round">more_horiz</span><span>More</span>
   </button>
 </nav>
@@ -886,7 +877,10 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
 <div id="mob-more-ov" onclick="if(event.target===this)closeMobMore()">
   <div id="mob-more-sheet">
     <div class="mms-handle"></div>
-    <div class="mms-title">More Tools</div>
+    <div class="mms-title">Menu</div>
+    <button class="mms-row" onclick="closeMobMore();openReports()"><span class="material-icons-round">bar_chart</span>Reports</button>
+    <button class="mms-row" onclick="closeMobMore();openMessaging()"><span class="material-icons-round">forum</span>Messages</button>
+    <button class="mms-row" onclick="closeMobMore();openAlertScheduler()"><span class="material-icons-round">notifications</span>Alert Scheduler</button>
     <button class="mms-row" onclick="closeMobMore();openDPH()"><span class="material-icons-round">assessment</span>DPH Report</button>
     <button class="mms-row" onclick="closeMobMore();exportCSV()"><span class="material-icons-round">download</span>Export CSV</button>
     <button class="mms-row" onclick="closeMobMore();openImport()"><span class="material-icons-round">upload_file</span>Import Data</button>
@@ -1823,27 +1817,14 @@ function mobNav(type) {
   if(sb && !sb.classList.contains('collapsed')) sb.classList.add('collapsed');
 }
 
-// ── WhatsApp-style bottom navigation ──────────────────────────
-function mobBottomNav(section) {
-  // Highlight active tab (except transient actions)
-  if(section === 'home' || section === 'more') {
-    document.querySelectorAll('.mbn-item').forEach(b => b.classList.remove('active'));
-    const map = {home:'mbn-home', more:'mbn-more'};
-    const el = document.getElementById(map[section]);
-    if(el) el.classList.add('active');
-  }
-  if(section === 'home') {
-    // Scroll list to top and show all
-    window.scrollTo({top:0, behavior:'smooth'});
-  } else if(section === 'reports') {
-    openReports();
-  } else if(section === 'messages') {
-    openMessaging();
-  } else if(section === 'alerts') {
-    openAlertScheduler();
-  } else if(section === 'more') {
-    openMobMore();
-  }
+// ── Bottom navigation filter tabs ─────────────────────────────
+function mobFilterNav(type) {
+  document.querySelectorAll('#mob-bottomnav .mbn-item').forEach(b => b.classList.remove('active'));
+  const map = {all:'bn-all', active:'bn-undel', delivered:'bn-del', highrisk:'bn-risk'};
+  const el = document.getElementById(map[type]);
+  if(el) el.classList.add('active');
+  if(type === 'all') sbSelect('all'); else sbFilter(type);
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
 function openMobMore() {
@@ -1854,10 +1835,6 @@ function openMobMore() {
 }
 function closeMobMore() {
   document.getElementById('mob-more-ov').classList.remove('open');
-  // Reset active tab back to Patients
-  document.querySelectorAll('.mbn-item').forEach(b => b.classList.remove('active'));
-  const home = document.getElementById('mbn-home');
-  if(home) home.classList.add('active');
 }
 
 function toggleSidebar() {
