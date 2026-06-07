@@ -484,12 +484,24 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
   .mob-card-bot .material-icons-round{font-size:13px;color:var(--txt3)}
 
   /* ── 10. FULL-SCREEN DRAWER ───────────────────────── */
+  /* Use display toggle (NOT transform) — a translateX'd fixed panel
+     creates horizontal overflow that body overflow-x:clip can't clip */
   .drawer{
+    display:none;
     position:fixed;inset:0;
-    width:100%!important;z-index:500;
+    width:100%!important;max-width:100%!important;
+    z-index:500;
     overflow-y:auto;
+    transform:none!important;
+    transition:none!important;
     background:var(--sur2);
   }
+  .drawer.open{
+    display:block;
+    transform:none!important;
+    animation:drawerFadeIn .2s ease;
+  }
+  @keyframes drawerFadeIn{from{opacity:.4}to{opacity:1}}
   /* Mobile drawer header: blue app-bar style */
   .dwr-header{
     background:var(--pri)!important;
