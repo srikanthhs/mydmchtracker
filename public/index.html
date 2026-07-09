@@ -568,6 +568,11 @@ tr.data-row.risk-none td:first-child{border-left-color:var(--bdr)}
     color:#fff!important;
     border-color:rgba(255,255,255,.3)!important;
   }
+  /* Tighter, mobile-friendly spacing inside the drawer */
+  .dwr-body{padding:12px 12px 32px!important}
+  .dwr-body .detail-grid{gap:8px;margin:8px 0}
+  .dwr-body .dg{padding:8px 10px}
+  .dwr-body .sec-title{margin:14px 2px 6px}
 
   /* ── 11. BOTTOM-SHEET MODALS ──────────────────────── */
   /* Modals must sit ABOVE the bottom nav (8000) and header (9000) */
@@ -2340,25 +2345,37 @@ function openDrawer(key, idx) {
       <button class="dwr-close-btn" onclick="closeDrawer()"><span class="material-icons-round">close</span></button>
     </div>
     <div class="dwr-body">
+      <div class="sec-title">Patient</div>
       <div class="detail-grid">
         <div class="dg"><label>Age</label><div class="v">${r.a||'—'} yrs</div></div>
         <div class="dg"><label>EDD</label><div class="v">${fmtDate(r.e)}</div></div>
         <div class="dg"><label>Gravida / Para</label><div class="v">G${r.g||'—'} P${r.pa||'—'}</div></div>
         <div class="dg"><label>Mobile</label><div class="v" style="font-size:13px">${r.ph||'—'}</div></div>
-        <div class="dg"><label>Block</label><div class="v">${r.b}</div></div>
-        <div class="dg"><label>PHC</label><div class="v">${r.p}</div></div>
-        <div class="dg"><label>HSC / Sub-centre</label><div class="v">${r.h||'—'}</div></div>
         <div class="dg"><label>Husband</label><div class="v" style="font-size:13px">${r.hu||'—'}</div></div>
+        <div class="dg"><label>Block</label><div class="v">${r.b||'—'}</div></div>
+      </div>
+
+      <div class="sec-title">Visit tracking</div>
+      <div class="detail-grid">
         <div class="dg"><label>Next visit due</label><div class="v" style="color:${vs?('var(--c-'+(vs.cls==='overdue-tag'?'crit':vs.cls==='due-soon-tag'?'high':'mod')+')'):''}">${vs?vs.label:'—'}</div></div>
         <div class="dg"><label>Visit interval</label><div class="v">Every ${score_interval} days</div></div>
+      </div>
+
+      <div class="sec-title">Delivery</div>
+      <div class="detail-grid">
         <div class="dg"><label>Adm. Status</label><div class="v">${r.as||'—'}</div></div>
         <div class="dg"><label>Delivery Status</label><div class="v">${r.ds||'Undelivered'}</div></div>
         <div class="dg"><label>Delivery Date</label><div class="v">${fmtDate(r.dd)}</div></div>
         <div class="dg"><label>Place of Delivery</label><div class="v">${r.pd||'—'}</div></div>
         <div class="dg"><label>Family Planning</label><div class="v">${r.fp||'—'}</div></div>
-        <div class="dg"><label>Mentor OG</label><div class="v">${r.mo||'—'}</div></div>
-        <div class="dg"><label>Mentor Opinion</label><div class="v">${r.mop||'—'}</div></div>
       </div>
+
+      ${(r.mo||r.mop) ? `<div class="sec-title">Mentor OG</div>
+      <div class="detail-grid">
+        <div class="dg"><label>Allotted</label><div class="v">${r.mo||'—'}</div></div>
+        <div class="dg"><label>Opinion</label><div class="v">${r.mop||'—'}</div></div>
+      </div>` : ''}
+
       <div class="sec-title">Risk score breakdown</div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
         <span style="font-family:'Google Sans',sans-serif;font-size:32px;font-weight:500;color:${cat.color}">${score}</span>
